@@ -311,7 +311,10 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="page" id="page-teams">
   <div class="flex-row flex-between mb12 flex-wrap">
     <div><div class="section-title">Teams</div><div class="section-sub" id="teamsSubtext">Adding singles players</div></div>
-    <button class="btn btn-primary no-print" onclick="openAddTeamModal()">+ Add Team</button>
+    <div class="flex-row no-print" style="gap:6px">
+      <button class="btn btn-outline btn-sm" onclick="loadSampleTeams()" title="Load sample doubles teams for testing">⚡ Load Samples</button>
+      <button class="btn btn-primary" onclick="openAddTeamModal()">+ Add Team</button>
+    </div>
   </div>
   <div id="teamsList"><div class="empty-state"><div class="ei">🎾</div><strong>No teams yet</strong>Click Add Team to get started</div></div>
   <div id="teamsActions" style="display:none" class="no-print">
@@ -680,6 +683,29 @@ function renderTeams(){
         <button class="btn btn-danger btn-sm no-print" onclick="removeTeam(${t.id})">✕</button>
       </div></div>`;
   }).join('');
+}
+
+function loadSampleTeams(){
+  if(S.teams.length&&!confirm('This will add sample doubles teams to your current list. Continue?'))return;
+  // Switch to doubles mode
+  S.tType='doubles';
+  document.querySelectorAll('.toggle-group button').forEach(b=>{if(b.textContent.trim()==='Doubles')b.click();});
+  const samples=[
+    {tn:'The Picklers',    p1:'Alex Rivera',   s1:5, p2:'Sam Torres',    s2:4},
+    {tn:'Dink Dynasty',    p1:'Jordan Lee',    s1:4, p2:'Morgan Kim',    s2:4},
+    {tn:'Net Dominators',  p1:'Casey Patel',   s1:4, p2:'Riley Chen',    s2:3},
+    {tn:'Spin Doctors',    p1:'Drew Martinez', s1:3, p2:'Quinn Nguyen',  s2:3},
+    {tn:'Drop Shot Duo',   p1:'Avery Johnson', s1:3, p2:'Sage Williams', s2:3},
+    {tn:'Kitchen Kings',   p1:'Blake Thompson',s1:2, p2:'Reese Davis',   s2:3},
+    {tn:'Serve & Protect', p1:'Taylor Brown',  s1:2, p2:'Jamie Wilson',  s2:2},
+    {tn:'The Bangers',     p1:'Charlie Moore', s1:2, p2:'Finley Taylor', s2:2},
+  ];
+  samples.forEach(({tn,p1,s1,p2,s2})=>{
+    const skills=[s1,s2].filter(s=>s>0);
+    const avg=skills.reduce((a,b)=>a+b,0)/skills.length;
+    S.teams.push({id:_tid++,name:tn,players:[{name:p1,skill:s1},{name:p2,skill:s2}],avgSkill:avg});
+  });
+  renderTeams();renderPlayersPage();
 }
 
 function renderPlayersPage(){
