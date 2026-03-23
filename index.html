@@ -1,1643 +1,1748 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NGM0C5RC5E"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-NGM0C5RC5E');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Voyage — International Travel Dashboard | Currency, Weather, Time & Visa</title>
-
-<!-- ── PRIMARY SEO ── -->
-<meta name="description" content="Voyage is a free international travel dashboard. Get real-time currency conversion, dual time zones, live weather, visa requirements, emergency numbers, plug adapters, and instant phrase translation for 19+ countries.">
-<meta name="keywords" content="international travel dashboard, currency converter, travel time zones, visa requirements, travel weather, travel phrases translator, plug adapter checker, emergency numbers abroad, travel tools, free travel app">
-<meta name="author" content="Voyage Travel Dashboard">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://btran12.github.io/voyage/index.html">
-
-<!-- ── OPEN GRAPH (Facebook, LinkedIn, iMessage previews) ── -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://btran12.github.io/voyage/index.html">
-<meta property="og:title" content="Voyage — International Travel Dashboard">
-<meta property="og:description" content="Free travel dashboard with real-time currency conversion, live weather, dual clocks, visa requirements, emergency numbers, and instant translation for 19+ countries.">
-<meta property="og:image" content="https://btran12.github.io/voyage/voyage-og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:site_name" content="Voyage Travel Dashboard">
-<meta property="og:locale" content="en_US">
-
-<!-- ── TWITTER CARD ── -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:url" content="https://btran12.github.io/voyage/index.html">
-<meta name="twitter:title" content="Voyage — International Travel Dashboard">
-<meta name="twitter:description" content="Free travel dashboard with real-time currency conversion, live weather, dual clocks, visa requirements, emergency numbers, and instant translation for 19+ countries.">
-<meta name="twitter:image" content="https://btran12.github.io/voyage/voyage-og.png">
-
-<!-- ── STRUCTURED DATA (Google Rich Results) ── -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Voyage — International Travel Dashboard",
-  "url": "https://btran12.github.io/voyage/index.html",
-  "description": "A free international travel dashboard with real-time currency conversion, dual time zones, live weather, visa requirements, emergency numbers, plug adapter info, and instant translation for 19+ countries.",
-  "applicationCategory": "TravelApplication",
-  "operatingSystem": "Any",
-  "browserRequirements": "Requires JavaScript",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "featureList": [
-    "Real-time currency conversion",
-    "Dual time zone clocks",
-    "Live weather for destination country",
-    "Visa requirement checker",
-    "Emergency numbers by country",
-    "Power plug and voltage guide",
-    "Essential travel phrases and translation",
-    "Packing tips"
-  ],
-  "inLanguage": "en",
-  "isAccessibleForFree": true,
-  "creator": {
-    "@type": "Person",
-    "name": "Bao Tran"
-  }
-}
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<title>PickleBracket — Tournament Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f2ec;
-    --surface: #ffffff;
-    --surface2: #f0ece3;
-    --border: rgba(0,0,0,0.09);
-    --accent: #9a6f2e;
-    --accent2: #2e7fa0;
-    --accent3: #3a8c3d;
-    --danger: #b04040;
-    --text: #1a1612;
-    --muted: #7a6e60;
-    --card-glow: rgba(154,111,46,0.05);
-    --grid-line: rgba(154,111,46,0.06);
-    --select-bg: #ffffff;
-    --transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
-  }
-  html.dark {
-    --bg: #0a0c10;
-    --surface: #11141a;
-    --surface2: #181c24;
-    --border: rgba(255,255,255,0.07);
-    --accent: #c9a96e;
-    --accent2: #7eb8d4;
-    --accent3: #9ecfa0;
-    --danger: #d47e7e;
-    --text: #e8e4dc;
-    --muted: #6b7280;
-    --card-glow: rgba(201,169,110,0.06);
-    --grid-line: rgba(201,169,110,0.03);
-    --select-bg: #11141a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Outfit', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    transition: var(--transition);
-  }
-  /* Background grid */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--grid-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    z-index: 0;
-    transition: var(--transition);
-  }
-
-  /* ── HEADER ── */
-  header {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 40px;
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(8px);
-  }
-  .logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 28px;
-    font-weight: 300;
-    letter-spacing: 6px;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-  .logo span { font-style: italic; color: var(--text); }
-  .tagline {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  /* ── COUNTRY SELECTOR HERO ── */
-  .selector-hero {
-    position: relative;
-    z-index: 10;
-    padding: 48px 40px 36px;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 24px;
-    align-items: end;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  .country-block label {
-    display: block;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  .country-select-wrapper {
-    position: relative;
-  }
-  .country-select-wrapper .flag {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 20px;
-    pointer-events: none;
-  }
-  .country-select-wrapper select {
-    width: 100%;
-    appearance: none;
-    background: var(--select-bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: 'Outfit', sans-serif;
-    font-size: 15px;
-    font-weight: 300;
-    padding: 14px 40px 14px 48px;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.35s ease, color 0.35s ease;
-  }
-  .country-select-wrapper select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .arrow-block {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding-bottom: 14px;
-  }
-  .arrow-icon {
-    font-size: 28px;
-    color: var(--accent);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .arrow-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
-
-  /* ── DASHBOARD GRID ── */
-  .dashboard {
-    position: relative;
-    z-index: 10;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 40px 60px;
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 16px;
-  }
-
-  /* ── CARDS ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 24px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s, transform 0.2s, background 0.35s ease;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--card-glow);
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-  }
-  .card:hover { border-color: rgba(201,169,110,0.2); transform: translateY(-1px); }
-  .card:hover::before { opacity: 1; }
-  .card-label {
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-  .card-value {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 42px;
-    font-weight: 300;
-    line-height: 1;
-    color: var(--text);
-  }
-  .card-value.mono {
-    font-family: 'DM Mono', monospace;
-    font-size: 32px;
-    font-weight: 300;
-  }
-  .card-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
-  .accent { color: var(--accent); }
-  .accent2 { color: var(--accent2); }
-  .accent3 { color: var(--accent3); }
-
-  /* grid spans */
-  .span-4 { grid-column: span 4; }
-  .span-3 { grid-column: span 3; }
-  .span-6 { grid-column: span 6; }
-  .span-8 { grid-column: span 8; }
-  .span-12 { grid-column: span 12; }
-
-  /* ── CLOCK CARD ── */
-  .dual-clock {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 16px;
-    align-items: center;
-  }
-  .clock-face { text-align: center; }
-  .clock-time {
-    font-family: 'DM Mono', monospace;
-    font-size: 36px;
-    font-weight: 300;
-    letter-spacing: 2px;
-  }
-  .clock-date { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .clock-city { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-top: 8px; }
-  .clock-divider {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .clock-divider span { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
-  .time-diff {
-    font-family: 'DM Mono', monospace;
-    font-size: 18px;
-    color: var(--accent);
-  }
-  @media (max-width: 540px) {
-    .dual-clock {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto;
-      gap: 0;
-    }
-    .clock-face { padding: 14px 0; }
-    .clock-face:first-child {
-      border-bottom: 1px solid var(--border);
-    }
-    .clock-time { font-size: 28px; }
-    .clock-divider {
-      flex-direction: row;
-      justify-content: center;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .clock-divider span:first-child { display: none; }
-    .clock-divider span:last-child { display: none; }
-  }
-
-  /* ── CURRENCY CARD ── */
-  .currency-converter {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .currency-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 14px;
-  }
-  .currency-code {
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    color: var(--accent);
-    min-width: 36px;
-    font-weight: 400;
-  }
-  .currency-input {
-    flex: 1;
-    background: none;
-    border: none;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 22px;
-    font-weight: 300;
-    outline: none;
-  }
-  .currency-name { font-size: 11px; color: var(--muted); }
-  .rate-line {
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-    font-family: 'DM Mono', monospace;
-  }
-  .swap-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    width: 32px; height: 32px;
-    cursor: pointer;
-    color: var(--accent);
-    font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    align-self: center;
-    transition: background 0.2s;
-    margin: 0 auto;
-  }
-  .swap-btn:hover { background: var(--surface2); }
-
-  /* ── WEATHER CARD ── */
-  .weather-main {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 16px;
-  }
-  .weather-icon { font-size: 52px; line-height: 1; }
-  .weather-temp {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 56px;
-    font-weight: 300;
-  }
-  .weather-info { flex: 1; }
-  .weather-desc { font-size: 14px; color: var(--muted); text-transform: capitalize; }
-  .weather-loc { font-size: 11px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
-  .weather-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  .weather-stat {
-    background: var(--surface2);
-    border-radius: 6px;
-    padding: 10px;
-    text-align: center;
-  }
-  .weather-stat-val { font-family: 'DM Mono', monospace; font-size: 16px; color: var(--accent2); }
-  .weather-stat-label { font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
-
-  /* ── PACKING LIST / TIPS ── */
-  .tips-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .tips-list li {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-  .tips-list li .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    margin-top: 6px;
-    flex-shrink: 0;
-  }
-
-  /* ── PHRASE CARD ── */
-  .phrase-grid { display: flex; flex-direction: column; gap: 10px; }
-  .phrase-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface2);
-    border-radius: 6px;
-    padding: 10px 14px;
-    gap: 12px;
-  }
-  .phrase-en { font-size: 12px; color: var(--muted); min-width: 100px; }
-  .phrase-local {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 16px;
-    color: var(--text);
-    text-align: right;
-  }
-  .phrase-pronun { font-size: 10px; color: var(--accent); font-style: italic; text-align: right; }
-
-  /* ── EMERGENCY CARD ── */
-  .emergency-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .emergency-item {
-    background: var(--surface2);
-    border: 1px solid rgba(212, 126, 126, 0.15);
-    border-radius: 6px;
-    padding: 10px 12px;
-  }
-  .emergency-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 20px;
-    color: var(--danger);
-  }
-  .emergency-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
-
-  /* ── VISA STATUS CARD ── */
-  .visa-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 40px;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 12px;
-  }
-  .visa-ok { background: rgba(158, 207, 160, 0.12); border: 1px solid rgba(158,207,160,0.3); color: var(--accent3); }
-  .visa-warn { background: rgba(201,169,110,0.12); border: 1px solid rgba(201,169,110,0.3); color: var(--accent); }
-  .visa-req { background: rgba(212,126,126,0.12); border: 1px solid rgba(212,126,126,0.3); color: var(--danger); }
-  .visa-details { font-size: 12px; color: var(--muted); line-height: 1.7; }
-
-  /* ── POWER / PLUG CARD ── */
-  .plug-info { display: flex; align-items: center; gap: 16px; }
-  .plug-icon { font-size: 40px; }
-  .plug-details { font-size: 13px; color: var(--muted); line-height: 1.8; }
-  .plug-highlight { color: var(--accent2); font-family: 'DM Mono', monospace; }
-
-  /* ── FLIGHT INFO ── */
-  .flight-bar {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 16px;
-    text-align: center;
-  }
-  .flight-airport { font-family: 'DM Mono', monospace; font-size: 30px; color: var(--accent); }
-  .flight-city { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .flight-line {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    color: var(--muted);
-    font-size: 11px;
-  }
-  .flight-arrow { font-size: 20px; color: var(--accent2); }
-
-  /* ── LOADING ── */
-  .loading {
-    color: var(--muted);
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    animation: blink 1s infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  /* ── SECTION DIVIDER ── */
-  .section-title {
-    grid-column: span 12;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 13px;
-    font-style: italic;
-    color: var(--muted);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-top: 8px;
-  }
-  .section-title::before, .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* ── UNIT TOGGLE ── */
-  .unit-toggle {
-    display: flex;
-    gap: 4px;
-    margin-top: 8px;
-  }
-  .unit-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    padding: 4px 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .unit-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #0a0c10;
-  }
-
-  /* ── STATUS BAR ── */
-  .status-bar {
-    grid-column: span 12;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    padding: 10px 0;
-    border-top: 1px solid var(--border);
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
-  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3); display: inline-block; margin-right: 4px; }
-
-  /* ── TRANSLATOR CARD ── */
-  .translator-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'Outfit', sans-serif;
-    font-size: 15px;
-    font-weight: 300;
-    padding: 14px;
-    resize: none;
-    outline: none;
-    transition: border-color 0.2s, background 0.35s ease, color 0.35s ease;
-    min-height: 90px;
-  }
-  .translator-input:focus { border-color: var(--accent); }
-  .translator-input::placeholder { color: var(--muted); }
-  .translate-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    background: var(--accent);
-    border: none;
-    border-radius: 6px;
-    color: #fff;
-    font-family: 'Outfit', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    padding: 11px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    margin: 10px 0;
-  }
-  html.dark .translate-btn { color: #0a0c10; }
-  .translate-btn:hover { opacity: 0.85; }
-  .translate-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .translator-result {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    min-height: 90px;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    font-weight: 300;
-    color: var(--text);
-    line-height: 1.5;
-    position: relative;
-    transition: background 0.35s ease;
-  }
-  .translator-result.empty { font-family: 'Outfit', sans-serif; font-size: 13px; color: var(--muted); font-style: italic; }
-  .translator-lang-tag {
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-family: 'Outfit', sans-serif;
-    margin-bottom: 6px;
-    display: block;
-  }
-  .copy-btn {
-    position: absolute;
-    top: 10px; right: 10px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--muted);
-    font-size: 13px;
-    padding: 3px 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .translator-history {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 12px;
-    max-height: 160px;
-    overflow-y: auto;
-  }
-  .history-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .history-item:hover { border-color: var(--accent); }
-  .history-en { font-size: 11px; color: var(--muted); }
-  .history-local { font-size: 14px; color: var(--text); font-family: 'Cormorant Garamond', serif; }
-
-  /* ── TOP SPOTS CARD ── */
-  .spots-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .spot-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    transition: border-color 0.2s, transform 0.15s;
-    cursor: default;
-  }
-  .spot-item:hover { border-color: var(--accent); transform: translateY(-1px); }
-  .spot-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-  .spot-emoji { font-size: 18px; line-height: 1; }
-  .spot-name { font-size: 13px; font-weight: 500; color: var(--text); }
-  .spot-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
-  @media (max-width: 540px) { .spots-grid { grid-template-columns: 1fr; } }
-
-  /* ── THEME TOGGLE ── */
-  .theme-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .theme-toggle-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-    transition: color 0.35s ease;
-  }
-  .theme-switch {
-    position: relative;
-    width: 56px;
-    height: 28px;
-    flex-shrink: 0;
-  }
-  .theme-switch input { display: none; }
-  .theme-switch-track {
-    position: absolute;
-    inset: 0;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    cursor: pointer;
-    transition: background 0.35s ease, border-color 0.35s ease;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 7px;
-    font-size: 12px;
-  }
-  .theme-switch-thumb {
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--accent);
-    transition: transform 0.35s cubic-bezier(.4,0,.2,1), background 0.35s ease;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-    pointer-events: none;
-  }
-  html.dark .theme-switch-thumb { transform: translateX(28px); }
-
-  @media (max-width: 900px) {
-    header { padding: 16px 20px; }
-    .selector-hero { padding: 24px 20px; grid-template-columns: 1fr; }
-    .arrow-block { display: none; }
-    .dashboard { padding: 0 20px 40px; }
-    .span-4, .span-3, .span-6, .span-8 { grid-column: span 12; }
-  }
+:root{--bg:#0d0f0a;--surface:#141710;--surface2:#1c2016;--surface3:#242a1c;--border:#2e3826;--border2:#3d4f2a;--accent:#a8d44a;--accent2:#c8f060;--accent-dim:rgba(168,212,74,.12);--accent-dim2:rgba(168,212,74,.25);--text:#e8f0d8;--text2:#9aab80;--text3:#5a6b44;--red:#e05555;--red-dim:rgba(224,85,85,.15);--gold:#e8c84a;--gold-dim:rgba(232,200,74,.15);--blue:#4ab8e8;--blue-dim:rgba(74,184,232,.12);--purple:#b48ae8;--purple-dim:rgba(180,138,232,.12);--r:6px;--r2:10px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+header{display:flex;align-items:center;justify-content:space-between;padding:13px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--accent);line-height:1;flex-shrink:0}
+.logo span{color:var(--text2)}
+.header-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.phase-badge{font-family:'DM Mono',monospace;font-size:11px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--border2);padding:3px 10px;border-radius:99px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+nav{display:flex;gap:3px;padding:9px 24px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto}
+nav button{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:6px 13px;border-radius:var(--r);border:1px solid transparent;cursor:pointer;background:transparent;color:var(--text2);transition:all .15s;white-space:nowrap}
+nav button:hover{color:var(--text);background:var(--surface2)}
+nav button.active{background:var(--accent-dim);border-color:var(--border2);color:var(--accent)}
+main{padding:22px 24px;max-width:1280px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--text);margin-bottom:3px}
+.section-sub{font-size:13px;color:var(--text3);margin-bottom:18px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:680px){.grid-2,.grid-3{grid-template-columns:1fr}}
+label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px}
+input,select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .15s}
+input:focus,select:focus{border-color:var(--accent)}
+select option{background:var(--surface2)}
+.form-row{margin-bottom:11px}
+.form-row-inline{display:flex;gap:9px;align-items:flex-end}
+.form-row-inline>*{flex:1}
+.btn{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:8px 16px;border-radius:var(--r);border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--accent);color:#0d0f0a}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:var(--red-dim);border:1px solid rgba(224,85,85,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(224,85,85,.25)}
+.btn-ghost{background:transparent;border:1px solid transparent;color:var(--text3)}
+.btn-ghost:hover{color:var(--text2);background:var(--surface2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.toggle-group{display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:3px}
+.toggle-group button{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:5px 12px;border-radius:5px;border:none;cursor:pointer;background:transparent;color:var(--text3);transition:all .15s}
+.toggle-group button.active{background:var(--accent);color:#0d0f0a}
+.skill-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:2px 6px;border-radius:4px;margin-left:5px}
+.skill-1,.skill-2{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(74,184,232,.25)}
+.skill-3{background:var(--accent-dim);color:var(--accent);border:1px solid var(--border2)}
+.skill-4{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(232,200,74,.3)}
+.skill-5{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,85,85,.3)}
+.team-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;transition:border-color .15s}
+.team-item:hover{border-color:var(--border2)}
+.team-name{font-size:14px;font-weight:500}
+.team-meta{font-size:12px;color:var(--text3);margin-top:1px}
+.group-container{display:flex;flex-wrap:wrap;gap:12px}
+.group-card{flex:1;min-width:190px;max-width:290px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:12px;transition:border-color .15s,background .15s}
+.group-card.drag-over{border-color:var(--accent);background:var(--accent-dim)}
+.group-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.group-label{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;color:var(--accent)}
+.group-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.group-team{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:4px;font-size:13px;font-weight:500;cursor:grab;user-select:none;transition:all .15s}
+.group-team:active{cursor:grabbing}
+.group-team.dragging{opacity:.35;border-style:dashed;border-color:var(--accent)}
+.group-team:hover{border-color:var(--border2)}
+.unassigned-pool{background:var(--surface);border:2px dashed var(--border);border-radius:var(--r2);padding:12px;margin-top:14px;transition:border-color .15s,background .15s}
+.unassigned-pool.drag-over{border-color:var(--accent);background:var(--accent-dim)}
+.match-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:13px;margin-bottom:9px;transition:border-color .15s}
+.match-card.active-match{border-color:var(--accent)}
+.match-card.completed{opacity:.72}
+.match-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:7px;flex-wrap:wrap}
+.match-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:1px}
+.match-meta{display:flex;align-items:center;gap:6px}
+.match-status-badge{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:3px 7px;border-radius:99px}
+.status-pending{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.status-live{background:rgba(168,212,74,.2);color:var(--accent);border:1px solid var(--border2);animation:pulse 2s infinite}
+.status-done{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(232,200,74,.3)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.court-badge{font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:var(--purple-dim);color:var(--purple);border:1px solid rgba(180,138,232,.25)}
+.time-badge{font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.teams-row{display:flex;align-items:center;gap:9px}
+.team-slot{flex:1;padding:9px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);text-align:center}
+.team-slot.winner{border-color:var(--accent);background:var(--accent-dim)}
+.team-slot-name{font-size:13px;font-weight:600}
+.team-slot-score{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);line-height:1;margin-top:2px}
+.team-slot-score.loser-score{color:var(--text3)}
+.vs-sep{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--text3);flex-shrink:0}
+.standings-table{width:100%;border-collapse:collapse;font-size:13px}
+.standings-table th{text-align:left;padding:6px 9px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border)}
+.standings-table td{padding:8px 9px;border-bottom:1px solid var(--border)}
+.standings-table tr:last-child td{border-bottom:none}
+.standings-table tr:hover td{background:var(--surface2)}
+.rank-num{font-family:'DM Mono',monospace;color:var(--text3)}
+.rank-1{color:var(--gold)}.rank-2{color:var(--text2)}.rank-3{color:#cd7f32}
+.pts-cell{font-family:'DM Mono',monospace;font-weight:500;color:var(--accent)}
+.bracket-wrapper{overflow-x:auto;padding-bottom:12px}
+.bracket{display:flex;align-items:flex-start;min-width:max-content}
+.bracket-round{display:flex;flex-direction:column;justify-content:space-around}
+.bracket-round-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--text3);text-align:center;padding:0 18px 9px}
+.bracket-match{margin:7px 0}
+.bracket-match-inner{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);width:180px;overflow:hidden}
+.bracket-match-inner.winner-decided{border-color:var(--accent)}
+.bracket-slot{padding:6px 9px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);font-size:12px;font-weight:500}
+.bracket-slot:last-child{border-bottom:none}
+.bracket-slot.winner-slot{background:var(--accent-dim);color:var(--accent)}
+.bracket-slot-score{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.schedule-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.court-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.court-header{padding:9px 13px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.court-name{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;color:var(--purple)}
+.court-slot{padding:9px 13px;border-bottom:1px solid var(--border);font-size:13px}
+.court-slot:last-child{border-bottom:none}
+.court-slot-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:2px}
+.court-slot-match{font-weight:500}
+.court-slot.empty-slot{color:var(--text3);font-style:italic;font-size:12px}
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.setting-item:last-child{border-bottom:none}
+.setting-label{font-size:14px;font-weight:500}
+.setting-desc{font-size:12px;color:var(--text3);margin-top:1px}
+.num-control{display:flex;align-items:center;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.num-control button{width:30px;height:32px;background:var(--surface2);border:none;color:var(--text);cursor:pointer;font-size:16px;transition:background .15s}
+.num-control button:hover{background:var(--surface3)}
+.num-control span{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;padding:0 12px;color:var(--accent);min-width:44px;text-align:center}
+.alert{padding:10px 13px;border-radius:var(--r);margin-bottom:12px;font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.alert-info{background:var(--blue-dim);border:1px solid rgba(74,184,232,.25);color:var(--blue)}
+.alert-success{background:var(--accent-dim);border:1px solid var(--border2);color:var(--accent)}
+.alert-warn{background:var(--gold-dim);border:1px solid rgba(232,200,74,.3);color:var(--gold)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+.empty-state .ei{font-size:36px;margin-bottom:8px}
+.empty-state strong{display:block;font-size:15px;color:var(--text2);margin-bottom:4px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.76);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);padding:20px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--text);margin-bottom:14px}
+.modal-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:16px}
+.score-game-block{padding:11px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:9px}
+.score-game-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px}
+.score-inputs{display:flex;gap:9px;align-items:flex-end}
+.score-inputs>div{flex:1}
+.score-inputs input{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:26px;height:48px}
+.score-sep{flex:0;padding-bottom:8px;font-size:16px;color:var(--text3)}
+.game-pip{font-family:'DM Mono',monospace;font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text3)}
+.game-pip.win{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.game-pip.loss{border-color:rgba(224,85,85,.3);color:var(--red);background:var(--red-dim)}
+.history-entry{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.history-entry:last-child{border-bottom:none}
+.history-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);white-space:nowrap;padding-top:1px;min-width:70px}
+.history-text{flex:1;color:var(--text2)}
+.history-text strong{color:var(--text)}
+.spec-banner{background:linear-gradient(135deg,var(--surface2),var(--surface3));border:1px solid var(--border2);border-radius:var(--r2);padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:11px}
+.live-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 1.5s infinite;flex-shrink:0}
+.sync-indicator{font-family:'DM Mono',monospace;font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface2);color:var(--text3);white-space:nowrap;transition:all .3s}
+.sync-indicator.connected{background:var(--accent-dim);border-color:var(--border2);color:var(--accent)}
+.sync-indicator.syncing{background:var(--gold-dim);border-color:rgba(232,200,74,.3);color:var(--gold)}
+.sync-indicator.error{background:var(--red-dim);border-color:rgba(224,85,85,.3);color:var(--red)}
+.spec-section{margin-bottom:24px}
+.spec-section-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--text2);margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.flex-end{justify-content:flex-end}
+.flex-between{justify-content:space-between}
+.flex-wrap{flex-wrap:wrap}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb18{margin-bottom:18px}
+.mt8{margin-top:8px}.mt12{margin-top:12px}
+hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+@media print{
+  body{background:#fff;color:#000}
+  header,nav,.no-print{display:none!important}
+  .page{display:block!important}
+  .card,.match-card,.bracket-match-inner,.group-card{border:1px solid #ccc;background:#fff}
+  .standings-table th,.standings-table td{border-color:#ccc}
+  .section-title,.logo,.group-label,.court-name,.bracket-round-title{color:#000}
+  .match-status-badge,.skill-badge{border:1px solid #999;color:#333;background:#eee}
+  .team-slot-score{color:#333}
+  .btn{display:none!important}
+  .bracket-slot{border-color:#ccc}
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">V<span>oyage</span></div>
-  <div class="tagline">International Travel Dashboard</div>
-  <div style="display:flex;align-items:center;gap:20px">
-    <div class="theme-toggle">
-      <span class="theme-toggle-label" id="theme-label">Light</span>
-      <label class="theme-switch">
-        <input type="checkbox" id="theme-checkbox" onchange="toggleTheme(this.checked)">
-        <div class="theme-switch-track">
-          <span>🌙</span>
-          <span>☀️</span>
-        </div>
-        <div class="theme-switch-thumb"></div>
-      </label>
-    </div>
-    <div id="live-date" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)"></div>
+  <div class="logo">Pickle<span>Bracket</span></div>
+  <div class="header-actions">
+    <div class="phase-badge" id="phaseBadge">Setup</div>
+    <div id="syncIndicator" class="sync-indicator" title="Not connected">⚫ Offline</div>
+    <div id="presenceCount" style="display:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)"></div>
+    <button class="btn btn-sm btn-outline no-print" id="shareBtn" onclick="openShareModal()" style="display:none">🔗 Share</button>
+    <button class="btn btn-sm btn-primary no-print" id="createSessionBtn" onclick="createSession()">☁ Go Live</button>
+    <button class="btn btn-sm btn-outline no-print" onclick="exportCSV()" title="Export to CSV">⬇ CSV</button>
+    <button class="btn btn-sm btn-outline no-print" onclick="openSpectator()" title="Spectator view">📺 Live View</button>
+    <button class="btn btn-sm btn-outline no-print" onclick="window.print()" title="Print">🖨 Print</button>
   </div>
 </header>
 
-<div class="selector-hero">
-  <div class="country-block">
-    <label>🏠 Your Home Country</label>
-    <div class="country-select-wrapper">
-      <span class="flag" id="home-flag">🏠</span>
-      <select id="home-country" onchange="updateDashboard()">
-        <!-- populated by JS -->
-      </select>
+<nav>
+  <button class="active" data-page="setup">⚙ Setup</button>
+  <button data-page="teams">👥 Teams</button>
+  <button data-page="groups">🎯 Groups</button>
+  <button data-page="schedule">🏟 Courts</button>
+  <button data-page="roundrobin">🔄 Round Robin</button>
+  <button data-page="bracket">🏆 Bracket</button>
+  <button data-page="history">📋 History</button>
+</nav>
+
+<main>
+
+<!-- SETUP + SETTINGS -->
+<div class="page active" id="page-setup">
+  <div class="section-title">Tournament Setup</div>
+  <div class="section-sub">Configure your tournament, scoring rules, and match format</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Tournament Info</div>
+      <div class="form-row"><label>Tournament Name</label><input type="text" id="tournamentName" value="Summer Open" placeholder="Enter name"></div>
+      <div class="form-row"><label>Format</label>
+        <div class="toggle-group">
+          <button class="active" onclick="setTType('singles',this)">Singles</button>
+          <button onclick="setTType('doubles',this)">Doubles</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Bracketing</div>
+      <div class="form-row"><label>Group Assignment</label>
+        <div class="toggle-group">
+          <button class="active" onclick="setBMethod('skill',this)">By Skill</button>
+          <button onclick="setBMethod('random',this)">Random</button>
+          <button onclick="setBMethod('manual',this)">Manual</button>
+        </div>
+      </div>
+      <div class="form-row mt8"><label>Number of Groups</label>
+        <div class="num-control">
+          <button onclick="adj('numGroups',-1)">−</button><span id="val-numGroups">2</span><button onclick="adj('numGroups',1)">+</button>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="arrow-block">
-    <div class="arrow-icon">✈</div>
-    <div class="arrow-label">Traveling to</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Scoring Rules</div>
+      <div class="setting-item">
+        <div><div class="setting-label">Win Score</div><div class="setting-desc">Points to win a game</div></div>
+        <div class="toggle-group">
+          <button onclick="setSetting('winScore',9,this)">9</button>
+          <button class="active" onclick="setSetting('winScore',11,this)">11</button>
+          <button onclick="setSetting('winScore',15,this)">15</button>
+        </div>
+      </div>
+      <div class="setting-item">
+        <div><div class="setting-label">Win By 2</div><div class="setting-desc">Must win by 2 after tie</div></div>
+        <div class="toggle-group">
+          <button class="active" onclick="setSettingB('winBy2',true,this)">On</button>
+          <button onclick="setSettingB('winBy2',false,this)">Off</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Round Robin</div>
+      <div class="setting-item">
+        <div><div class="setting-label">Best Of (per match)</div><div class="setting-desc">Games per round robin matchup</div></div>
+        <div class="num-control"><button onclick="adj('rrBestOf',-2)">−</button><span id="val-rrBestOf">1</span><button onclick="adj('rrBestOf',2)">+</button></div>
+      </div>
+      <div class="setting-item">
+        <div><div class="setting-label">Teams Advancing per Group</div><div class="setting-desc">Top N advance to bracket</div></div>
+        <div class="num-control"><button onclick="adj('advanceCount',-1)">−</button><span id="val-advanceCount">2</span><button onclick="adj('advanceCount',1)">+</button></div>
+      </div>
+    </div>
   </div>
-  <div class="country-block">
-    <label>📍 Visiting Country</label>
-    <div class="country-select-wrapper">
-      <span class="flag" id="visit-flag">📍</span>
-      <select id="visit-country" onchange="updateDashboard()">
-        <!-- populated by JS -->
-      </select>
+
+  <div class="card">
+    <div class="card-title">Elimination Bracket</div>
+    <div class="grid-3" style="gap:0">
+      <div class="setting-item" style="padding:10px 12px;border-bottom:none;border-right:1px solid var(--border)">
+        <div><div class="setting-label">Semi-Finals</div><div class="setting-desc">Best Of</div></div>
+        <div class="num-control"><button onclick="adj('sfBestOf',-2)">−</button><span id="val-sfBestOf">3</span><button onclick="adj('sfBestOf',2)">+</button></div>
+      </div>
+      <div class="setting-item" style="padding:10px 12px;border-bottom:none;border-right:1px solid var(--border)">
+        <div><div class="setting-label">Finals</div><div class="setting-desc">Best Of</div></div>
+        <div class="num-control"><button onclick="adj('finalsBestOf',-2)">−</button><span id="val-finalsBestOf">5</span><button onclick="adj('finalsBestOf',2)">+</button></div>
+      </div>
+      <div class="setting-item" style="padding:10px 12px;border-bottom:none">
+        <div><div class="setting-label">3rd Place</div><div class="setting-desc">Best Of</div></div>
+        <div class="num-control"><button onclick="adj('thirdBestOf',-2)">−</button><span id="val-thirdBestOf">3</span><button onclick="adj('thirdBestOf',2)">+</button></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-full no-print" onclick="navTo('teams')">→ Continue to Add Teams</button>
+</div>
+
+<!-- TEAMS -->
+<div class="page" id="page-teams">
+  <div class="flex-row flex-between mb12 flex-wrap">
+    <div><div class="section-title">Teams</div><div class="section-sub" id="teamsSubtext">Adding singles players</div></div>
+    <button class="btn btn-primary no-print" onclick="openAddTeamModal()">+ Add Team</button>
+  </div>
+  <div id="teamsList"><div class="empty-state"><div class="ei">🎾</div><strong>No teams yet</strong>Click Add Team to get started</div></div>
+  <div id="teamsActions" style="display:none" class="no-print">
+    <div class="flex-row flex-end mt12">
+      <button class="btn btn-outline" onclick="navTo('setup')">← Back</button>
+      <button class="btn btn-primary" onclick="goToGroups()">Assign Groups →</button>
     </div>
   </div>
 </div>
 
-<div class="dashboard" id="dashboard">
-  <!-- Populated dynamically -->
+<!-- GROUPS -->
+<div class="page" id="page-groups">
+  <div class="flex-row flex-between mb12 flex-wrap">
+    <div><div class="section-title">Groups</div><div class="section-sub" id="groupsSubtext">Drag teams between groups to reassign manually</div></div>
+    <div class="flex-row flex-wrap no-print" style="gap:5px">
+      <button class="btn btn-outline btn-sm" onclick="assignGroups()">🔀 Re-assign</button>
+      <button class="btn btn-primary btn-sm" onclick="startRR()">Start Round Robin →</button>
+    </div>
+  </div>
+  <div id="groupsContainer" class="group-container"></div>
+  <div id="unassignedPool" style="display:none">
+    <div class="unassigned-pool" id="unassignedDrop" ondragover="dragOver(event,null)" ondrop="drop(event,null)" ondragleave="dragLeave(event,null)">
+      <div class="card-title">Unassigned — drag to a group above</div>
+      <div id="unassignedList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- COURTS -->
+<div class="page" id="page-schedule">
+  <div class="flex-row flex-between mb12 flex-wrap">
+    <div><div class="section-title">Court Schedule</div><div class="section-sub">Assign matches to courts and time slots</div></div>
+    <div class="flex-row flex-wrap no-print" style="gap:5px">
+      <button class="btn btn-outline btn-sm" onclick="autoSchedule()">⚡ Auto-Schedule</button>
+      <button class="btn btn-outline btn-sm" onclick="openAddCourtModal()">+ Add Court</button>
+    </div>
+  </div>
+  <div class="grid-2 mb12">
+    <div class="card">
+      <div class="card-title">Schedule Settings</div>
+      <div class="form-row"><label>Start Time</label><input type="time" id="schedStart" value="09:00"></div>
+      <div class="form-row"><label>Minutes per Match</label>
+        <div class="num-control"><button onclick="adj('matchDuration',-5)">−</button><span id="val-matchDuration">20</span><button onclick="adj('matchDuration',5)">+</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Courts</div>
+      <div id="courtListSummary"></div>
+      <button class="btn btn-outline btn-sm mt8 no-print" onclick="openAddCourtModal()">+ Add Court</button>
+    </div>
+  </div>
+  <div id="scheduleContent"><div class="empty-state"><div class="ei">🏟</div><strong>No courts added</strong>Add courts then click Auto-Schedule</div></div>
+</div>
+
+<!-- ROUND ROBIN -->
+<div class="page" id="page-roundrobin">
+  <div class="section-title">Round Robin</div>
+  <div class="section-sub">All teams play within their group</div>
+  <div id="rrTabs" class="flex-row mb12 flex-wrap no-print" style="gap:5px"></div>
+  <div id="rrContent"></div>
+</div>
+
+<!-- BRACKET -->
+<div class="page" id="page-bracket">
+  <div class="section-title">Elimination Bracket</div>
+  <div class="section-sub">Top teams from each group advance</div>
+  <div id="bracketContent"><div class="empty-state"><div class="ei">🏆</div><strong>Bracket not generated yet</strong>Complete round robin first</div></div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="flex-row flex-between mb12 flex-wrap">
+    <div><div class="section-title">Score History</div><div class="section-sub">All score entries — undo the most recent action</div></div>
+    <div class="flex-row no-print" style="gap:5px">
+      <button class="btn btn-danger btn-sm" id="undoBtn" onclick="undoLast()" disabled>↩ Undo Last</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearHistory()">🗑 Clear</button>
+    </div>
+  </div>
+  <div class="card"><div id="historyList"><div class="empty-state" style="padding:20px 0"><strong>No score history yet</strong></div></div></div>
+</div>
+
+
+</main>
+
+<!-- CELEBRATION OVERLAY -->
+<div id="celebrationOverlay" style="display:none;position:fixed;inset:0;z-index:500;pointer-events:none">
+  <canvas id="confettiCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+  <div id="celebrationCard" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--surface);border:2px solid var(--accent);border-radius:16px;padding:36px 48px;text-align:center;pointer-events:all;min-width:320px;max-width:90vw;box-shadow:0 0 60px rgba(168,212,74,.3)">
+    <div style="font-size:52px;margin-bottom:8px">🏆</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:var(--text3);margin-bottom:4px">TOURNAMENT CHAMPION</div>
+    <div id="celebChampName" style="font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:2px;color:var(--accent);line-height:1;margin-bottom:8px"></div>
+    <div id="celebThirdRow" style="font-size:13px;color:var(--text3);margin-bottom:20px"></div>
+    <button class="btn btn-outline btn-sm" onclick="stopConfetti()">✕ Stop Celebration</button>
+  </div>
+</div>
+
+<!-- SPECTATOR FULLSCREEN -->
+<div id="spectatorOverlay" style="display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow:hidden;flex-direction:column">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="live-dot"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--accent)" id="specTitle">Live View</div>
+      <div style="font-size:12px;color:var(--text3)" id="specDate"></div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-outline btn-sm" onclick="window.print()">🖨</button>
+      <button class="btn btn-outline btn-sm" onclick="closeSpectator()">✕ Close</button>
+    </div>
+  </div>
+  <div id="spectatorContent" style="flex:1;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:var(--border)"></div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <div class="modal-title">🔗 SHARE TOURNAMENT</div>
+    <div class="alert alert-success mb12">Live session active — all changes sync instantly</div>
+    <div class="form-row">
+      <label>Admin Link (can edit scores & settings)</label>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="shareAdminUrl" readonly style="font-family:'DM Mono',monospace;font-size:12px">
+        <button class="btn btn-outline btn-sm" style="flex-shrink:0" onclick="copyUrl('shareAdminUrl','adminCopied')">Copy</button>
+      </div>
+      <div id="adminCopied" style="font-size:11px;color:var(--accent);margin-top:4px;min-height:14px"></div>
+    </div>
+    <div class="form-row">
+      <label>Viewer Link (read-only Live View)</label>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="shareViewerUrl" readonly style="font-family:'DM Mono',monospace;font-size:12px">
+        <button class="btn btn-outline btn-sm" style="flex-shrink:0" onclick="copyUrl('shareViewerUrl','viewerCopied')">Copy</button>
+      </div>
+      <div id="viewerCopied" style="font-size:11px;color:var(--accent);margin-top:4px;min-height:14px"></div>
+    </div>
+    <hr>
+    <div style="font-size:12px;color:var(--text3)">
+      <strong style="color:var(--text2)">Tournament ID:</strong>
+      <span id="shareTournamentId" style="font-family:'DM Mono',monospace"></span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('shareModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- WS CONFIG MODAL -->
+<div class="modal-overlay" id="wsConfigModal">
+  <div class="modal">
+    <div class="modal-title">☁ GO LIVE</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Creating a new tournament session…</p>
+    
+    <div class="alert alert-info" style="margin-bottom:16px;font-size:12px">
+      You'll be the admin. Share the link below to invite others to join!
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-full" onclick="closeModal('wsConfigModal')">Got it, let's go!</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN NOTIFICATION -->
+<div id="joinToast" style="display:none;position:fixed;bottom:20px;right:20px;z-index:400;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);padding:12px 16px;font-size:13px;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+  <div id="joinToastText"></div>
+</div>
+<div class="modal-overlay" id="addTeamModal">
+  <div class="modal">
+    <div class="modal-title" id="addTeamTitle">ADD PLAYER</div>
+    <div id="addTeamForm"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('addTeamModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddTeam()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE MODAL -->
+<div class="modal-overlay" id="scoreModal">
+  <div class="modal">
+    <div class="modal-title">ENTER SCORES</div>
+    <div id="scoreModalContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('scoreModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitScore()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD COURT MODAL -->
+<div class="modal-overlay" id="addCourtModal">
+  <div class="modal">
+    <div class="modal-title">ADD COURT</div>
+    <div class="form-row"><label>Court Name</label><input type="text" id="courtNameInput" placeholder="e.g. Court 1, Main Court"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('addCourtModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddCourt()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGN COURT MODAL -->
+<div class="modal-overlay" id="assignCourtModal">
+  <div class="modal">
+    <div class="modal-title">ASSIGN COURT & TIME</div>
+    <div id="assignCourtContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('assignCourtModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAssignCourt()">Assign</button>
+    </div>
+  </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════
-// THEME
-// ═══════════════════════════════════════
-function toggleTheme(isDark) {
-  document.documentElement.classList.toggle('dark', isDark);
-  document.getElementById('theme-label').textContent = isDark ? 'Dark' : 'Light';
-  localStorage.setItem('voyage-theme', isDark ? 'dark' : 'light');
+// ─── STATE ───────────────────────────────────────────
+const S={
+  tType:'singles', bMethod:'skill',
+  teams:[], groups:[], rrMatches:{}, bracketMatches:[], bracketRounds:[],
+  courts:[], schedule:{},  // matchId -> {courtId, time}
+  history:[],
+  curRRGroup:0, scoringCtx:null, assignCtx:null,
+  settings:{winScore:11,winBy2:true,rrBestOf:1,advanceCount:2,sfBestOf:3,finalsBestOf:5,thirdBestOf:3,numGroups:2,matchDuration:20},
+};
+let _tid=1,_mid=1,_cid=1;
+let dragTeam=null,dragFromG=null;
+
+const SKILL_LABELS={1:'2.0',2:'2.5–3.0',3:'3.5',4:'4.0',5:'4.5+'};
+const S_CONSTRAINTS={numGroups:{min:1,max:8},rrBestOf:{min:1,max:5},advanceCount:{min:1,max:8},sfBestOf:{min:1,max:7},finalsBestOf:{min:1,max:7},thirdBestOf:{min:1,max:7},matchDuration:{min:5,max:120}};
+const ODD_ONLY=['rrBestOf','sfBestOf','finalsBestOf','thirdBestOf'];
+
+// ─── NAV ─────────────────────────────────────────────
+function navTo(p){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelector(`nav button[data-page="${p}"]`).classList.add('active');
+  const L={setup:'Setup',teams:'Teams',groups:'Groups',schedule:'Courts',roundrobin:'Round Robin',bracket:'Bracket',history:'History'};
+  document.getElementById('phaseBadge').textContent=L[p]||p;
+  if(p==='teams')renderTeams();
+  if(p==='roundrobin')renderRRPage();
+  if(p==='bracket')renderBracketPage();
+  if(p==='schedule')renderSchedulePage();
+  if(p==='history')renderHistory();
 }
-// Restore saved theme (default = light, no class needed)
-(function() {
-  const saved = localStorage.getItem('voyage-theme');
-  if (saved === 'dark') {
-    document.documentElement.classList.add('dark');
-    window.addEventListener('DOMContentLoaded', () => {
-      const cb = document.getElementById('theme-checkbox');
-      if (cb) { cb.checked = true; document.getElementById('theme-label').textContent = 'Dark'; }
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>navTo(b.dataset.page)));
+
+// ─── SETUP ───────────────────────────────────────────
+function setTType(t,btn){S.tType=t;tog(btn);}
+function setBMethod(m,btn){S.bMethod=m;tog(btn);}
+function tog(btn){btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+
+// ─── SETTINGS ────────────────────────────────────────
+function adj(k,d){
+  let v=S.settings[k]+d;
+  const c=S_CONSTRAINTS[k]||{min:1,max:99};
+  v=Math.max(c.min,Math.min(c.max,v));
+  if(ODD_ONLY.includes(k)&&v%2===0)v+=d>0?1:-1;
+  v=Math.max(c.min,Math.min(c.max,v));
+  S.settings[k]=v;
+  const el=document.getElementById('val-'+k);if(el)el.textContent=v;
+  syncPv();
+}
+function setSetting(k,v,btn){S.settings[k]=v;tog(btn);syncPv();}
+function setSettingB(k,v,btn){S.settings[k]=v;tog(btn);}
+function syncPv(){} // preview elements removed (settings merged into setup)
+
+// ─── TEAMS ───────────────────────────────────────────
+function openAddTeamModal(){
+  const isD=S.tType==='doubles';
+  document.getElementById('addTeamTitle').textContent=isD?'ADD DOUBLES TEAM':'ADD PLAYER';
+  document.getElementById('addTeamForm').innerHTML=isD?`
+    <div class="form-row"><label>Team Name (optional)</label><input type="text" id="tm-tn" placeholder="Auto-generated if blank"></div>
+    <div class="form-row-inline"><div><label>Player 1</label><input type="text" id="tm-p1" placeholder="Player 1"></div><div><label>Skill</label><select id="tm-s1">${skOpts()}</select></div></div>
+    <div class="form-row-inline mt8"><div><label>Player 2</label><input type="text" id="tm-p2" placeholder="Player 2"></div><div><label>Skill</label><select id="tm-s2">${skOpts()}</select></div></div>`:`
+    <div class="form-row"><label>Player Name</label><input type="text" id="tm-p1" placeholder="Enter name"></div>
+    <div class="form-row"><label>Skill Level</label><select id="tm-s1">${skOpts()}</select></div>`;
+  openModal('addTeamModal');
+  setTimeout(()=>document.getElementById('tm-p1')?.focus(),50);
+}
+function skOpts(){return `<option value="">Not specified</option><option value="1">2.0 — Beginner</option><option value="2">2.5–3.0 — Intermediate</option><option value="3">3.5 — Solid</option><option value="4">4.0 — Advanced</option><option value="5">4.5+ — Elite</option>`;}
+function submitAddTeam(){
+  const p1=document.getElementById('tm-p1')?.value.trim();
+  if(!p1){alert('Enter player name.');return;}
+  const s1=parseInt(document.getElementById('tm-s1')?.value)||0;
+  let team;
+  if(S.tType==='singles'){
+    team={id:_tid++,name:p1,players:[{name:p1,skill:s1}],avgSkill:s1};
+  } else {
+    const p2=document.getElementById('tm-p2')?.value.trim()||'Player 2';
+    const s2=parseInt(document.getElementById('tm-s2')?.value)||0;
+    const tn=document.getElementById('tm-tn')?.value.trim()||`${p1} / ${p2}`;
+    const skills=[s1,s2].filter(s=>s>0);
+    const avg=skills.length?skills.reduce((a,b)=>a+b,0)/skills.length:0;
+    team={id:_tid++,name:tn,players:[{name:p1,skill:s1},{name:p2,skill:s2}],avgSkill:avg};
+  }
+  S.teams.push(team);closeModal('addTeamModal');renderTeams();
+}
+function removeTeam(id){S.teams=S.teams.filter(t=>t.id!==id);renderTeams();}
+function renderTeams(){
+  const sub=document.getElementById('teamsSubtext');
+  if(sub)sub.textContent=S.tType==='doubles'?'Adding doubles teams (2 players)':'Adding singles players';
+  const list=document.getElementById('teamsList');
+  const act=document.getElementById('teamsActions');
+  if(!S.teams.length){list.innerHTML=`<div class="empty-state"><div class="ei">🎾</div><strong>No teams yet</strong>Click Add Team</div>`;act.style.display='none';return;}
+  act.style.display='block';
+  list.innerHTML=S.teams.map(t=>{
+    const sk=t.avgSkill?`<span class="skill-badge skill-${Math.round(t.avgSkill)}">${SKILL_LABELS[Math.round(t.avgSkill)]||'?'}</span>`:'';
+    const meta=S.tType==='doubles'?t.players.map(p=>p.name+(p.skill?` (${SKILL_LABELS[p.skill]})`:'')).join(' & '):'';
+    return `<div class="team-item"><div><div class="team-name">${t.name}${sk}</div><div class="team-meta">${meta}</div></div><button class="btn btn-danger btn-sm no-print" onclick="removeTeam(${t.id})">✕</button></div>`;
+  }).join('');
+}
+
+// ─── GROUPS + DRAG & DROP ────────────────────────────
+function goToGroups(){if(S.teams.length<2){alert('Add at least 2 teams.');return;}assignGroups();navTo('groups');}
+function assignGroups(){
+  const n=S.settings.numGroups;
+  S.groups=Array.from({length:n},(_,i)=>({id:i,name:'Group '+String.fromCharCode(65+i),teams:[]}));
+  if(S.bMethod==='skill'){
+    const sorted=[...S.teams].sort((a,b)=>(b.avgSkill||0)-(a.avgSkill||0));
+    let dir=1,gi=0;
+    sorted.forEach(t=>{S.groups[gi].teams.push(t);gi+=dir;if(gi>=n){gi=n-1;dir=-1;}else if(gi<0){gi=0;dir=1;}});
+  } else if(S.bMethod==='random'){
+    [...S.teams].sort(()=>Math.random()-.5).forEach((t,i)=>S.groups[i%n].teams.push(t));
+  } else {
+    S.teams.forEach((t,i)=>S.groups[i%n].teams.push(t));
+  }
+  renderGroups();
+}
+function renderGroups(){
+  const isM=S.bMethod==='manual';
+  document.getElementById('groupsSubtext').textContent=isM?'Drag teams between groups to reassign':`${S.teams.length} teams across ${S.groups.length} groups — ${S.bMethod} assignment`;
+  const c=document.getElementById('groupsContainer');
+  c.innerHTML=S.groups.map(g=>`
+    <div class="group-card" id="gc-${g.id}" ondragover="dragOver(event,${g.id})" ondrop="drop(event,${g.id})" ondragleave="dragLeave(event,${g.id})">
+      <div class="group-header"><div class="group-label">${g.name}</div><div class="group-count">${g.teams.length} teams</div></div>
+      ${g.teams.length===0?`<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px 0">Drop here</div>`:g.teams.map(t=>teamDragEl(t,g.id)).join('')}
+    </div>`).join('');
+  document.getElementById('unassignedPool').style.display=isM?'block':'none';
+}
+function teamDragEl(t,gid){
+  const sk=t.avgSkill?`<span class="skill-badge skill-${Math.round(t.avgSkill)}">${SKILL_LABELS[Math.round(t.avgSkill)]}</span>`:'';
+  return `<div class="group-team" id="dt-${t.id}" draggable="true" ondragstart="dragStart(event,${t.id},${gid})" ondragend="dragEnd(event)">${t.name}${sk}</div>`;
+}
+function dragStart(e,tid,gid){dragTeam=tid;dragFromG=gid;setTimeout(()=>document.getElementById('dt-'+tid)?.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';}
+function dragEnd(){document.querySelectorAll('.group-team').forEach(el=>el.classList.remove('dragging'));}
+function dragOver(e,gid){e.preventDefault();const el=gid!==null?document.getElementById('gc-'+gid):document.getElementById('unassignedDrop');el?.classList.add('drag-over');}
+function dragLeave(e,gid){const el=gid!==null?document.getElementById('gc-'+gid):document.getElementById('unassignedDrop');el?.classList.remove('drag-over');}
+function drop(e,toGid){
+  e.preventDefault();
+  document.querySelectorAll('.group-card,.unassigned-pool').forEach(el=>el.classList.remove('drag-over'));
+  if(dragTeam===null)return;
+  if(dragFromG!==null){const src=S.groups.find(g=>g.id===dragFromG);if(src)src.teams=src.teams.filter(t=>t.id!==dragTeam);}
+  const team=S.teams.find(t=>t.id===dragTeam);
+  if(team&&toGid!==null){const dest=S.groups.find(g=>g.id===toGid);if(dest&&!dest.teams.find(t=>t.id===dragTeam))dest.teams.push(team);}
+  dragTeam=null;dragFromG=null;renderGroups();
+}
+
+// ─── COURTS & SCHEDULE ───────────────────────────────
+function openAddCourtModal(){document.getElementById('courtNameInput').value='';openModal('addCourtModal');setTimeout(()=>document.getElementById('courtNameInput').focus(),50);}
+function submitAddCourt(){
+  const nm=document.getElementById('courtNameInput').value.trim();
+  if(!nm){alert('Enter a court name.');return;}
+  S.courts.push({id:_cid++,name:nm});closeModal('addCourtModal');renderSchedulePage();
+}
+function removeCourt(id){
+  S.courts=S.courts.filter(c=>c.id!==id);
+  for(const mid in S.schedule){if(S.schedule[mid].courtId===id)delete S.schedule[mid];}
+  renderSchedulePage();
+}
+function allMatchesFlat(){
+  const arr=[];
+  for(const gi in S.rrMatches)arr.push(...S.rrMatches[gi]);
+  arr.push(...S.bracketMatches.filter(m=>!m.teamA?.isBye&&!m.teamB?.isBye));
+  return arr;
+}
+function autoSchedule(){
+  if(!S.courts.length){alert('Add at least one court first.');return;}
+  const matches=allMatchesFlat().filter(m=>m.status!=='done');
+  const sp=document.getElementById('schedStart').value.split(':');
+  let baseMin=parseInt(sp[0])*60+parseInt(sp[1]);
+  const dur=S.settings.matchDuration;
+  const courtSlots={};
+  S.courts.forEach(c=>courtSlots[c.id]=0);
+  matches.forEach((m,i)=>{
+    const court=S.courts[i%S.courts.length];
+    const slot=courtSlots[court.id];
+    const t=baseMin+slot*dur;
+    const h=Math.floor((t/60)%24).toString().padStart(2,'0');
+    const mn=(t%60).toString().padStart(2,'0');
+    S.schedule[m.id]={courtId:court.id,time:`${h}:${mn}`};
+    courtSlots[court.id]++;
+  });
+  renderSchedulePage();
+}
+function fmtTime(t){
+  if(!t)return '';const[h,m]=t.split(':');const hr=parseInt(h);return `${hr%12||12}:${m} ${hr>=12?'PM':'AM'}`;
+}
+function openAssignCourt(mid){
+  S.assignCtx=mid;const cur=S.schedule[mid]||{};
+  document.getElementById('assignCourtContent').innerHTML=`
+    <div class="form-row"><label>Court</label><select id="ac-court">${S.courts.map(c=>`<option value="${c.id}" ${cur.courtId===c.id?'selected':''}>${c.name}</option>`).join('')}</select></div>
+    <div class="form-row"><label>Time</label><input type="time" id="ac-time" value="${cur.time||'09:00'}"></div>`;
+  openModal('assignCourtModal');
+}
+function submitAssignCourt(){
+  const mid=S.assignCtx;if(!mid)return;
+  S.schedule[mid]={courtId:parseInt(document.getElementById('ac-court').value),time:document.getElementById('ac-time').value};
+  closeModal('assignCourtModal');renderSchedulePage();
+}
+function renderCourtSummary(){
+  const el=document.getElementById('courtListSummary');if(!el)return;
+  if(!S.courts.length){el.innerHTML='<div style="font-size:13px;color:var(--text3)">No courts yet</div>';return;}
+  el.innerHTML=S.courts.map(c=>`<div class="flex-row flex-between" style="padding:4px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--purple)">${c.name}</span><button class="btn btn-ghost btn-sm" onclick="removeCourt(${c.id})">✕</button></div>`).join('');
+}
+function renderSchedulePage(){
+  renderCourtSummary();
+  const content=document.getElementById('scheduleContent');
+  if(!S.courts.length){content.innerHTML=`<div class="empty-state"><div class="ei">🏟</div><strong>No courts added</strong>Add courts then click Auto-Schedule</div>`;return;}
+  const matches=allMatchesFlat();
+  const byCourt={};S.courts.forEach(c=>{byCourt[c.id]=[];});
+  matches.forEach(m=>{const sc=S.schedule[m.id];if(sc&&byCourt[sc.courtId])byCourt[sc.courtId].push({m,time:sc.time});});
+  content.innerHTML=`<div class="schedule-grid">${S.courts.map(c=>{
+    const slots=(byCourt[c.id]||[]).sort((a,b)=>a.time.localeCompare(b.time));
+    return `<div class="court-card"><div class="court-header"><div class="court-name">${c.name}</div><span style="font-size:12px;color:var(--text3)">${slots.length} match${slots.length!==1?'es':''}</span></div>
+    ${slots.length?slots.map(({m,time})=>{
+      const isDone=m.status==='done',ta=m.teamA?.name||'TBD',tb=m.teamB?.name||'TBD';
+      return `<div class="court-slot" style="${isDone?'opacity:.6':''}"><div class="court-slot-time">${fmtTime(time)} · ${S.settings.matchDuration} min</div>
+        <div class="court-slot-match">${ta} <span style="color:var(--text3)">vs</span> ${tb}</div>
+        <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
+          ${isDone?'<span style="font-size:11px;color:var(--accent)">✓ Done</span>':''}
+          <button class="btn btn-ghost btn-sm no-print" style="padding:1px 7px;font-size:11px" onclick="openAssignCourt(${m.id})">✏ Reassign</button>
+        </div></div>`;
+    }).join(''):`<div class="court-slot empty-slot">No matches assigned</div>`}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ─── ROUND ROBIN ─────────────────────────────────────
+function startRR(){
+  if(!S.groups.length){alert('Assign groups first.');return;}
+  S.rrMatches={};
+  S.groups.forEach((g,gi)=>{
+    const ms=[];
+    for(let a=0;a<g.teams.length;a++)for(let b=a+1;b<g.teams.length;b++)
+      ms.push({id:_mid++,teamA:g.teams[a],teamB:g.teams[b],games:[],winner:null,status:'pending'});
+    S.rrMatches[gi]=ms;
+  });
+  navTo('roundrobin');
+}
+function renderRRPage(){
+  const tabs=document.getElementById('rrTabs'),content=document.getElementById('rrContent');
+  if(!Object.keys(S.rrMatches).length){content.innerHTML=`<div class="empty-state"><div class="ei">🔄</div><strong>Round Robin not started</strong>Go to Groups and click Start Round Robin</div>`;tabs.innerHTML='';return;}
+  tabs.innerHTML=S.groups.map((g,i)=>`<button class="btn btn-sm ${i===S.curRRGroup?'btn-primary':'btn-outline'}" onclick="switchRR(${i})">${g.name}</button>`).join('');
+  renderRRGroup(S.curRRGroup);
+}
+function switchRR(gi){S.curRRGroup=gi;renderRRPage();}
+function renderRRGroup(gi){
+  const content=document.getElementById('rrContent');
+  const matches=S.rrMatches[gi]||[],group=S.groups[gi];
+  const standings=computeStandings(gi);
+  const allDone=matches.length>0&&matches.every(m=>m.status==='done');
+  let html=`<div class="card mb12"><div class="card-title">Standings — ${group.name}</div>
+    <table class="standings-table"><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>GW</th><th>GL</th><th>PD</th></tr></thead><tbody>
+    ${standings.map((s,i)=>`<tr>
+      <td><span class="rank-num rank-${i+1}">${i+1}</span></td>
+      <td style="font-weight:500">${s.team.name}${i<S.settings.advanceCount?` <span style="font-size:10px;color:var(--accent)">↑</span>`:''}</td>
+      <td style="color:var(--accent)">${s.wins}</td><td style="color:var(--red)">${s.losses}</td>
+      <td style="color:var(--text2)">${s.gamesWon}</td><td style="color:var(--text3)">${s.gamesLost}</td>
+      <td class="pts-cell">${s.pd>=0?'+':''}${s.pd}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+  if(allDone)html+=`<div class="alert alert-success">✅ Group complete! <button class="btn btn-sm btn-primary no-print" style="margin-left:9px" onclick="generateBracket()">Generate Bracket →</button></div>`;
+  html+=`<div class="card-title mb8">Matches</div>`;
+  html+=matches.map(m=>rrMatchCard(m)).join('');
+  content.innerHTML=html;
+}
+function matchScoreDisplay(m,bestOf){
+  // For Best-of-1: show raw point score of the single game
+  // For Best-of-X: show games-won count + game-by-game pips
+  if(!m.games.length) return '';
+  const isDone=m.status==='done';
+  if(bestOf===1){
+    const g=m.games[0];
+    const wA=isDone&&m.winner?.id===m.teamA.id,wB=isDone&&m.winner?.id===m.teamB.id;
+    return {
+      scoreA:`<div class="team-slot-score ${isDone&&!wA?'loser-score':''}">${g.scoreA}</div>`,
+      scoreB:`<div class="team-slot-score ${isDone&&!wB?'loser-score':''}">${g.scoreB}</div>`,
+      pips:''
+    };
+  }
+  const gwA=gamesWon(m,'A'),gwB=gamesWon(m,'B');
+  const wA=isDone&&m.winner?.id===m.teamA.id,wB=isDone&&m.winner?.id===m.teamB.id;
+  const pips=m.games.map((g,i)=>`<div style="display:flex;gap:6px;align-items:center;margin-top:6px">
+    <span style="font-size:11px;color:var(--text3)">G${i+1}</span>
+    <span class="game-pip ${gameWin(g.scoreA,g.scoreB)===0?'win':gameWin(g.scoreA,g.scoreB)===1?'loss':''}">${g.scoreA}</span>
+    <span style="font-size:11px;color:var(--text3)">—</span>
+    <span class="game-pip ${gameWin(g.scoreA,g.scoreB)===1?'win':gameWin(g.scoreA,g.scoreB)===0?'loss':''}">${g.scoreB}</span>
+  </div>`).join('');
+  return {
+    scoreA:`<div class="team-slot-score ${isDone&&!wA?'loser-score':''}">${gwA}</div>`,
+    scoreB:`<div class="team-slot-score ${isDone&&!wB?'loser-score':''}">${gwB}</div>`,
+    pips
+  };
+}
+function rrMatchCard(m){
+  const isDone=m.status==='done';
+  const bestOf=S.settings.rrBestOf;
+  const sc=S.schedule[m.id],court=sc?S.courts.find(c=>c.id===sc.courtId):null;
+  const sd=matchScoreDisplay(m,bestOf);
+  return `<div class="match-card ${m.status==='live'?'active-match':''} ${isDone?'completed':''}">
+    <div class="match-header">
+      <div class="flex-row" style="gap:5px;flex-wrap:wrap">
+        <span class="match-label">Best of ${bestOf}</span>
+        ${court?`<span class="court-badge">${court.name}</span>`:''}
+        ${sc?.time?`<span class="time-badge">${fmtTime(sc.time)}</span>`:''}
+      </div>
+      <div class="match-meta">
+        ${isDone?`<button class="btn btn-ghost btn-sm no-print" onclick="openScoreModal('rr',${m.id})" title="Edit">✏</button>`:''}
+        <span class="match-status-badge status-${m.status==='pending'?'pending':m.status==='done'?'done':'live'}">
+          ${m.status==='pending'?'Pending':m.status==='done'?'W: '+m.winner.name:'Live'}
+        </span>
+      </div>
+    </div>
+    <div class="teams-row">
+      <div class="team-slot ${isDone&&m.winner?.id===m.teamA.id?'winner':''}">
+        <div class="team-slot-name">${m.teamA.name}</div>
+        ${sd?sd.scoreA:''}
+      </div>
+      <div class="vs-sep">VS</div>
+      <div class="team-slot ${isDone&&m.winner?.id===m.teamB.id?'winner':''}">
+        <div class="team-slot-name">${m.teamB.name}</div>
+        ${sd?sd.scoreB:''}
+      </div>
+    </div>
+    ${sd?sd.pips:''}
+    ${!isDone?`<div class="mt8 no-print"><button class="btn btn-outline btn-sm" onclick="openScoreModal('rr',${m.id})">${m.games.length?'✏ Update':'+ Enter Score'}</button></div>`:''}
+  </div>`;
+}
+function computeStandings(gi){
+  const matches=S.rrMatches[gi]||[];
+  const map={};
+  S.groups[gi].teams.forEach(t=>{map[t.id]={team:t,wins:0,losses:0,gamesWon:0,gamesLost:0,pd:0};});
+  matches.forEach(m=>{
+    if(m.status!=='done'||!m.winner)return;
+    const wId=m.winner.id,lId=wId===m.teamA.id?m.teamB.id:m.teamA.id;
+    if(map[wId])map[wId].wins++;if(map[lId])map[lId].losses++;
+    m.games.forEach(g=>{
+      const w=gameWin(g.scoreA,g.scoreB);
+      if(map[m.teamA.id]){map[m.teamA.id].pd+=(g.scoreA-g.scoreB);if(w===0)map[m.teamA.id].gamesWon++;else if(w===1)map[m.teamA.id].gamesLost++;}
+      if(map[m.teamB.id]){map[m.teamB.id].pd+=(g.scoreB-g.scoreA);if(w===1)map[m.teamB.id].gamesWon++;else if(w===0)map[m.teamB.id].gamesLost++;}
     });
-  }
-})();
-
-// ═══════════════════════════════════════
-// COUNTRY DATA
-// ═══════════════════════════════════════
-const COUNTRIES = [
-  { code: 'US', name: 'United States', flag: '🇺🇸', currency: 'USD', symbol: '$', tz: 'America/New_York', capital: 'Washington D.C.', lang: 'English', plug: 'A/B', voltage: '120V / 60Hz', plugIcon: '🔌', airport: 'JFK', visa: { default: 'voa', text: 'Visa on Arrival or ESTA for many nationalities. Citizens of VWP countries need ESTA ($21). Others may need B-2 visa.', days: 90 }, emergency: { police: '911', ambulance: '911', fire: '911', tourist: '1-800-USA-INFO' }, phrases: {}, drives: 'right',
-    spots: [
-      { name: 'New York City', emoji: '🗽', desc: 'The city that never sleeps — Times Square, Central Park, world-class museums.' },
-      { name: 'Grand Canyon', emoji: '🏜️', desc: 'Jaw-dropping natural wonder carved by the Colorado River over millions of years.' },
-      { name: 'Las Vegas', emoji: '🎰', desc: 'Entertainment capital of the world — casinos, shows, and neon-lit nightlife.' },
-      { name: 'Yellowstone', emoji: '🦬', desc: 'First national park on Earth with geysers, hot springs, and abundant wildlife.' },
-      { name: 'San Francisco', emoji: '🌉', desc: 'Golden Gate Bridge, Alcatraz, Fisherman\'s Wharf, and hilly Victorian streets.' },
-      { name: 'Hawaii', emoji: '🌺', desc: 'Volcanic islands with pristine beaches, lush rainforests, and aloha culture.' },
-      { name: 'New Orleans', emoji: '🎷', desc: 'Jazz birthplace with vibrant Creole cuisine, Mardi Gras, and French Quarter charm.' },
-      { name: 'Yellowstone', emoji: '🌋', desc: 'Old Faithful geyser, prismatic springs, and the largest supervolcano in North America.' },
-    ]
-  },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', currency: 'GBP', symbol: '£', tz: 'Europe/London', capital: 'London', lang: 'English', plug: 'G', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'LHR', visa: { default: 'voa', text: 'No visa required for most Western nationals. ETA required from 2025 for eligible nationalities (£10).', days: 180 }, emergency: { police: '999', ambulance: '999', fire: '999', tourist: '0800 400 900' }, phrases: { 'Hello': ['Hiya!', 'Hiya'], 'Thank you': ["Ta / Cheers", 'tah / cheerz'], 'Excuse me': ['Pardon', 'par-don'], 'Where is...': ['Where is...', 'wer-iz'] }, drives: 'left',
-    spots: [
-      { name: 'London', emoji: '🏰', desc: 'Big Ben, Tower of London, Buckingham Palace, and world-renowned museums.' },
-      { name: 'Edinburgh', emoji: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', desc: 'Scotland\'s dramatic capital with a medieval castle, Arthur\'s Seat, and the Royal Mile.' },
-      { name: 'The Cotswolds', emoji: '🌿', desc: 'Idyllic honey-stone villages, rolling hills, and quintessentially English countryside.' },
-      { name: 'Stonehenge', emoji: '🪨', desc: 'Mysterious prehistoric monument on Salisbury Plain, over 4,000 years old.' },
-      { name: 'Bath', emoji: '🛁', desc: 'Georgian architecture, Roman baths, and Jane Austen heritage in one elegant city.' },
-      { name: 'Lake District', emoji: '⛰️', desc: 'England\'s largest national park with dramatic fells, lakes, and Wordsworth connections.' },
-      { name: 'Oxford & Cambridge', emoji: '🎓', desc: 'Centuries-old university cities with stunning colleges, punting, and academic tradition.' },
-    ]
-  },
-  { code: 'JP', name: 'Japan', flag: '🇯🇵', currency: 'JPY', symbol: '¥', tz: 'Asia/Tokyo', capital: 'Tokyo', lang: 'Japanese', plug: 'A/B', voltage: '100V / 50/60Hz', plugIcon: '🔌', airport: 'NRT', visa: { default: 'free', text: 'Visa-free for citizens of 68 countries for up to 90 days. Japan Tourist Tax of ¥1000 applies.', days: 90 }, emergency: { police: '110', ambulance: '119', fire: '119', tourist: '03-3503-4306' }, phrases: { 'Hello': ['こんにちは (Konnichiwa)', 'kon-ni-chi-wa'], 'Thank you': ['ありがとう (Arigatou)', 'a-ri-ga-toh'], 'Excuse me': ['すみません (Sumimasen)', 'su-mi-ma-sen'], 'Where is...': ['...はどこですか？', '...wa do-ko des-ka'] }, drives: 'left',
-    spots: [
-      { name: 'Tokyo', emoji: '🗼', desc: 'Neon-drenched mega-city of contrasts — temples, anime, sushi, and Robot Restaurant.' },
-      { name: 'Kyoto', emoji: '⛩️', desc: 'Japan\'s cultural soul with 2,000 temples, geisha districts, and bamboo groves.' },
-      { name: 'Osaka', emoji: '🍜', desc: 'Japan\'s kitchen — street food paradise, Dotonbori canal, and Osaka Castle.' },
-      { name: 'Hiroshima & Miyajima', emoji: '🕊️', desc: 'Powerful Peace Memorial Park and the iconic floating torii gate of Itsukushima.' },
-      { name: 'Hakone', emoji: '🗻', desc: 'Stunning views of Mount Fuji, volcanic hot springs, and ryokan experiences.' },
-      { name: 'Nara', emoji: '🦌', desc: 'Friendly free-roaming deer and the giant bronze Buddha of Tōdai-ji temple.' },
-      { name: 'Hokkaido', emoji: '❄️', desc: 'Japan\'s northern frontier — ski resorts, lavender fields, and fresh seafood.' },
-      { name: 'Okinawa', emoji: '🌊', desc: 'Tropical islands with emerald waters, coral reefs, and unique Ryukyuan culture.' },
-    ]
-  },
-  { code: 'FR', name: 'France', flag: '🇫🇷', currency: 'EUR', symbol: '€', tz: 'Europe/Paris', capital: 'Paris', lang: 'French', plug: 'C/E', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'CDG', visa: { default: 'free', text: 'Schengen Area. No visa required for EU/EEA + many others up to 90 days in 180. ETIAS required from 2025 (€7).', days: 90 }, emergency: { police: '17', ambulance: '15', fire: '18', tourist: '3975' }, phrases: { 'Hello': ['Bonjour', 'bon-zhoor'], 'Thank you': ['Merci', 'mair-see'], 'Excuse me': ['Excusez-moi', 'ex-koo-zay mwah'], 'Where is...': ['Où est...?', 'oo-ay'] }, drives: 'right',
-    spots: [
-      { name: 'Paris', emoji: '🗼', desc: 'City of Light — Eiffel Tower, Louvre, Notre-Dame, and unrivalled café culture.' },
-      { name: 'Provence', emoji: '💜', desc: 'Lavender fields, Roman ruins, hilltop villages, and rosé wine in the sun.' },
-      { name: 'French Riviera', emoji: '🏖️', desc: 'Glamorous Côte d\'Azur with Nice, Cannes, Monaco, and azure Mediterranean waters.' },
-      { name: 'Mont Saint-Michel', emoji: '🏰', desc: 'Tidal island abbey rising dramatically from the Normandy sea — a UNESCO wonder.' },
-      { name: 'Loire Valley', emoji: '🍷', desc: 'Châteaux, vineyards, and Renaissance splendour along the "Garden of France."' },
-      { name: 'Alsace', emoji: '🎄', desc: 'Fairytale half-timbered villages, Christmas markets, and Germanic wine culture.' },
-      { name: 'Bordeaux', emoji: '🍾', desc: 'World wine capital with elegant architecture and superb gastronomy.' },
-    ]
-  },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪', currency: 'EUR', symbol: '€', tz: 'Europe/Berlin', capital: 'Berlin', lang: 'German', plug: 'C/F', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'FRA', visa: { default: 'free', text: 'Schengen Area. Visa-free for many countries up to 90 days. ETIAS system launching soon.', days: 90 }, emergency: { police: '110', ambulance: '112', fire: '112', tourist: '030 25002333' }, phrases: { 'Hello': ['Guten Tag', 'goo-ten tahg'], 'Thank you': ['Danke', 'dan-keh'], 'Excuse me': ['Entschuldigung', 'ent-shool-dee-goong'], 'Where is...': ['Wo ist...?', 'vo-ist'] }, drives: 'right',
-    spots: [
-      { name: 'Berlin', emoji: '🏛️', desc: 'History, art, and nightlife — Brandenburg Gate, Berlin Wall remnants, and Museum Island.' },
-      { name: 'Neuschwanstein Castle', emoji: '🏰', desc: 'The fairy-tale castle that inspired Disney — perched in the Bavarian Alps.' },
-      { name: 'Munich', emoji: '🍺', desc: 'Oktoberfest, the Marienplatz, English Garden, and Bavaria\'s proud traditions.' },
-      { name: 'Black Forest', emoji: '🌲', desc: 'Dense forest, cuckoo clocks, cakes, and charming spa towns like Baden-Baden.' },
-      { name: 'Cologne', emoji: '⛪', desc: 'Soaring Gothic cathedral, Rhine riverfront, and the famous Cologne Carnival.' },
-      { name: 'Hamburg', emoji: '⚓', desc: 'Maritime city with the famous Reeperbahn, Speicherstadt, and Miniatur Wunderland.' },
-      { name: 'Rhine Valley', emoji: '🍇', desc: 'Castles, vineyards, and dramatic river scenery along Germany\'s most iconic waterway.' },
-    ]
-  },
-  { code: 'IT', name: 'Italy', flag: '🇮🇹', currency: 'EUR', symbol: '€', tz: 'Europe/Rome', capital: 'Rome', lang: 'Italian', plug: 'C/F/L', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'FCO', visa: { default: 'free', text: 'Schengen Area. Visa-free for 90 days for most nationalities. ETIAS required from 2025.', days: 90 }, emergency: { police: '113', ambulance: '118', fire: '115', tourist: '06 0608' }, phrases: { 'Hello': ['Ciao / Buongiorno', 'chow / bwon-jor-no'], 'Thank you': ['Grazie', 'gra-tsee-ay'], 'Excuse me': ['Scusi', 'skoo-zee'], 'Where is...': ['Dov\'è...?', 'dov-eh'] }, drives: 'right',
-    spots: [
-      { name: 'Rome', emoji: '🏛️', desc: 'The Eternal City — Colosseum, Vatican, Trevi Fountain, and 2,800 years of history.' },
-      { name: 'Venice', emoji: '🚣', desc: 'Floating city of canals, gondolas, St. Mark\'s Basilica, and Carnival magic.' },
-      { name: 'Florence', emoji: '🎨', desc: 'Birthplace of the Renaissance — Uffizi, Duomo, David, and Ponte Vecchio.' },
-      { name: 'Amalfi Coast', emoji: '🌊', desc: 'Dramatic cliffside villages, turquoise sea, and lemon groves above the Tyrrhenian.' },
-      { name: 'Tuscany', emoji: '🍷', desc: 'Rolling hills, cypress trees, Chianti wine, and medieval hill towns like Siena.' },
-      { name: 'Sicily', emoji: '🌋', desc: 'Greece meets Italy — Mount Etna, Greek temples, and the best food in the country.' },
-      { name: 'Cinque Terre', emoji: '🏘️', desc: 'Five pastel-coloured fishing villages clinging to dramatic Ligurian clifftops.' },
-      { name: 'Lake Como', emoji: '⛵', desc: 'Aristocratic lakeside villas, Alpine scenery, and effortless Italian glamour.' },
-    ]
-  },
-  { code: 'ES', name: 'Spain', flag: '🇪🇸', currency: 'EUR', symbol: '€', tz: 'Europe/Madrid', capital: 'Madrid', lang: 'Spanish', plug: 'C/F', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'MAD', visa: { default: 'free', text: 'Schengen Area. Visa-free for many nationalities for up to 90 days. ETIAS launching 2025.', days: 90 }, emergency: { police: '091', ambulance: '061', fire: '080', tourist: '010' }, phrases: { 'Hello': ['Hola', 'oh-lah'], 'Thank you': ['Gracias', 'gra-see-as'], 'Excuse me': ['Perdón', 'pair-don'], 'Where is...': ['¿Dónde está...?', 'don-day es-ta'] }, drives: 'right',
-    spots: [
-      { name: 'Barcelona', emoji: '🏗️', desc: 'Gaudí\'s masterpieces, Las Ramblas, Gothic Quarter, and vibrant beach culture.' },
-      { name: 'Madrid', emoji: '🎨', desc: 'Royal Palace, Prado Museum, tapas bars, and pulsating nightlife of the capital.' },
-      { name: 'Seville', emoji: '💃', desc: 'Flamenco heartland with the stunning Alcázar, Cathedral, and lively tapas scene.' },
-      { name: 'Granada', emoji: '🕌', desc: 'The magnificent Alhambra palace overlooking the Sierra Nevada mountains.' },
-      { name: 'Ibiza', emoji: '🎶', desc: 'World-famous for nightclubs, but also beautiful beaches and a historic old town.' },
-      { name: 'San Sebastián', emoji: '🦞', desc: 'Pintxos capital of the world with Belle Époque architecture and La Concha beach.' },
-      { name: 'Toledo', emoji: '⚔️', desc: 'Medieval walled city with El Greco masterworks and Christian-Moorish-Jewish heritage.' },
-    ]
-  },
-  { code: 'AU', name: 'Australia', flag: '🇦🇺', currency: 'AUD', symbol: 'A$', tz: 'Australia/Sydney', capital: 'Canberra', lang: 'English', plug: 'I', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'SYD', visa: { default: 'req', text: 'Electronic Travel Authority (ETA) required for most nationalities. Apply via Australian ETA app (~A$20). No ETA needed for NZ citizens.', days: 90 }, emergency: { police: '000', ambulance: '000', fire: '000', tourist: '1300 555 135' }, phrases: {}, drives: 'left',
-    spots: [
-      { name: 'Sydney', emoji: '🦘', desc: 'Opera House, Harbour Bridge, Bondi Beach, and stunning harbour scenery.' },
-      { name: 'Great Barrier Reef', emoji: '🐠', desc: 'World\'s largest coral reef system — snorkelling and diving in a UNESCO wonder.' },
-      { name: 'Uluru', emoji: '🪨', desc: 'Sacred sandstone monolith rising from the red heart of the Australian outback.' },
-      { name: 'Melbourne', emoji: '☕', desc: 'Coffee culture, street art, AFL football, and the world\'s most liveable city vibes.' },
-      { name: 'Daintree Rainforest', emoji: '🌿', desc: 'World\'s oldest tropical rainforest meeting the Great Barrier Reef at Cape Tribulation.' },
-      { name: 'Whitsunday Islands', emoji: '⛵', desc: '74 islands of pure white beaches, turquoise lagoons, and sailing paradise.' },
-      { name: 'Tasmania', emoji: '🌲', desc: 'Wilderness island with ancient forests, MONA museum, and dramatic coastlines.' },
-    ]
-  },
-  { code: 'CA', name: 'Canada', flag: '🇨🇦', currency: 'CAD', symbol: 'C$', tz: 'America/Toronto', capital: 'Ottawa', lang: 'English/French', plug: 'A/B', voltage: '120V / 60Hz', plugIcon: '🔌', airport: 'YYZ', visa: { default: 'voa', text: 'eTA required for visa-exempt foreign nationals flying to Canada (CAD $7). US citizens exempt. No visa for many countries.', days: 180 }, emergency: { police: '911', ambulance: '911', fire: '911', tourist: '1-800-267-8376' }, phrases: {}, drives: 'right',
-    spots: [
-      { name: 'Banff & Jasper', emoji: '🏔️', desc: 'Turquoise glacier lakes, towering Rockies, and abundant wildlife in Alberta.' },
-      { name: 'Vancouver', emoji: '🌲', desc: 'Mountains meet ocean — Stanley Park, ski resorts, and Pacific Rim cuisine.' },
-      { name: 'Niagara Falls', emoji: '💧', desc: 'Thundering waterfalls straddling Ontario and New York — breathtaking up close.' },
-      { name: 'Québec City', emoji: '⚜️', desc: 'Europe in North America — fortified walls, cobblestones, French language, and poutine.' },
-      { name: 'Toronto', emoji: '🏙️', desc: 'CN Tower, diverse neighbourhoods, and one of the world\'s most multicultural cities.' },
-      { name: 'Northern Lights (Yukon)', emoji: '🌌', desc: 'Chase the aurora borealis across dark wilderness skies in Canada\'s north.' },
-      { name: 'Prince Edward Island', emoji: '🦞', desc: 'Red sand beaches, lobster suppers, and the home of Anne of Green Gables.' },
-    ]
-  },
-  { code: 'TH', name: 'Thailand', flag: '🇹🇭', currency: 'THB', symbol: '฿', tz: 'Asia/Bangkok', capital: 'Bangkok', lang: 'Thai', plug: 'A/B/C', voltage: '220V / 50Hz', plugIcon: '🔌', airport: 'BKK', visa: { default: 'free', text: 'Visa Exemption for 93 countries for 60 days (extendable). Thailand has expanded its visa-free policy significantly in 2024-2025.', days: 60 }, emergency: { police: '191', ambulance: '1669', fire: '199', tourist: '1155' }, phrases: { 'Hello': ['สวัสดี (Sawasdee)', 'sa-wad-dee'], 'Thank you': ['ขอบคุณ (Khob Khun)', 'kob-koon'], 'Excuse me': ['ขอโทษ (Kho Thot)', 'kor-tot'], 'Where is...': ['...อยู่ที่ไหน?', '...yoo tee nai'] }, drives: 'left',
-    spots: [
-      { name: 'Bangkok', emoji: '🛕', desc: 'Grand Palace, floating markets, street food, and wild nightlife in the capital.' },
-      { name: 'Chiang Mai', emoji: '🐘', desc: 'Northern temple city with elephant sanctuaries, night bazaars, and hill tribe culture.' },
-      { name: 'Phuket', emoji: '🏝️', desc: 'Thailand\'s largest island with stunning beaches, clear waters, and lively resorts.' },
-      { name: 'Koh Samui', emoji: '🌴', desc: 'Luxury resorts, Full Moon parties, and paradisiacal beaches in the Gulf of Thailand.' },
-      { name: 'Krabi', emoji: '🧗', desc: 'Limestone karsts, sea kayaking, Railay Beach, and island-hopping adventures.' },
-      { name: 'Ayutthaya', emoji: '🏛️', desc: 'Ancient ruined temples of the former Siamese capital — a UNESCO World Heritage Site.' },
-      { name: 'Pai', emoji: '🌄', desc: 'Laid-back mountain town in Mae Hong Son with waterfalls, hot springs, and great vibes.' },
-    ]
-  },
-  { code: 'VN', name: 'Vietnam', flag: '🇻🇳', currency: 'VND', symbol: '₫', tz: 'Asia/Ho_Chi_Minh', capital: 'Hanoi', lang: 'Vietnamese', plug: 'A/C/F', voltage: '220V / 50Hz', plugIcon: '🔌', airport: 'SGN', visa: { default: 'voa', text: 'E-visa ($25) available to 80+ nationalities for 90 days. Visa-free for 45 days for citizens of select countries including Germany, France, UK, Italy, Spain, Japan, South Korea.', days: 90 }, emergency: { police: '113', ambulance: '115', fire: '114', tourist: '024 3942 5678' }, phrases: { 'Hello': ['Xin chào', 'sin chow'], 'Thank you': ['Cảm ơn', 'gam un'], 'Excuse me': ['Xin lỗi', 'sin loy'], 'Where is...': ['...ở đâu?', '...uh dow'] }, drives: 'right',
-    spots: [
-      { name: 'Ha Long Bay', emoji: '⛵', desc: 'Thousands of limestone karst islands rising from emerald waters — a UNESCO marvel.' },
-      { name: 'Hội An', emoji: '🏮', desc: 'Lantern-lit ancient town, tailor shops, cycling through rice paddies, and Thu Bon River.' },
-      { name: 'Ho Chi Minh City', emoji: '🛵', desc: 'Buzzing metropolis of motorbikes, war history, street food, and French colonial charm.' },
-      { name: 'Hanoi', emoji: '🍜', desc: 'Capital of contrasts — Old Quarter, Hoan Kiem Lake, pho breakfasts, and opera house.' },
-      { name: 'Sapa', emoji: '🌾', desc: 'Terraced rice fields and hill tribe villages in the misty mountains near the Chinese border.' },
-      { name: 'Da Nang & Đà Nẵng', emoji: '🌉', desc: 'Dragon Bridge, My Khe Beach, Ba Na Hills, and gateway to Hội An and Mỹ Sơn.' },
-      { name: 'Phú Quốc', emoji: '🏖️', desc: 'Rapidly developing island paradise with pristine beaches and spectacular sunsets.' },
-      { name: 'Ninh Bình', emoji: '⛵', desc: '"Ha Long Bay on land" — boat rides through karst landscapes and Tràng An grottoes.' },
-    ]
-  },
-  { code: 'SG', name: 'Singapore', flag: '🇸🇬', currency: 'SGD', symbol: 'S$', tz: 'Asia/Singapore', capital: 'Singapore', lang: 'English/Mandarin/Malay/Tamil', plug: 'G', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'SIN', visa: { default: 'free', text: 'Visa-free for most nationalities for 30-90 days. Singapore has mutual visa-free agreements with 165+ countries.', days: 30 }, emergency: { police: '999', ambulance: '995', fire: '995', tourist: '1800 736 2000' }, phrases: { 'Hello': ['Hello / Eh!', 'lah!'], 'Thank you': ['Thank you lah', 'tank yoo lah'], 'Excuse me': ['Sorry leh', 'sor-ree leh'], 'Where is...': ['Where got...?', 'wair got'] }, drives: 'left',
-    spots: [
-      { name: 'Marina Bay Sands', emoji: '🏙️', desc: 'Iconic rooftop infinity pool, SkyPark observation deck, and ArtScience Museum.' },
-      { name: 'Gardens by the Bay', emoji: '🌿', desc: 'Supertree Grove, Cloud Forest, and Flower Dome — futuristic urban nature at its best.' },
-      { name: 'Sentosa Island', emoji: '🎢', desc: 'Universal Studios, beaches, cable car rides, and resort entertainment galore.' },
-      { name: 'Chinatown & Little India', emoji: '🏮', desc: 'Colourful heritage districts with temples, street food, and vibrant bazaars.' },
-      { name: 'Hawker Centres', emoji: '🍢', desc: 'Singapore\'s soul — Lau Pa Sat, Maxwell, Old Airport Road for world-class cheap eats.' },
-      { name: 'Singapore Zoo & Night Safari', emoji: '🦁', desc: 'World-renowned open-concept zoo with nocturnal night safari experience.' },
-      { name: 'Orchard Road', emoji: '🛍️', desc: 'Legendary shopping boulevard with luxury malls, street food, and neon lights.' },
-    ]
-  },
-  { code: 'MX', name: 'Mexico', flag: '🇲🇽', currency: 'MXN', symbol: 'MX$', tz: 'America/Mexico_City', capital: 'Mexico City', lang: 'Spanish', plug: 'A/B', voltage: '127V / 60Hz', plugIcon: '🔌', airport: 'MEX', visa: { default: 'free', text: 'No visa required for citizens of 68 countries. Electronic Authorization (AEM) may be required. US/EU/UK citizens: visa-free up to 180 days.', days: 180 }, emergency: { police: '911', ambulance: '911', fire: '911', tourist: '800 987 8224' }, phrases: { 'Hello': ['¡Hola!', 'oh-lah'], 'Thank you': ['Gracias', 'gra-see-as'], 'Excuse me': ['Perdón', 'pair-don'], 'Where is...': ['¿Dónde está...?', 'don-day es-ta'] }, drives: 'right',
-    spots: [
-      { name: 'Mexico City', emoji: '🏙️', desc: 'Zócalo, Frida Kahlo Museum, Teotihuacán pyramids nearby, and incredible food scene.' },
-      { name: 'Cancún & Riviera Maya', emoji: '🏖️', desc: 'Caribbean beaches, cenotes, Tulum ruins, and vibrant resort nightlife.' },
-      { name: 'Oaxaca', emoji: '🎨', desc: 'Indigenous culture, mole, mezcal, Day of the Dead traditions, and Monte Albán ruins.' },
-      { name: 'Chichen Itza', emoji: '🏛️', desc: 'El Castillo pyramid — one of the New Seven Wonders of the World in the Yucatán.' },
-      { name: 'Guanajuato', emoji: '🌈', desc: 'Colourful colonial city built into a ravine with underground roads and a famous mummy museum.' },
-      { name: 'San Miguel de Allende', emoji: '💐', desc: 'UNESCO heritage city famous for its Baroque architecture and thriving arts scene.' },
-      { name: 'Copper Canyon', emoji: '🏜️', desc: 'Larger and deeper than the Grand Canyon — epic train journey through the Sierra Madre.' },
-    ]
-  },
-  { code: 'IN', name: 'India', flag: '🇮🇳', currency: 'INR', symbol: '₹', tz: 'Asia/Kolkata', capital: 'New Delhi', lang: 'Hindi / English', plug: 'C/D/M', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'DEL', visa: { default: 'voa', text: 'e-Visa required for most nationalities. Apply online ($25–$100). Valid for 30-365 days. Visa on Arrival at select airports.', days: 60 }, emergency: { police: '100', ambulance: '102', fire: '101', tourist: '1800 11 1363' }, phrases: { 'Hello': ['नमस्ते (Namaste)', 'na-mas-tay'], 'Thank you': ['धन्यवाद (Dhanyavaad)', 'dhan-ya-vaad'], 'Excuse me': ['माफ़ करें (Maaf Karen)', 'maaf ka-rain'], 'Where is...': ['...कहाँ है? (Kahan hai?)', '...ka-han hai'] }, drives: 'left',
-    spots: [
-      { name: 'Taj Mahal, Agra', emoji: '🕌', desc: 'The world\'s greatest monument to love — a UNESCO marble masterpiece at sunrise.' },
-      { name: 'Jaipur', emoji: '🐪', desc: 'The Pink City — Amber Fort, Hawa Mahal, bazaars, and Rajasthani royal grandeur.' },
-      { name: 'Varanasi', emoji: '🪔', desc: 'Oldest living city on earth — Ganges ghats, burning rituals, and spiritual intensity.' },
-      { name: 'Kerala Backwaters', emoji: '🚢', desc: 'Houseboat cruises through tranquil palm-fringed canals, lagoons, and villages.' },
-      { name: 'Mumbai', emoji: '🎬', desc: 'Bollywood, Gateway of India, Dharavi, street food, and colonial Victoria architecture.' },
-      { name: 'Ladakh', emoji: '🏔️', desc: 'High-altitude Himalayan desert with Buddhist monasteries and starlit moonscapes.' },
-      { name: 'Goa', emoji: '🏄', desc: 'Portuguese-flavoured beaches, seafood shacks, yoga retreats, and hippie markets.' },
-      { name: 'Hampi', emoji: '🪨', desc: 'Surreal boulder landscape with ruins of the Vijayanagara Empire — a UNESCO site.' },
-    ]
-  },
-  { code: 'BR', name: 'Brazil', flag: '🇧🇷', currency: 'BRL', symbol: 'R$', tz: 'America/Sao_Paulo', capital: 'Brasília', lang: 'Portuguese', plug: 'N', voltage: '127/220V / 60Hz', plugIcon: '🔌', airport: 'GRU', visa: { default: 'free', text: 'Visa-free for US, EU, UK, and many others for up to 90 days. Brazil reinstated visa-free access for US citizens in 2024.', days: 90 }, emergency: { police: '190', ambulance: '192', fire: '193', tourist: '0800 023 0023' }, phrases: { 'Hello': ['Olá', 'oh-lah'], 'Thank you': ['Obrigado/a', 'ob-ree-GAH-do'], 'Excuse me': ['Com licença', 'com lee-SEN-sa'], 'Where is...': ['Onde fica...?', 'on-jee FEE-ka'] }, drives: 'right',
-    spots: [
-      { name: 'Rio de Janeiro', emoji: '🏖️', desc: 'Christ the Redeemer, Copacabana, Sugarloaf Mountain, and samba culture.' },
-      { name: 'Amazon Rainforest', emoji: '🌿', desc: 'The lungs of the Earth — jungle lodges, river dolphins, and astonishing biodiversity.' },
-      { name: 'Iguaçu Falls', emoji: '💧', desc: 'One of the world\'s great waterfalls — wider than Niagara with 275 separate cascades.' },
-      { name: 'Salvador', emoji: '🥁', desc: 'Afro-Brazilian heartbeat — Pelourinho historic centre, capoeira, and candomblé.' },
-      { name: 'Fernando de Noronha', emoji: '🐢', desc: 'Protected marine paradise with pristine beaches and some of the world\'s best diving.' },
-      { name: 'Pantanal', emoji: '🐊', desc: 'World\'s largest tropical wetland — the best place on earth to spot jaguars.' },
-      { name: 'São Paulo', emoji: '🌆', desc: 'Brazil\'s cultural powerhouse — food scene, museums, galleries, and nightlife.' },
-    ]
-  },
-  { code: 'AE', name: 'UAE', flag: '🇦🇪', currency: 'AED', symbol: 'د.إ', tz: 'Asia/Dubai', capital: 'Abu Dhabi', lang: 'Arabic / English', plug: 'G', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'DXB', visa: { default: 'voa', text: 'Visa on Arrival for 50+ nationalities for 30 days (extendable). Free Visa on Arrival for US, UK, EU, AU citizens and many more.', days: 30 }, emergency: { police: '999', ambulance: '998', fire: '997', tourist: '800 DUBAI' }, phrases: { 'Hello': ['مرحبا (Marhaba)', 'mar-ha-ba'], 'Thank you': ['شكراً (Shukran)', 'shuk-ran'], 'Excuse me': ['عفواً (Afwan)', 'af-wan'], 'Where is...': ['أين...؟ (Ayna?)', 'ay-na'] }, drives: 'right',
-    spots: [
-      { name: 'Burj Khalifa & Dubai Mall', emoji: '🏙️', desc: 'World\'s tallest building with stunning observation decks and the world\'s largest mall.' },
-      { name: 'Abu Dhabi', emoji: '🕌', desc: 'Sheikh Zayed Grand Mosque, the Louvre Abu Dhabi, and Formula 1 at Yas Marina.' },
-      { name: 'Dubai Desert Safari', emoji: '🏜️', desc: 'Dune bashing, camel riding, sandboarding, and Bedouin camp dining under the stars.' },
-      { name: 'Palm Jumeirah', emoji: '🌴', desc: 'Iconic man-made palm island with luxury hotels, Atlantis, and The Pointe boardwalk.' },
-      { name: 'Dubai Creek & Old Souk', emoji: '🛶', desc: 'Historic heart of Dubai — abra rides, gold souk, spice souk, and Al Fahidi district.' },
-      { name: 'Sharjah', emoji: '🏺', desc: 'Cultural capital of the UAE with world-class museums, arts, and Islamic heritage.' },
-      { name: 'Ras Al Khaimah', emoji: '⛰️', desc: 'Hajar Mountains, Jebel Jais zip line (world\'s longest), and quieter beaches.' },
-    ]
-  },
-  { code: 'KR', name: 'South Korea', flag: '🇰🇷', currency: 'KRW', symbol: '₩', tz: 'Asia/Seoul', capital: 'Seoul', lang: 'Korean', plug: 'C/F', voltage: '220V / 60Hz', plugIcon: '🔌', airport: 'ICN', visa: { default: 'free', text: 'K-ETA required for visa-exempt countries (₩10,000). 90-day visa-free for 112 countries. K-ETA temporarily waived for many nationalities.', days: 90 }, emergency: { police: '112', ambulance: '119', fire: '119', tourist: '1330' }, phrases: { 'Hello': ['안녕하세요 (Annyeonghaseyo)', 'an-nyong-ha-se-yo'], 'Thank you': ['감사합니다 (Gamsahamnida)', 'gam-sa-ham-ni-da'], 'Excuse me': ['저기요 (Jeogiyo)', 'jeo-gi-yo'], 'Where is...': ['...어디예요?', '...eo-di-ye-yo'] }, drives: 'right',
-    spots: [
-      { name: 'Seoul', emoji: '🏙️', desc: 'Gyeongbokgung Palace, K-pop, BBQ, Han River, and Dongdaemun Design Plaza.' },
-      { name: 'Jeju Island', emoji: '🌋', desc: 'Volcanic island paradise with lava tubes, waterfalls, and Hallasan mountain.' },
-      { name: 'Busan', emoji: '🎨', desc: 'Gamcheon Culture Village, Haeundae Beach, seafood markets, and temple by the sea.' },
-      { name: 'Gyeongju', emoji: '⛩️', desc: 'Open-air museum of Silla dynasty — royal tombs, Bulguksa Temple, and Seokguram.' },
-      { name: 'DMZ', emoji: '🪖', desc: 'Demilitarized Zone tour — one of the most surreal geopolitical sites on earth.' },
-      { name: 'Seoraksan National Park', emoji: '🍂', desc: 'Dramatic granite peaks, Buddhist temples, and spectacular autumn foliage.' },
-      { name: 'Jeonju', emoji: '🍱', desc: 'Hanok village of traditional architecture and the birthplace of bibimbap.' },
-    ]
-  },
-  { code: 'NL', name: 'Netherlands', flag: '🇳🇱', currency: 'EUR', symbol: '€', tz: 'Europe/Amsterdam', capital: 'Amsterdam', lang: 'Dutch', plug: 'C/F', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'AMS', visa: { default: 'free', text: 'Schengen Area. Visa-free for 90 days for most nationalities. ETIAS required from 2025 (€7).', days: 90 }, emergency: { police: '112', ambulance: '112', fire: '112', tourist: '0900 400 4040' }, phrases: { 'Hello': ['Hallo', 'hal-oh'], 'Thank you': ['Dank je', 'dank yuh'], 'Excuse me': ['Pardon', 'par-don'], 'Where is...': ['Waar is...?', 'var is'] }, drives: 'right',
-    spots: [
-      { name: 'Amsterdam', emoji: '🚲', desc: 'Canal rings, Anne Frank House, Rijksmuseum, and a city built for cyclists.' },
-      { name: 'Keukenhof Gardens', emoji: '🌷', desc: 'World\'s largest tulip garden with 7 million blooming flowers each spring.' },
-      { name: 'Delft', emoji: '🏺', desc: 'Charming canal town, birthplace of Vermeer, and home of iconic blue-and-white pottery.' },
-      { name: 'Rotterdam', emoji: '🏗️', desc: 'Europe\'s largest port with bold modern architecture, Cube Houses, and Markthal.' },
-      { name: 'The Hague', emoji: '⚖️', desc: 'Seat of government, International Court of Justice, and Mauritshuis museum.' },
-      { name: 'Kinderdijk Windmills', emoji: '⚙️', desc: '19 iconic windmills in a UNESCO-listed polder landscape near Rotterdam.' },
-      { name: 'Utrecht', emoji: '🎻', desc: 'Vibrant student city with wharf-level cafés, a towering Dom tower, and canal charm.' },
-    ]
-  },
-  { code: 'CH', name: 'Switzerland', flag: '🇨🇭', currency: 'CHF', symbol: 'Fr', tz: 'Europe/Zurich', capital: 'Bern', lang: 'German/French/Italian', plug: 'J', voltage: '230V / 50Hz', plugIcon: '🔌', airport: 'ZRH', visa: { default: 'free', text: 'Schengen member. Visa-free for 90 days. Note: uses Swiss Franc (CHF), not Euro.', days: 90 }, emergency: { police: '117', ambulance: '144', fire: '118', tourist: '0800 100 200 30' }, phrases: { 'Hello': ['Grüezi', 'groo-et-zi'], 'Thank you': ['Merci / Danke', 'mair-see / dan-keh'], 'Excuse me': ['Entschuldigung', 'ent-shool-dee-goong'], 'Where is...': ['Wo ist...?', 'vo ist'] }, drives: 'right',
-    spots: [
-      { name: 'Jungfrau Region', emoji: '🏔️', desc: 'Top of Europe — Eiger, Mönch, Jungfrau peaks with the famous cogwheel railway.' },
-      { name: 'Lucerne', emoji: '🌉', desc: 'Chapel Bridge, Lion Monument, and lakeside views framed by Alpine peaks.' },
-      { name: 'Zermatt & Matterhorn', emoji: '⛷️', desc: 'Car-free mountain village dominated by the iconic pyramid of the Matterhorn.' },
-      { name: 'Geneva', emoji: '⌚', desc: 'Jet d\'Eau fountain, luxury watches, CERN, and the United Nations European HQ.' },
-      { name: 'Interlaken', emoji: '🪂', desc: 'Adventure capital between two lakes — skydiving, paragliding, and bungee jumping.' },
-      { name: 'Bern', emoji: '🐻', desc: 'UNESCO old town of arcaded streets, clock towers, and the Swiss capital\'s bear pit.' },
-      { name: 'Swiss Riviera (Montreux)', emoji: '🎵', desc: 'Freddie Mercury statue, Chillon Castle, and the famous Jazz Festival on Lake Geneva.' },
-    ]
-  },
-];
-
-// Exchange rates (base: USD) — approximate
-const RATES_USD = {
-  USD: 1, GBP: 0.79, EUR: 0.92, JPY: 149, CAD: 1.36, AUD: 1.53, CHF: 0.89,
-  SGD: 1.35, THB: 35, VND: 24500, INR: 83, BRL: 4.97, AED: 3.67, KRW: 1320, MXN: 17.1,
-};
-
-function getRate(fromCur, toCur) {
-  const f = RATES_USD[fromCur] || 1;
-  const t = RATES_USD[toCur] || 1;
-  return t / f;
-}
-
-// Visa rules simplified
-function getVisaStatus(home, visit) {
-  if (home.code === visit.code) return { cls: 'visa-ok', icon: '✓', text: 'You are home!', detail: '' };
-  const v = visit.visa;
-  // Some hardcoded logic
-  const freeFromUS = ['FR','DE','IT','ES','GB','JP','AU','CA','MX','BR','NL','CH','SG','KR','VN','TH','AE'];
-  const freeFromGB = ['FR','DE','IT','ES','JP','AU','CA','NL','CH','SG','KR','VN','TH','AE','BR','MX'];
-  const requiresFromAll = [];
-
-  if (v.default === 'free') {
-    return { cls: 'visa-ok', icon: '✓', text: 'Visa Not Required', detail: v.text };
-  } else if (v.default === 'voa') {
-    return { cls: 'visa-warn', icon: '⚡', text: 'Visa / ETA Required', detail: v.text };
-  } else {
-    return { cls: 'visa-req', icon: '⚠', text: 'Visa Required', detail: v.text };
-  }
-}
-
-// ═══════════════════════════════════════
-// WEATHER (OpenMeteo — free, no key)
-// ═══════════════════════════════════════
-const CITY_COORDS = {
-  US: { lat: 40.71, lon: -74.01, city: 'New York' },
-  GB: { lat: 51.51, lon: -0.13, city: 'London' },
-  JP: { lat: 35.68, lon: 139.69, city: 'Tokyo' },
-  FR: { lat: 48.85, lon: 2.35, city: 'Paris' },
-  DE: { lat: 52.52, lon: 13.40, city: 'Berlin' },
-  IT: { lat: 41.90, lon: 12.50, city: 'Rome' },
-  ES: { lat: 40.42, lon: -3.70, city: 'Madrid' },
-  AU: { lat: -33.87, lon: 151.21, city: 'Sydney' },
-  CA: { lat: 43.65, lon: -79.38, city: 'Toronto' },
-  TH: { lat: 13.76, lon: 100.50, city: 'Bangkok' },
-  VN: { lat: 10.82, lon: 106.63, city: 'Ho Chi Minh City' },
-  SG: { lat: 1.35, lon: 103.82, city: 'Singapore' },
-  MX: { lat: 19.43, lon: -99.13, city: 'Mexico City' },
-  IN: { lat: 28.61, lon: 77.21, city: 'New Delhi' },
-  BR: { lat: -23.55, lon: -46.63, city: 'São Paulo' },
-  AE: { lat: 25.20, lon: 55.27, city: 'Dubai' },
-  KR: { lat: 37.57, lon: 126.98, city: 'Seoul' },
-  NL: { lat: 52.37, lon: 4.90, city: 'Amsterdam' },
-  CH: { lat: 47.38, lon: 8.54, city: 'Zurich' },
-};
-
-const WMO_ICONS = {
-  0:'☀️', 1:'🌤', 2:'⛅', 3:'☁️',
-  45:'🌫', 48:'🌫',
-  51:'🌦', 53:'🌦', 55:'🌧',
-  61:'🌧', 63:'🌧', 65:'🌧',
-  71:'🌨', 73:'🌨', 75:'❄️',
-  80:'🌦', 81:'🌦', 82:'⛈',
-  95:'⛈', 96:'⛈', 99:'⛈',
-};
-const WMO_DESC = {
-  0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
-  45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
-  61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',
-  80:'Showers',81:'Rain showers',82:'Violent showers',95:'Thunderstorm',96:'Thunderstorm w/ hail',99:'Thunderstorm w/ heavy hail',
-};
-
-let weatherData = null;
-let weatherUnit = 'C';
-
-async function fetchWeather(countryCode) {
-  const coord = CITY_COORDS[countryCode];
-  if (!coord) return null;
-  try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${coord.lat}&longitude=${coord.lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`;
-    const r = await fetch(url);
-    const d = await r.json();
-    return { ...d, city: coord.city };
-  } catch { return null; }
-}
-
-function cToF(c) { return Math.round(c * 9/5 + 32); }
-function displayTemp(c) { return weatherUnit === 'C' ? `${Math.round(c)}°C` : `${cToF(c)}°F`; }
-
-// ═══════════════════════════════════════
-// CLOCKS
-// ═══════════════════════════════════════
-function formatTime(tz) {
-  try {
-    return new Date().toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-  } catch { return '--:--:--'; }
-}
-function formatDate(tz) {
-  try {
-    return new Date().toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', month: 'short', day: 'numeric' });
-  } catch { return ''; }
-}
-function getTimeDiff(tz1, tz2) {
-  try {
-    const now = new Date();
-    const t1 = new Date(now.toLocaleString('en-US', { timeZone: tz1 }));
-    const t2 = new Date(now.toLocaleString('en-US', { timeZone: tz2 }));
-    const diffH = (t2 - t1) / 3600000;
-    const h = Math.round(diffH);
-    if (h === 0) return 'Same time';
-    return `${h > 0 ? '+' : ''}${h}h`;
-  } catch { return '?'; }
-}
-
-// ═══════════════════════════════════════
-// CURRENCY
-// ═══════════════════════════════════════
-let homeAmount = 100;
-let swapped = false;
-
-function convertCurrency() {
-  const home = getHome(), visit = getVisit();
-  const fromCur = swapped ? visit.currency : home.currency;
-  const toCur = swapped ? home.currency : visit.currency;
-  const rate = getRate(fromCur, toCur);
-  const el = document.getElementById('currency-result');
-  if (el) el.value = (homeAmount * rate).toFixed(2);
-}
-
-// ═══════════════════════════════════════
-// PACKING TIPS
-// ═══════════════════════════════════════
-function getPackingTips(home, visit) {
-  const tips = [];
-  // Plug adapter
-  if (home.plug !== visit.plug) tips.push(`Bring a Type ${visit.plug} plug adapter — plugs differ from home.`);
-  // Voltage
-  const homeV = parseInt(home.voltage); const visitV = parseInt(visit.voltage);
-  if (Math.abs(homeV - visitV) > 20) tips.push(`Check device compatibility — ${visit.name} uses ${visit.voltage}.`);
-  // Driving
-  if (home.drives !== visit.drives) tips.push(`Traffic drives on the ${visit.drives} — stay alert when crossing roads.`);
-  // Climate tips based on country
-  const tropical = ['TH','VN','SG','IN','BR','MX'];
-  const cold = ['JP','CA','DE','CH','NO'];
-  if (tropical.includes(visit.code)) tips.push('Pack lightweight, breathable clothing. Humidity can be high.');
-  if (cold.includes(visit.code)) tips.push('Layer up — temperatures can drop significantly, especially at night.');
-  // Language
-  if (home.lang !== visit.lang && visit.lang !== 'English') tips.push(`Learn basic ${visit.lang} phrases — locals appreciate the effort!`);
-  // Currency cash
-  tips.push(`Keep some ${visit.currency} cash handy — not all venues accept cards.`);
-  tips.push('Store passport/visa copies in cloud storage as a backup.');
-  tips.push('Check travel insurance coverage before departure.');
-  if (tips.length < 4) tips.push('Download offline maps for the destination city.');
-  return tips.slice(0, 6);
-}
-
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-function getHome() { return COUNTRIES.find(c => c.code === document.getElementById('home-country').value) || COUNTRIES[0]; }
-function getVisit() { return COUNTRIES.find(c => c.code === document.getElementById('visit-country').value) || COUNTRIES[2]; }
-
-function buildDashboard(weather) {
-  const home = getHome(), visit = getVisit();
-  const visa = getVisaStatus(home, visit);
-  const tips = getPackingTips(home, visit);
-  const rate = getRate(home.currency, visit.currency);
-  const rateDisplay = rate >= 1000 ? rate.toFixed(0) : rate >= 100 ? rate.toFixed(1) : rate.toFixed(4);
-  const phrases = visit.phrases && Object.keys(visit.phrases).length > 0 ? visit.phrases : null;
-
-  // Weather render
-  let weatherHTML = `<div class="loading">Fetching weather…</div>`;
-  if (weather) {
-    const c = weather.current;
-    const wcode = c.weathercode;
-    const icon = WMO_ICONS[wcode] || '🌡';
-    const desc = WMO_DESC[wcode] || 'Unknown';
-    const temp = c.temperature_2m;
-    weatherHTML = `
-      <div class="weather-main">
-        <div class="weather-icon">${icon}</div>
-        <div>
-          <div class="weather-loc">${weather.city}</div>
-          <div class="weather-temp">${displayTemp(temp)}</div>
-          <div class="weather-desc">${desc}</div>
-        </div>
-        <div style="margin-left:auto">
-          <div class="unit-toggle">
-            <button class="unit-btn ${weatherUnit==='C'?'active':''}" onclick="weatherUnit='C';updateWeatherDisplay(${temp},${c.windspeed_10m},${c.relativehumidity_2m})">°C</button>
-            <button class="unit-btn ${weatherUnit==='F'?'active':''}" onclick="weatherUnit='F';updateWeatherDisplay(${temp},${c.windspeed_10m},${c.relativehumidity_2m})">°F</button>
-          </div>
-        </div>
-      </div>
-      <div class="weather-stats" id="weather-stats">
-        <div class="weather-stat"><div class="weather-stat-val">${c.windspeed_10m} km/h</div><div class="weather-stat-label">Wind</div></div>
-        <div class="weather-stat"><div class="weather-stat-val">${c.relativehumidity_2m}%</div><div class="weather-stat-label">Humidity</div></div>
-        <div class="weather-stat"><div class="weather-stat-val" id="temp-feel">${displayTemp(temp - 2)}</div><div class="weather-stat-label">Feels Like</div></div>
-      </div>
-    `;
-    window._lastWeather = { temp, wind: c.windspeed_10m, humid: c.relativehumidity_2m };
-  } else {
-    weatherHTML = `<div style="color:var(--muted);font-size:13px">⚠ Weather unavailable. Check your connection.</div>`;
-  }
-
-  // Phrases
-  const phrasesHTML = phrases ? Object.entries(phrases).map(([en, [local, pronun]]) => `
-    <div class="phrase-row">
-      <div class="phrase-en">${en}</div>
-      <div>
-        <div class="phrase-local">${local}</div>
-        <div class="phrase-pronun">${pronun}</div>
-      </div>
-    </div>
-  `).join('') : `<div style="color:var(--muted);font-size:13px">English is widely spoken or phrases not available for this destination.</div>`;
-
-  const timeDiff = getTimeDiff(home.tz, visit.tz);
-
-  document.getElementById('dashboard').innerHTML = `
-    <!-- Clocks -->
-    <div class="section-title">Time & Location</div>
-    <div class="card span-8">
-      <div class="card-label">Dual Time</div>
-      <div class="dual-clock">
-        <div class="clock-face">
-          <div class="clock-time accent" id="home-clock">${formatTime(home.tz)}</div>
-          <div class="clock-date" id="home-date">${formatDate(home.tz)}</div>
-          <div class="clock-city">${home.flag} ${home.name}</div>
-        </div>
-        <div class="clock-divider">
-          <span>DIFF</span>
-          <div class="time-diff">${timeDiff}</div>
-          <span>ahead</span>
-        </div>
-        <div class="clock-face">
-          <div class="clock-time accent2" id="visit-clock">${formatTime(visit.tz)}</div>
-          <div class="clock-date" id="visit-date">${formatDate(visit.tz)}</div>
-          <div class="clock-city">${visit.flag} ${visit.name}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Flight snippet -->
-    <div class="card span-4">
-      <div class="card-label">Route Overview</div>
-      <div class="flight-bar">
-        <div>
-          <div class="flight-airport">${home.airport}</div>
-          <div class="flight-city">${home.capital}</div>
-        </div>
-        <div class="flight-line">
-          <div class="flight-arrow">✈ ━━━</div>
-          <div>${home.flag} → ${visit.flag}</div>
-        </div>
-        <div>
-          <div class="flight-airport">${visit.airport}</div>
-          <div class="flight-city">${visit.capital}</div>
-        </div>
-      </div>
-      <div style="margin-top:16px;font-size:11px;color:var(--muted);text-align:center">Major international airports shown</div>
-    </div>
-
-    <!-- Currency -->
-    <div class="section-title">Money & Exchange</div>
-    <div class="card span-4">
-      <div class="card-label">Currency Converter</div>
-      <div class="currency-converter">
-        <div class="currency-row">
-          <div>
-            <div class="currency-code">${swapped ? visit.currency : home.currency}</div>
-            <div class="currency-name">${swapped ? visit.name : home.name}</div>
-          </div>
-          <input class="currency-input" id="currency-from" type="number" value="${homeAmount}" oninput="homeAmount=parseFloat(this.value)||0;convertCurrency()">
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="rate-line" style="flex:1">1 ${swapped?visit.currency:home.currency} = ${rateDisplay} ${swapped?home.currency:visit.currency}</div>
-          <button class="swap-btn" onclick="swapped=!swapped;updateDashboard()" title="Swap currencies">⇅</button>
-        </div>
-        <div class="currency-row">
-          <div>
-            <div class="currency-code">${swapped ? home.currency : visit.currency}</div>
-            <div class="currency-name">${swapped ? home.name : visit.name}</div>
-          </div>
-          <input class="currency-input" id="currency-result" type="number" value="${(homeAmount * rate).toFixed(2)}" readonly>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick amounts -->
-    <div class="card span-4">
-      <div class="card-label">Quick Reference — ${home.currency} → ${visit.currency}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${[10,20,50,100,200,500].map(amt => {
-          const converted = (amt * rate);
-          const display = converted >= 1000 ? (converted/1000).toFixed(1)+'K' : converted >= 10 ? converted.toFixed(0) : converted.toFixed(2);
-          return `<div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border-radius:6px;padding:8px 12px">
-            <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--muted)">${home.symbol}${amt}</span>
-            <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)">${visit.symbol}${display}</span>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <!-- Visa -->
-    <div class="card span-4">
-      <div class="card-label">Visa Status</div>
-      <div class="visa-badge ${visa.cls}">${visa.icon} ${visa.text}</div>
-      <div class="visa-details">${visa.detail}</div>
-      ${visa.days ? `<div style="margin-top:12px;font-size:11px;color:var(--accent2)">📅 Stay up to: <strong>${visa.days} days</strong></div>` : ''}
-    </div>
-
-    <!-- Weather -->
-    <div class="section-title">Weather & Environment</div>
-    <div class="card span-6" id="weather-card">
-      <div class="card-label">Current Weather — ${visit.name}</div>
-      ${weatherHTML}
-    </div>
-
-    <!-- Power -->
-    <div class="card span-3">
-      <div class="card-label">Power & Plug</div>
-      <div class="plug-info">
-        <div class="plug-icon">🔌</div>
-        <div class="plug-details">
-          Type: <span class="plug-highlight">${visit.plug}</span><br>
-          Voltage: <span class="plug-highlight">${visit.voltage}</span><br>
-          ${home.plug !== visit.plug ? `⚠ <span style="color:var(--danger)">Adapter needed</span>` : `✓ <span style="color:var(--accent3)">Compatible</span>`}<br>
-          ${parseInt(home.voltage) !== parseInt(visit.voltage) ? `⚡ <span style="color:var(--accent)">Check converter</span>` : ''}
-        </div>
-      </div>
-    </div>
-
-    <!-- Driving -->
-    <div class="card span-3">
-      <div class="card-label">Driving Side</div>
-      <div style="text-align:center;padding:10px 0">
-        <div style="font-size:40px">${visit.drives === 'right' ? '🚗➡' : '⬅🚗'}</div>
-        <div style="font-size:13px;color:var(--text);margin-top:12px">Drives on the <span class="accent">${visit.drives}</span></div>
-        ${home.drives !== visit.drives ? `<div style="font-size:11px;color:var(--danger);margin-top:8px">⚠ Opposite to home — take care</div>` : `<div style="font-size:11px;color:var(--accent3);margin-top:8px">✓ Same as home</div>`}
-      </div>
-    </div>
-
-    <!-- Emergency -->
-    <div class="section-title">Safety & Communication</div>
-    <div class="card span-4">
-      <div class="card-label">Emergency Numbers</div>
-      <div class="emergency-grid">
-        <div class="emergency-item"><div class="emergency-num">${visit.emergency.police}</div><div class="emergency-label">Police</div></div>
-        <div class="emergency-item"><div class="emergency-num">${visit.emergency.ambulance}</div><div class="emergency-label">Ambulance</div></div>
-        <div class="emergency-item"><div class="emergency-num">${visit.emergency.fire}</div><div class="emergency-label">Fire</div></div>
-        <div class="emergency-item"><div class="emergency-num">${visit.emergency.tourist}</div><div class="emergency-label">Tourist Helpline</div></div>
-      </div>
-    </div>
-
-    <!-- Phrases -->
-    <div class="card span-4">
-      <div class="card-label">Essential Phrases — ${visit.lang}</div>
-      <div class="phrase-grid">${phrasesHTML}</div>
-    </div>
-
-    <!-- Packing Tips -->
-    <div class="card span-4">
-      <div class="card-label">Packing & Travel Tips</div>
-      <ul class="tips-list">
-        ${tips.map(t => `<li><span class="dot"></span>${t}</li>`).join('')}
-      </ul>
-    </div>
-
-    <!-- Top Spots -->
-    <div class="section-title">Top Places to Visit</div>
-    <div class="card span-12">
-      <div class="card-label">Must-See Destinations — ${visit.name}</div>
-      <div class="spots-grid">
-        ${(visit.spots || []).map(s => `
-          <div class="spot-item">
-            <div class="spot-header">
-              <span class="spot-emoji">${s.emoji}</span>
-              <span class="spot-name">${s.name}</span>
-            </div>
-            <div class="spot-desc">${s.desc}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-
-    <!-- Translator -->
-    <div class="section-title">Translator</div>
-    <div class="card span-6">
-      <div class="card-label">Type & Translate — English → ${visit.lang}</div>
-      <textarea class="translator-input" id="translate-input" placeholder="Type anything in English… e.g. Where is the nearest pharmacy?" maxlength="500"></textarea>
-      <button class="translate-btn" id="translate-btn" onclick="doTranslate()">
-        <span>↓</span> Translate to ${visit.lang}
-      </button>
-      <div class="translator-result empty" id="translate-output">
-        Translation will appear here…
-      </div>
-    </div>
-
-    <!-- Translation History -->
-    <div class="card span-6">
-      <div class="card-label">Recent Translations</div>
-      <div class="translator-history" id="translation-history">
-        <div style="font-size:12px;color:var(--muted);font-style:italic">Your translations will appear here.</div>
-      </div>
-    </div>
-
-    <!-- Status bar -->
-    <div class="status-bar">
-      <span><span class="status-dot"></span>Live rates (approximate)</span>
-      <span>Weather via Open-Meteo</span>
-      <span>Translation via MyMemory</span>
-      <span>Always verify visa rules with official embassy</span>
-      <span style="margin-left:auto">${home.flag} ${home.name} → ${visit.flag} ${visit.name}</span>
-    </div>
-  `;
-}
-
-function updateWeatherDisplay(temp, wind, humid) {
-  // update unit toggle buttons
-  document.querySelectorAll('.unit-btn').forEach((btn, i) => {
-    btn.className = 'unit-btn' + (i === (weatherUnit==='C'?0:1) ? ' active' : '');
   });
-  document.querySelectorAll('.weather-stat-val')[0] && (document.querySelectorAll('.weather-stat-val')[0].textContent = `${wind} km/h`);
-  document.querySelectorAll('.weather-stat-val')[1] && (document.querySelectorAll('.weather-stat-val')[1].textContent = `${humid}%`);
-  document.querySelectorAll('.weather-stat-val')[2] && (document.querySelectorAll('.weather-stat-val')[2].textContent = displayTemp(temp - 2));
-  const tempEl = document.querySelector('.weather-temp');
-  if (tempEl) tempEl.textContent = displayTemp(temp);
+  return Object.values(map).sort((a,b)=>b.wins-a.wins||b.gamesWon-a.gamesWon||b.pd-a.pd);
 }
 
-// ═══════════════════════════════════════
-// TRANSLATION
-// ═══════════════════════════════════════
-const LANG_CODES = {
-  US: 'en', GB: 'en', AU: 'en', CA: 'en',
-  JP: 'ja', FR: 'fr', DE: 'de', IT: 'it', ES: 'es',
-  TH: 'th', VN: 'vi', SG: 'zh', MX: 'es', IN: 'hi',
-  BR: 'pt', AE: 'ar', KR: 'ko', NL: 'nl', CH: 'de',
-};
-
-let translationHistory = [];
-
-async function doTranslate() {
-  const input = document.getElementById('translate-input');
-  const output = document.getElementById('translate-output');
-  const btn = document.getElementById('translate-btn');
-  const text = input.value.trim();
-  if (!text) return;
-
-  const visit = getVisit();
-  const targetLang = LANG_CODES[visit.code] || 'en';
-  if (targetLang === 'en') {
-    output.className = 'translator-result';
-    output.innerHTML = `<span class="translator-lang-tag">Note</span>The destination language is English — no translation needed!`;
-    return;
+// ─── SCORE MODAL ─────────────────────────────────────
+function openScoreModal(type,matchId){
+  let match=null;
+  if(type==='rr'){for(const g in S.rrMatches){match=S.rrMatches[g].find(m=>m.id===matchId);if(match)break;}}
+  else match=S.bracketMatches.find(m=>m.id===matchId);
+  if(!match)return;
+  S.scoringCtx={type,matchId};
+  const bestOf=type==='rr'?S.settings.rrBestOf:(match.bestOf||S.settings.sfBestOf);
+  const wn=Math.ceil(bestOf/2);
+  let html=`<div class="alert alert-info mb12">First to ${wn} game${wn>1?'s':''} wins · Score to ${S.settings.winScore}${S.settings.winBy2?', win by 2':''}</div>`;
+  for(let i=0;i<bestOf;i++){
+    const g=match.games[i]||{};
+    html+=`<div class="score-game-block"><div class="score-game-title">Game ${i+1}</div>
+      <div class="score-inputs">
+        <div><label>${match.teamA.name}</label><input type="number" min="0" max="99" id="sc-a-${i}" value="${g.scoreA!==undefined?g.scoreA:''}" placeholder="0" oninput="liveCheck()"></div>
+        <div class="score-sep">—</div>
+        <div><label>${match.teamB.name}</label><input type="number" min="0" max="99" id="sc-b-${i}" value="${g.scoreB!==undefined?g.scoreB:''}" placeholder="0" oninput="liveCheck()"></div>
+      </div>
+      <div id="gv-${i}" style="font-size:11px;color:var(--text3);margin-top:4px;min-height:13px"></div>
+    </div>`;
   }
+  document.getElementById('scoreModalContent').innerHTML=html;
+  openModal('scoreModal');liveCheck();
+}
+function liveCheck(){
+  const ctx=S.scoringCtx;if(!ctx)return;
+  let match=null;
+  if(ctx.type==='rr'){for(const g in S.rrMatches){match=S.rrMatches[g].find(m=>m.id===ctx.matchId);if(match)break;}}
+  else match=S.bracketMatches.find(m=>m.id===ctx.matchId);
+  if(!match)return;
+  const bestOf=ctx.type==='rr'?S.settings.rrBestOf:(match.bestOf||S.settings.sfBestOf);
+  for(let i=0;i<bestOf;i++){
+    const aE=document.getElementById(`sc-a-${i}`),bE=document.getElementById(`sc-b-${i}`),vE=document.getElementById(`gv-${i}`);
+    if(!aE||!bE||!vE)continue;
+    const sa=parseInt(aE.value)||0,sb=parseInt(bE.value)||0;
+    if(aE.value===''&&bE.value===''){vE.textContent='';continue;}
+    const w=gameWin(sa,sb);
+    if(w===0)vE.innerHTML=`<span style="color:var(--accent)">✓ ${match.teamA.name} wins this game</span>`;
+    else if(w===1)vE.innerHTML=`<span style="color:var(--accent)">✓ ${match.teamB.name} wins this game</span>`;
+    else vE.textContent=`In progress (${sa}–${sb})`;
+  }
+}
+function submitScore(){
+  const ctx=S.scoringCtx;if(!ctx)return;
+  let match=null,gi=null;
+  if(ctx.type==='rr'){for(const g in S.rrMatches){match=S.rrMatches[g].find(m=>m.id===ctx.matchId);if(match){gi=g;break;}}}
+  else match=S.bracketMatches.find(m=>m.id===ctx.matchId);
+  if(!match)return;
+  const snapshot=JSON.stringify({games:match.games,winner:match.winner?{id:match.winner.id}:null,status:match.status});
+  const bestOf=ctx.type==='rr'?S.settings.rrBestOf:(match.bestOf||S.settings.sfBestOf);
+  const wn=Math.ceil(bestOf/2);
+  const games=[];let wA=0,wB=0;
+  for(let i=0;i<bestOf;i++){
+    const aE=document.getElementById(`sc-a-${i}`),bE=document.getElementById(`sc-b-${i}`);
+    if(!aE||!bE||aE.value===''||bE.value==='')continue;
+    const sa=parseInt(aE.value)||0,sb=parseInt(bE.value)||0;
+    games.push({scoreA:sa,scoreB:sb});
+    const w=gameWin(sa,sb);if(w===0)wA++;if(w===1)wB++;
+    if(wA>=wn||wB>=wn)break;
+  }
+  match.games=games;
+  if(wA>=wn){match.winner=match.teamA;match.status='done';}
+  else if(wB>=wn){match.winner=match.teamB;match.status='done';}
+  else{match.status=games.length>0?'live':'pending';match.winner=null;}
+  const desc=match.status==='done'
+    ?`${match.winner.name} def. ${match.winner.id===match.teamA.id?match.teamB.name:match.teamA.name} (${games.map(g=>g.scoreA+'-'+g.scoreB).join(', ')})`
+    :`Score updated: ${match.teamA.name} vs ${match.teamB.name}`;
+  logHistory(desc,{type:ctx.type,matchId:ctx.matchId,snapshot});
+  closeModal('scoreModal');
+  if(ctx.type==='rr')renderRRGroup(S.curRRGroup);
+  else{advanceWinner(match);renderBracketPage();}
+}
+function gameWin(sA,sB){
+  const t=S.settings.winScore,b2=S.settings.winBy2;
+  if(sA>=t&&(!b2||sA-sB>=2))return 0;
+  if(sB>=t&&(!b2||sB-sA>=2))return 1;
+  return -1;
+}
+function gamesWon(match,side){return match.games.filter(g=>{const w=gameWin(g.scoreA,g.scoreB);return side==='A'?w===0:w===1;}).length;}
 
-  btn.disabled = true;
-  btn.innerHTML = '<span style="animation:blink 0.8s infinite;display:inline-block">⏳</span> Translating…';
-  output.className = 'translator-result empty';
-  output.textContent = 'Translating…';
-
-  try {
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const translated = data.responseData?.translatedText;
-
-    if (translated && data.responseStatus === 200) {
-      output.className = 'translator-result';
-      output.innerHTML = `
-        <span class="translator-lang-tag">${visit.lang}</span>
-        <span id="translated-text">${translated}</span>
-        <button class="copy-btn" onclick="copyTranslation()" title="Copy">⎘ Copy</button>
-      `;
-      // Add to history
-      translationHistory.unshift({ en: text, local: translated, lang: visit.lang });
-      if (translationHistory.length > 10) translationHistory.pop();
-      renderHistory();
-    } else {
-      output.className = 'translator-result empty';
-      output.textContent = '⚠ Translation failed. Try again or check your connection.';
+// ─── HISTORY & UNDO ──────────────────────────────────
+function logHistory(desc,ctx){
+  S.history.push({ts:Date.now(),desc,ctx});
+  const b=document.getElementById('undoBtn');if(b)b.disabled=false;
+}
+function renderHistory(){
+  const list=document.getElementById('historyList');
+  const btn=document.getElementById('undoBtn');
+  if(btn)btn.disabled=S.history.length===0;
+  if(!S.history.length){list.innerHTML=`<div class="empty-state" style="padding:18px 0"><strong>No score history yet</strong></div>`;return;}
+  list.innerHTML=[...S.history].reverse().map((h,i)=>`<div class="history-entry">
+    <div class="history-time">${fmtTs(h.ts)}</div>
+    <div class="history-text"><strong>${h.desc}</strong></div>
+    ${i===0?`<button class="btn btn-danger btn-sm no-print" onclick="undoLast()">↩</button>`:''}
+  </div>`).join('');
+}
+function fmtTs(ts){const d=new Date(ts);return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function undoLast(){
+  if(!S.history.length)return;
+  const last=S.history.pop();
+  const{type,matchId,snapshot}=last.ctx;
+  let match=null;
+  if(type==='rr'){for(const g in S.rrMatches){match=S.rrMatches[g].find(m=>m.id===matchId);if(match)break;}}
+  else match=S.bracketMatches.find(m=>m.id===matchId);
+  if(match&&snapshot){
+    const prev=JSON.parse(snapshot);
+    match.games=prev.games;match.status=prev.status;
+    match.winner=prev.winner?{id:prev.winner.id,...(match.teamA.id===prev.winner.id?match.teamA:match.teamB)}:null;
+    if(type==='bracket'){
+      S.bracketMatches.forEach(m=>{
+        if(!m.feedFrom)return;
+        if(m.feedFrom[0]===matchId)m.teamA=null;
+        if(m.feedFrom[1]===matchId)m.teamB=null;
+      });
     }
-  } catch {
-    output.className = 'translator-result empty';
-    output.textContent = '⚠ Could not reach translation service. Check your connection.';
   }
+  renderHistory();
+  if(type==='rr')renderRRGroup(S.curRRGroup);else renderBracketPage();
+}
+function clearHistory(){if(!confirm('Clear all history?'))return;S.history=[];renderHistory();}
 
-  btn.disabled = false;
-  const visit2 = getVisit();
-  btn.innerHTML = `<span>↓</span> Translate to ${visit2.lang}`;
+// ─── BRACKET ─────────────────────────────────────────
+function generateBracket(){
+  let teams=[];
+  S.groups.forEach((g,gi)=>{const st=computeStandings(gi);teams=teams.concat(st.slice(0,S.settings.advanceCount).map(s=>s.team));});
+  if(teams.length<2){alert('Need at least 2 teams to generate bracket.');return;}
+  while(!isPow2(teams.length))teams.push(null);
+  S._confettiShown=false;
+  buildBracket(teams);navTo('bracket');
+}
+function isPow2(n){return n&&(n&(n-1))===0;}
+function buildBracket(seeds){
+  S.bracketRounds=[];S.bracketMatches=[];S.thirdPlaceMatch=null;
+  const n=seeds.length,total=Math.log2(n);
+  const getBO=ri=>{if(ri===total-1)return S.settings.finalsBestOf;if(ri===total-2)return S.settings.sfBestOf;return S.settings.rrBestOf;};
+  const pairs=[];for(let i=0;i<n/2;i++)pairs.push([seeds[i],seeds[n-1-i]]);
+  let cur=pairs.map(([a,b])=>{
+    const m={id:_mid++,teamA:a||{id:-_mid,name:'BYE',isBye:true},teamB:b||{id:-_mid-1,name:'BYE',isBye:true},games:[],winner:null,loser:null,status:'pending',bestOf:getBO(0),roundIdx:0};
+    if(!a||a.isBye){m.winner=b;m.loser=a;m.status='done';}if(!b||b.isBye){m.winner=a;m.loser=b;m.status='done';}
+    S.bracketMatches.push(m);return m;
+  });
+  S.bracketRounds.push({title:rndTitle(0,total),matches:cur});
+  let ri=1;
+  while(cur.length>1){
+    const next=[];
+    for(let i=0;i<cur.length;i+=2){
+      const m={id:_mid++,teamA:null,teamB:null,games:[],winner:null,loser:null,status:'pending',bestOf:getBO(ri),roundIdx:ri,feedFrom:[cur[i].id,cur[i+1]?.id]};
+      if(cur[i].status==='done')m.teamA=cur[i].winner;if(cur[i+1]?.status==='done')m.teamB=cur[i+1].winner;
+      if(m.teamA?.isBye||m.teamB?.isBye){m.winner=m.teamA?.isBye?m.teamB:m.teamA;m.loser=m.teamA?.isBye?m.teamA:m.teamB;m.status='done';}
+      S.bracketMatches.push(m);next.push(m);
+    }
+    S.bracketRounds.push({title:rndTitle(ri,total),matches:next});cur=next;ri++;
+  }
+  // 3rd place match: losers of the semi-finals round (second-to-last round if >=2 rounds)
+  if(total>=2){
+    const sfRound=S.bracketRounds[S.bracketRounds.length-2];
+    if(sfRound&&sfRound.matches.length>=2){
+      const sf1=sfRound.matches[0],sf2=sfRound.matches[1];
+      const m3={id:_mid++,
+        teamA:sf1.status==='done'?(sf1.loser?.isBye?null:sf1.loser):null,
+        teamB:sf2.status==='done'?(sf2.loser?.isBye?null:sf2.loser):null,
+        games:[],winner:null,loser:null,status:'pending',bestOf:S.settings.thirdBestOf||3,
+        roundIdx:-1,is3rdPlace:true,feedLoserFrom:[sf1.id,sf2.id]};
+      S.thirdPlaceMatch=m3;
+      S.bracketMatches.push(m3);
+    }
+  }
+}
+function rndTitle(i,t){if(i===t-1)return '🏆 Final';if(i===t-2)return '🥈 Semi-Finals';if(i===t-3)return 'Quarter-Finals';return `Round ${i+1}`;}
+function advanceWinner(match){
+  if(!match.winner)return;
+  // record loser
+  match.loser=match.winner.id===match.teamA?.id?match.teamB:match.teamA;
+  // advance winner forward
+  S.bracketMatches.forEach(m=>{
+    if(!m.feedFrom)return;
+    if(m.feedFrom[0]===match.id&&!m.teamA)m.teamA=match.winner;
+    else if(m.feedFrom[1]===match.id&&!m.teamB)m.teamB=match.winner;
+  });
+  // feed losers into 3rd place match
+  const tp=S.thirdPlaceMatch;
+  if(tp&&match.loser&&!match.loser.isBye&&tp.feedLoserFrom){
+    if(tp.feedLoserFrom[0]===match.id&&!tp.teamA)tp.teamA=match.loser;
+    else if(tp.feedLoserFrom[1]===match.id&&!tp.teamB)tp.teamB=match.loser;
+  }
+}
+function renderBracketPage(){
+  const content=document.getElementById('bracketContent');
+  if(!S.bracketRounds.length){content.innerHTML=`<div class="empty-state"><div class="ei">🏆</div><strong>Bracket not generated yet</strong>Complete round robin first</div>`;return;}
+  const fin=S.bracketRounds[S.bracketRounds.length-1]?.matches[0];
+  const champ=fin?.status==='done'?fin.winner:null;
+  const tp=S.thirdPlaceMatch;
+  const third=tp?.status==='done'?tp.winner:null;
+  // Check if entire tournament is done (final + 3rd place if exists)
+  const tournamentDone=champ&&(!tp||tp.status==='done');
+  let html='';
+  if(champ)html+=`<div class="alert alert-success" style="font-size:15px;margin-bottom:18px">
+    🏆 <strong>Champion: ${champ.name}</strong>${third?` · 🥉 3rd: ${third.name}`:''}
+    ${tournamentDone?`<button class="btn btn-sm btn-primary no-print" style="margin-left:12px" onclick="startConfetti()">🎉 Celebrate!</button>`:''}
+  </div>`;
+  // Visual bracket
+  html+=`<div class="bracket-wrapper"><div class="bracket">`;
+  S.bracketRounds.forEach(round=>{
+    html+=`<div class="bracket-round"><div class="bracket-round-title">${round.title}</div>`;
+    round.matches.forEach(m=>{
+      const isDone=m.status==='done';
+      const sd=matchScoreDisplay(m,m.bestOf);
+      const sA=sd?sd.scoreA.match(/>([\d]+)</)?.[1]||'?':'?';
+      const sB=sd?sd.scoreB.match(/>([\d]+)</)?.[1]||'?':'?';
+      html+=`<div class="bracket-match"><div class="bracket-match-inner ${isDone?'winner-decided':''}">
+        <div class="bracket-slot ${isDone&&m.winner?.id===m.teamA?.id?'winner-slot':''}">${m.teamA?.name||'?'}${m.games.length?` <span class="bracket-slot-score">${sA}</span>`:''}</div>
+        <div class="bracket-slot ${isDone&&m.winner?.id===m.teamB?.id?'winner-slot':''}">${m.teamB?.name||'?'}${m.games.length?` <span class="bracket-slot-score">${sB}</span>`:''}</div>
+      </div>${!isDone&&m.teamA&&m.teamB&&!m.teamA.isBye&&!m.teamB.isBye?`<div style="margin-top:4px;text-align:center" class="no-print"><button class="btn btn-outline btn-sm" onclick="openScoreModal('bracket',${m.id})">Score</button></div>`:''}</div>`;
+    });
+    html+=`</div>`;
+  });
+  // 3rd place in bracket vis
+  if(tp){
+    html+=`<div class="bracket-round"><div class="bracket-round-title" style="color:#cd7f32">🥉 3rd Place</div>
+      <div class="bracket-match" style="margin-top:40px"><div class="bracket-match-inner ${tp.status==='done'?'winner-decided':''}" style="border-color:rgba(205,127,50,.5)">
+        <div class="bracket-slot ${tp.status==='done'&&tp.winner?.id===tp.teamA?.id?'winner-slot':''}">${tp.teamA?.name||'?'}${tp.games.length?` <span class="bracket-slot-score">${matchScoreDisplay(tp,tp.bestOf)?.scoreA?.match(/>([\d]+)</)?.[1]||'?'}</span>`:''}</div>
+        <div class="bracket-slot ${tp.status==='done'&&tp.winner?.id===tp.teamB?.id?'winner-slot':''}">${tp.teamB?.name||'?'}${tp.games.length?` <span class="bracket-slot-score">${matchScoreDisplay(tp,tp.bestOf)?.scoreB?.match(/>([\d]+)</)?.[1]||'?'}</span>`:''}</div>
+      </div>${!tp.status==='done'&&tp.teamA&&tp.teamB?`<div style="margin-top:4px;text-align:center" class="no-print"><button class="btn btn-outline btn-sm" onclick="openScoreModal('bracket',${tp.id})">Score</button></div>`:''}</div>
+    </div>`;
+  }
+  html+=`</div></div><div style="margin-top:20px">`;
+  // 3rd place match detail card first
+  if(tp&&tp.teamA&&tp.teamB){
+    html+=`<div class="card-title mb8">🥉 3rd Place Match</div>`;
+    const isDone=tp.status==='done';
+    const sc=S.schedule[tp.id],court=sc?S.courts.find(c=>c.id===sc.courtId):null;
+    const sd=matchScoreDisplay(tp,tp.bestOf);
+    html+=`<div class="match-card" style="border-color:rgba(205,127,50,.4);margin-bottom:18px">
+      <div class="match-header">
+        <div class="flex-row" style="gap:5px;flex-wrap:wrap">
+          <span class="match-label">🥉 3rd Place · Best of ${tp.bestOf}</span>
+          ${court?`<span class="court-badge">${court.name}</span>`:''}
+          ${sc?.time?`<span class="time-badge">${fmtTime(sc.time)}</span>`:''}
+        </div>
+        <div class="match-meta">
+          ${isDone?`<button class="btn btn-ghost btn-sm no-print" onclick="openScoreModal('bracket',${tp.id})">✏</button>`:''}
+          <span class="match-status-badge status-${isDone?'done':'pending'}">${isDone?'W: '+tp.winner?.name:'Pending'}</span>
+        </div>
+      </div>
+      <div class="teams-row">
+        <div class="team-slot ${isDone&&tp.winner?.id===tp.teamA.id?'winner':''}"><div class="team-slot-name">${tp.teamA.name}</div>${sd?sd.scoreA:''}</div>
+        <div class="vs-sep">VS</div>
+        <div class="team-slot ${isDone&&tp.winner?.id===tp.teamB.id?'winner':''}"><div class="team-slot-name">${tp.teamB.name}</div>${sd?sd.scoreB:''}</div>
+      </div>
+      ${sd?sd.pips:''}
+      ${!isDone?`<div class="mt8 no-print"><button class="btn btn-outline btn-sm" onclick="openScoreModal('bracket',${tp.id})">+ Enter Score</button></div>`:''}
+    </div>`;
+  }
+  // Main bracket rounds detail
+  S.bracketRounds.forEach(round=>{
+    html+=`<div class="card-title mb8">${round.title}</div>`;
+    round.matches.forEach(m=>{
+      if(m.teamA?.isBye||m.teamB?.isBye||!m.teamA||!m.teamB)return;
+      const isDone=m.status==='done';
+      const sc=S.schedule[m.id],court=sc?S.courts.find(c=>c.id===sc.courtId):null;
+      const sd=matchScoreDisplay(m,m.bestOf);
+      const is3p=m.is3rdPlace;
+      html+=`<div class="match-card ${isDone?'completed':''}" ${is3p?'style="border-color:rgba(205,127,50,.4)"':''}>
+        <div class="match-header">
+          <div class="flex-row" style="gap:5px;flex-wrap:wrap">
+            <span class="match-label">${is3p?'🥉 3rd Place · ':''}Best of ${m.bestOf}</span>
+            ${court?`<span class="court-badge">${court.name}</span>`:''}
+            ${sc?.time?`<span class="time-badge">${fmtTime(sc.time)}</span>`:''}
+          </div>
+          <div class="match-meta">
+            ${isDone?`<button class="btn btn-ghost btn-sm no-print" onclick="openScoreModal('bracket',${m.id})">✏</button>`:''}
+            <span class="match-status-badge status-${isDone?'done':'pending'}">${isDone?'W: '+m.winner?.name:'Pending'}</span>
+          </div>
+        </div>
+        <div class="teams-row">
+          <div class="team-slot ${isDone&&m.winner?.id===m.teamA.id?'winner':''}"><div class="team-slot-name">${m.teamA.name}</div>${sd?sd.scoreA:''}</div>
+          <div class="vs-sep">VS</div>
+          <div class="team-slot ${isDone&&m.winner?.id===m.teamB.id?'winner':''}"><div class="team-slot-name">${m.teamB.name}</div>${sd?sd.scoreB:''}</div>
+        </div>
+        ${sd?sd.pips:''}
+        ${!isDone?`<div class="mt8 no-print"><button class="btn btn-outline btn-sm" onclick="openScoreModal('bracket',${m.id})">+ Enter Score</button></div>`:''}
+      </div>`;
+    });
+  });
+  html+=`</div>`;
+  content.innerHTML=html;
+  // Auto-trigger confetti if tournament just finished
+  if(tournamentDone&&!S._confettiShown){S._confettiShown=true;startConfetti();}
 }
 
-function copyTranslation() {
-  const el = document.getElementById('translated-text');
+// ─── CONFETTI ─────────────────────────────────────────
+let _confettiRAF=null,_confettiParticles=[];
+function startConfetti(){
+  const fin=S.bracketRounds[S.bracketRounds.length-1]?.matches[0];
+  const champ=fin?.status==='done'?fin.winner:null;
+  if(!champ)return;
+  const tp=S.thirdPlaceMatch;
+  const third=tp?.status==='done'?tp.winner:null;
+  document.getElementById('celebChampName').textContent=champ.name;
+  document.getElementById('celebThirdRow').textContent=third?`🥉 3rd Place: ${third.name}`:'';
+  const overlay=document.getElementById('celebrationOverlay');
+  overlay.style.display='block';overlay.style.pointerEvents='all';
+  const canvas=document.getElementById('confettiCanvas');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const ctx=canvas.getContext('2d');
+  const colors=['#a8d44a','#e8c84a','#4ab8e8','#e05555','#b48ae8','#c8f060','#e8f0d8'];
+  _confettiParticles=Array.from({length:180},()=>({
+    x:Math.random()*canvas.width,y:Math.random()*canvas.height-canvas.height,
+    r:Math.random()*7+3,color:colors[Math.floor(Math.random()*colors.length)],
+    vx:(Math.random()-0.5)*3,vy:Math.random()*4+2,
+    angle:Math.random()*360,spin:(Math.random()-0.5)*8,
+    shape:Math.random()>0.5?'rect':'circle',w:Math.random()*10+4,h:Math.random()*5+3,
+  }));
+  function frame(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    _confettiParticles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.angle+=p.spin;
+      if(p.y>canvas.height+20){p.y=-20;p.x=Math.random()*canvas.width;}
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle*Math.PI/180);
+      ctx.fillStyle=p.color;ctx.globalAlpha=0.85;
+      if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();}
+      else{ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);}
+      ctx.restore();
+    });
+    _confettiRAF=requestAnimationFrame(frame);
+  }
+  if(_confettiRAF)cancelAnimationFrame(_confettiRAF);
+  frame();
+}
+function stopConfetti(){
+  if(_confettiRAF)cancelAnimationFrame(_confettiRAF);_confettiRAF=null;
+  const overlay=document.getElementById('celebrationOverlay');
+  overlay.style.display='none';overlay.style.pointerEvents='none';
+  const canvas=document.getElementById('confettiCanvas');
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+}
+
+// ─── SPECTATOR FULLSCREEN ─────────────────────────────
+function openSpectator(){
+  const tn=document.getElementById('tournamentName')?.value||'Tournament';
+  document.getElementById('specTitle').textContent=tn;
+  document.getElementById('specDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  const overlay=document.getElementById('spectatorOverlay');
+  overlay.style.display='flex';
+
+  // Build the 4 panels
+  const fin=S.bracketRounds[S.bracketRounds.length-1]?.matches[0];
+  const champ=fin?.status==='done'?fin.winner:null;
+  const tp=S.thirdPlaceMatch;
+  const third=tp?.status==='done'?tp.winner:null;
+  const pending=allMatchesFlat().filter(m=>m.status!=='done'&&m.teamA&&m.teamB&&!m.teamA.isBye&&!m.teamB.isBye);
+  const done=allMatchesFlat().filter(m=>m.status==='done'&&!m.teamA?.isBye&&!m.teamB?.isBye).slice(-4).reverse();
+
+  const panel=(title,body,accentColor='var(--text3)')=>`
+    <div style="background:var(--surface);padding:16px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:${accentColor};margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);flex-shrink:0">${title}</div>
+      <div style="overflow:hidden;flex:1;min-height:0">${body}</div>
+    </div>`;
+
+  // Panel 1: Standings
+  let p1='';
+  if(Object.keys(S.rrMatches).length){
+    p1+=`<div style="display:flex;gap:10px;flex-wrap:wrap">`;
+    S.groups.forEach((g,gi)=>{
+      const st=computeStandings(gi);
+      p1+=`<div style="flex:1;min-width:140px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:6px">${g.name}</div>
+        <table class="standings-table"><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th></tr></thead><tbody>
+        ${st.map((s,i)=>`<tr><td><span class="rank-num rank-${i+1}">${i+1}</span></td><td style="font-size:12px">${s.team.name}</td><td style="color:var(--accent);font-size:12px">${s.wins}</td><td style="color:var(--red);font-size:12px">${s.losses}</td></tr>`).join('')}
+        </tbody></table></div>`;
+    });
+    p1+=`</div>`;
+  } else p1='<div style="color:var(--text3);font-size:13px">No round robin data yet</div>';
+
+  // Panel 2: Bracket visual
+  let p2='';
+  if(champ)p2+=`<div style="background:var(--accent-dim);border:1px solid var(--border2);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:13px;font-weight:600;color:var(--accent)">🏆 Champion: ${champ.name}${third?` · 🥉 ${third.name}`:''}</div>`;
+  if(S.bracketRounds.length){
+    p2+=`<div style="overflow-x:auto"><div style="display:flex;min-width:max-content">`;
+    S.bracketRounds.forEach(round=>{
+      p2+=`<div style="display:flex;flex-direction:column;justify-content:space-around"><div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--text3);text-align:center;padding:0 12px 6px">${round.title}</div>`;
+      round.matches.forEach(m=>{
+        const isDone=m.status==='done';
+        const sd=matchScoreDisplay(m,m.bestOf);
+        const sA=sd?sd.scoreA.match(/>([\d]+)</)?.[1]||'':'' ;
+        const sB=sd?sd.scoreB.match(/>([\d]+)</)?.[1]||'':'' ;
+        p2+=`<div style="margin:5px;background:var(--surface2);border:1px solid ${isDone?'var(--accent)':'var(--border)'};border-radius:var(--r);width:150px;overflow:hidden">
+          <div style="padding:5px 8px;display:flex;justify-content:space-between;font-size:11px;font-weight:500;border-bottom:1px solid var(--border);${isDone&&m.winner?.id===m.teamA?.id?'background:var(--accent-dim);color:var(--accent)':''}">${m.teamA?.name||'?'}${sA?` <span style="font-family:\'DM Mono\',monospace">${sA}</span>`:''}</div>
+          <div style="padding:5px 8px;display:flex;justify-content:space-between;font-size:11px;font-weight:500;${isDone&&m.winner?.id===m.teamB?.id?'background:var(--accent-dim);color:var(--accent)':''}">${m.teamB?.name||'?'}${sB?` <span style="font-family:\'DM Mono\',monospace">${sB}</span>`:''}</div>
+        </div>`;
+      });
+      p2+=`</div>`;
+    });
+    p2+=`</div></div>`;
+  } else p2+='<div style="color:var(--text3);font-size:13px">Bracket not generated yet</div>';
+
+  // Panel 3: Upcoming matches
+  let p3='';
+  if(pending.length){
+    p3+=pending.map(m=>{
+      const sc=S.schedule[m.id],court=sc?S.courts.find(c=>c.id===sc.courtId):null;
+      return `<div style="padding:9px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:7px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:11px;color:var(--purple)">${court?court.name:''}</span>
+          <span style="font-size:11px;color:var(--text3)">${sc?.time?fmtTime(sc.time):''}</span>
+          <span class="match-status-badge status-${m.status}" style="font-size:9px">${m.status==='live'?'🔴 Live':'Upcoming'}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;text-align:center">
+            <div style="font-size:12px;font-weight:600">${m.teamA.name}</div>
+            ${m.games.length?`<div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)">${gamesWon(m,'A')}</div>`:''}
+          </div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--text3)">VS</div>
+          <div style="flex:1;text-align:center">
+            <div style="font-size:12px;font-weight:600">${m.teamB.name}</div>
+            ${m.games.length?`<div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)">${gamesWon(m,'B')}</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } else p3='<div style="color:var(--text3);font-size:13px">No upcoming matches</div>';
+
+  // Panel 4: Recent results
+  let p4='';
+  if(done.length){
+    p4+=done.map(m=>{
+      const sd=matchScoreDisplay(m,m.bestOf);
+      const sA=sd?sd.scoreA.match(/>([\d]+)</)?.[1]||gamesWon(m,'A'):gamesWon(m,'A');
+      const sB=sd?sd.scoreB.match(/>([\d]+)</)?.[1]||gamesWon(m,'B'):gamesWon(m,'B');
+      return `<div style="padding:9px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:7px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:600;color:${m.winner?.id===m.teamA.id?'var(--accent)':'var(--text2)'}">${m.teamA.name}</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px;color:${m.winner?.id===m.teamB.id?'var(--accent)':'var(--text2)'}">${m.teamB.name}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${m.winner?.id===m.teamA.id?'var(--accent)':'var(--text3)'}">${sA}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${m.winner?.id===m.teamB.id?'var(--accent)':'var(--text3)'}">${sB}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">
+          ${m.games.map(g=>`<span class="game-pip ${gameWin(g.scoreA,g.scoreB)===0?'win':'loss'}" style="font-size:10px">${g.scoreA}–${g.scoreB}</span>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  } else p4='<div style="color:var(--text3);font-size:13px">No completed matches yet</div>';
+
+  document.getElementById('spectatorContent').innerHTML=
+    panel('📊 Standings',p1,'var(--blue)')+
+    panel('🏆 Bracket',p2,'var(--gold)')+
+    panel('⚡ On Court / Upcoming',p3,'var(--accent)')+
+    panel('✅ Recent Results',p4,'var(--text2)');
+}
+function closeSpectator(){
+  document.getElementById('spectatorOverlay').style.display='none';
+}
+
+// ─── CSV EXPORT ───────────────────────────────────────
+function exportCSV(){
+  const tn=document.getElementById('tournamentName')?.value||'Tournament';
+  const rows=[['PickleBracket Export — '+tn],[''],['ROUND ROBIN RESULTS'],['Group','Match #','Team A','Team B','Games','Winner']];
+  for(const gi in S.rrMatches)S.rrMatches[gi].forEach((m,i)=>rows.push([S.groups[gi]?.name||'',i+1,m.teamA.name,m.teamB.name,m.games.map(g=>g.scoreA+'-'+g.scoreB).join(' | '),m.winner?.name||'']));
+  rows.push([],['STANDINGS']);
+  S.groups.forEach((g,gi)=>{
+    rows.push([g.name],['Rank','Team','Wins','Losses','Pt Diff']);
+    computeStandings(gi).forEach((s,i)=>rows.push([i+1,s.team.name,s.wins,s.losses,s.pd]));
+    rows.push([]);
+  });
+  if(S.bracketMatches.length){
+    rows.push(['BRACKET'],['Round','Team A','Team B','Games Won A','Games Won B','Winner']);
+    S.bracketRounds.forEach(r=>r.matches.forEach(m=>{
+      if(m.teamA?.isBye||m.teamB?.isBye)return;
+      rows.push([r.title,m.teamA?.name||'',m.teamB?.name||'',gamesWon(m,'A'),gamesWon(m,'B'),m.winner?.name||'']);
+    }));
+  }
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`${tn.replace(/\s+/g,'_')}_results.csv`;a.click();
+}
+
+// ─── MODAL HELPERS ────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+
+// ═══════════════════════════════════════════
+// ─── CONFIG ─────────────────────────────────
+// ═══════════════════════════════════════════
+const CONFIG = {
+  // WebSocket URL from CloudFormation deployment
+  WEBSOCKET_URL: 'wss://mq8ptz92j9.execute-api.us-east-1.amazonaws.com/prod'
+};
+
+// ═══════════════════════════════════════════
+// ─── WEBSOCKET SYNC ENGINE (HARDENED) ────────────────
+// ═══════════════════════════════════════════
+const WS = {
+  socket: null,
+  url: null,
+
+  tournamentId: null,
+  role: 'viewer',        // 'admin' | 'viewer' — confirmed by server on join response
+  connected: false,
+  reconnectTimer: null,
+  reconnectDelay: 2000,
+  suppressBroadcast: false,
+  _broadcastDebounce: null,
+  _openSpectatorOnLoad: false,
+};
+
+function wsSetIndicator(state, text) {
+  const el = document.getElementById('syncIndicator');
   if (!el) return;
-  navigator.clipboard.writeText(el.textContent).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => btn.textContent = '⎘ Copy', 1500); }
+  el.className = 'sync-indicator' + (state ? ' ' + state : '');
+  el.textContent = text;
+}
+
+// ── Connect to WebSocket ───────────────────────────────
+function wsConnect(wsUrl, tournamentId, role) {
+  WS.url = wsUrl;
+  WS.tournamentId = tournamentId;
+  WS.role = role || 'viewer';
+  wsSetIndicator('syncing', '⟳ Connecting…');
+
+  try { WS.socket = new WebSocket(wsUrl); }
+  catch(e) { wsSetIndicator('error', '✕ Bad URL'); return; }
+
+  WS.socket.onopen = () => {
+    WS.connected = true;
+    WS.reconnectDelay = 2000;
+    clearTimeout(WS.reconnectTimer);
+    wsSetIndicator('connected', '● Live');
+    // Send join message with role
+    const joinMsg = { action: 'join', tournamentId, role: WS.role };
+    WS.socket.send(JSON.stringify(joinMsg));
+  };
+
+  WS.socket.onmessage = (evt) => {
+    try {
+      const msg = JSON.parse(evt.data);
+      if (msg.action === 'init') {
+        // Server confirms our actual role
+        if (msg.role) WS.role = msg.role;
+        wsApplyRemoteState(msg.state);
+      } else if (msg.action === 'update') {
+        wsApplyRemoteState(msg.state);
+      } else if (msg.action === 'empty') {
+        if (msg.role) WS.role = msg.role;
+        // New tournament — push our current state (only if admin)
+        if (WS.role === 'admin') wsBroadcast();
+      } else if (msg.action === 'error') {
+        console.warn('Server error:', msg.code, msg.message);
+        if (msg.code === 'CONN_LIMIT') showToast('⚠️ Tournament is full (max connections reached)', 5000);
+      } else if (msg.action === 'presence') {
+        updatePresence(msg.count);
+      }
+    } catch(e) { console.warn('WS parse error', e); }
+  };
+
+  WS.socket.onclose = () => {
+    WS.connected = false;
+    wsSetIndicator('error', '✕ Disconnected');
+    WS.reconnectTimer = setTimeout(() => {
+      if (WS.url) wsConnect(WS.url, WS.tournamentId, WS.role);
+    }, WS.reconnectDelay);
+    WS.reconnectDelay = Math.min(WS.reconnectDelay * 2, 30000);
+  };
+
+  WS.socket.onerror = () => wsSetIndicator('error', '✕ Error');
+}
+
+// ── Broadcast state to server (admin only, debounced) ─
+function wsBroadcast() {
+  if (!WS.connected || !WS.socket) return;
+  if (WS.role !== 'admin') return;            // viewers never write
+  if (WS.suppressBroadcast) return;
+
+  clearTimeout(WS._broadcastDebounce);
+  WS._broadcastDebounce = setTimeout(() => {
+    wsSetIndicator('syncing', '⟳ Syncing…');
+    const payload = JSON.stringify({
+      action: 'update',
+      tournamentId: WS.tournamentId,
+      role: WS.role,                          // role-based access control
+      state: getSerializableState(),
+    });
+    try {
+      WS.socket.send(payload);
+      setTimeout(() => { if (WS.connected) wsSetIndicator('connected', '● Live'); }, 600);
+    } catch(e) {
+      wsSetIndicator('error', '✕ Send failed');
+    }
+  }, 300); // 300ms debounce — collapses rapid successive changes
+}
+
+function getSerializableState() {
+  return {
+    tType: S.tType,
+    bMethod: S.bMethod,
+    tournamentName: document.getElementById('tournamentName')?.value || 'Tournament',
+    teams: S.teams,
+    groups: S.groups.map(g => ({ id: g.id, name: g.name, teamIds: g.teams.map(t => t.id) })),
+    rrMatches: serializeMatches(S.rrMatches),
+    bracketMatches: serializeMatches({'_': S.bracketMatches})['_'],
+    bracketRounds: S.bracketRounds.map(r => ({ title: r.title, matchIds: r.matches.map(m => m.id) })),
+    thirdPlaceMatchId: S.thirdPlaceMatch?.id || null,
+    courts: S.courts,
+    schedule: S.schedule,
+    history: S.history.slice(-50),
+    settings: S.settings,
+    _tid, _mid, _cid,
+  };
+}
+
+function serializeMatches(rrMatches) {
+  const out = {};
+  for (const gi in rrMatches) {
+    out[gi] = rrMatches[gi].map(m => ({
+      ...m,
+      teamA: m.teamA ? { id: m.teamA.id } : null,
+      teamB: m.teamB ? { id: m.teamB.id } : null,
+      winner: m.winner ? { id: m.winner.id } : null,
+      loser: m.loser ? { id: m.loser.id } : null,
+    }));
+  }
+  return out;
+}
+
+function wsApplyRemoteState(remoteState) {
+  if (!remoteState) return;
+  WS.suppressBroadcast = true;
+
+  const teamById = {};
+  (remoteState.teams || []).forEach(t => { teamById[t.id] = t; });
+
+  S.tType = remoteState.tType || S.tType;
+  S.bMethod = remoteState.bMethod || S.bMethod;
+  S.teams = remoteState.teams || [];
+  S.settings = { ...S.settings, ...remoteState.settings };
+  S.courts = remoteState.courts || [];
+  S.schedule = remoteState.schedule || {};
+  S.history = remoteState.history || [];
+  if (remoteState._tid) _tid = remoteState._tid;
+  if (remoteState._mid) _mid = remoteState._mid;
+  if (remoteState._cid) _cid = remoteState._cid;
+
+  const tnEl = document.getElementById('tournamentName');
+  if (tnEl && remoteState.tournamentName) tnEl.value = remoteState.tournamentName;
+
+  S.groups = (remoteState.groups || []).map(g => ({
+    id: g.id, name: g.name,
+    teams: (g.teamIds || []).map(id => teamById[id]).filter(Boolean),
+  }));
+
+  function hydrateTeam(ref) {
+    if (!ref) return null;
+    if (ref.isBye) return ref;
+    return teamById[ref.id] || ref;
+  }
+
+  S.bracketMatches = (remoteState.bracketMatches || []).map(m => ({
+    ...m,
+    teamA: hydrateTeam(m.teamA), teamB: hydrateTeam(m.teamB),
+    winner: hydrateTeam(m.winner), loser: hydrateTeam(m.loser),
+  }));
+
+  const matchById = {};
+  S.bracketMatches.forEach(m => { matchById[m.id] = m; });
+
+  S.bracketRounds = (remoteState.bracketRounds || []).map(r => ({
+    title: r.title,
+    matches: (r.matchIds || []).map(id => matchById[id]).filter(Boolean),
+  }));
+
+  S.thirdPlaceMatch = remoteState.thirdPlaceMatchId ? matchById[remoteState.thirdPlaceMatchId] || null : null;
+
+  S.rrMatches = {};
+  for (const gi in remoteState.rrMatches || {}) {
+    S.rrMatches[gi] = remoteState.rrMatches[gi].map(m => ({
+      ...m,
+      teamA: hydrateTeam(m.teamA), teamB: hydrateTeam(m.teamB),
+      winner: hydrateTeam(m.winner), loser: hydrateTeam(m.loser),
+    }));
+  }
+
+  const activePage = document.querySelector('.page.active')?.id?.replace('page-', '');
+  if (activePage === 'teams') renderTeams();
+  else if (activePage === 'groups') renderGroups();
+  else if (activePage === 'roundrobin') renderRRPage();
+  else if (activePage === 'bracket') renderBracketPage();
+  else if (activePage === 'schedule') renderSchedulePage();
+  else if (activePage === 'history') renderHistory();
+
+  syncSettingsUI();
+  setTimeout(() => { WS.suppressBroadcast = false; }, 100);
+
+  // Refresh spectator overlay if it's already open (covers all groups + bracket + results)
+  const _specOverlay = document.getElementById('spectatorOverlay');
+  if (_specOverlay && _specOverlay.style.display !== 'none') {
+    openSpectator();
+  }
+
+  // Restrict UI for viewers
+  if (WS.role === 'viewer') restrictViewerUI();
+}
+
+// ─── Restrict UI for viewer-only mode ───────────────
+function restrictViewerUI() {
+  if (WS.role !== 'viewer') return;
+  
+  // Hide the settings panel
+  const settingsPanel = document.getElementById('settingsPanel');
+  if (settingsPanel) settingsPanel.style.display = 'none';
+  
+  // Hide editing buttons from nav
+  document.querySelectorAll('.nav-buttons button').forEach(btn => {
+    const text = btn.textContent;
+    // Keep only: Live View (📺), CSV export, Print, Go Live
+    // Hide: Share, Settings
+    if (text.includes('🔗') || text.includes('⚙')) {
+      btn.style.display = 'none';
+    }
+  });
+  
+  // Hide tab navigation for editing pages
+  document.querySelectorAll('.tab-nav button').forEach(btn => {
+    const text = btn.textContent;
+    if (text.includes('Settings') || text.includes('Teams') || text.includes('Groups') || 
+        text.includes('RR') || text.includes('Round') || text.includes('Brackets') || 
+        text.includes('Schedule') || text.includes('Courts')) {
+      btn.style.display = 'none';
+    }
+  });
+  
+  // Hide close button in spectator so viewers cannot exit the live view
+  document.querySelectorAll('#spectatorOverlay button').forEach(btn => {
+    if (btn.textContent.includes('Close')) btn.style.display = 'none';
+  });
+
+  // Auto-open live view on first join; subsequent refreshes are handled by wsApplyRemoteState
+  const _ov = document.getElementById('spectatorOverlay');
+  if (!_ov || _ov.style.display === 'none') {
+    setTimeout(() => openSpectator(), 500);
+  }
+}
+
+function syncSettingsUI() {
+  ['rrBestOf','advanceCount','sfBestOf','finalsBestOf','thirdBestOf','numGroups','matchDuration'].forEach(k => {
+    const el = document.getElementById('val-' + k);
+    if (el) el.textContent = S.settings[k];
   });
 }
 
-function renderHistory() {
-  const el = document.getElementById('translation-history');
-  if (!el || translationHistory.length === 0) return;
-  el.innerHTML = translationHistory.map((item, i) => `
-    <div class="history-item" onclick="reuseTranslation(${i})">
-      <div class="history-en">${item.en}</div>
-      <div class="history-local">${item.local} <span style="font-size:10px;color:var(--muted);font-family:'Outfit',sans-serif">(${item.lang})</span></div>
-    </div>
-  `).join('');
+function updatePresence(count) {
+  const el = document.getElementById('presenceCount');
+  if (!el) return;
+  el.style.display = count > 1 ? 'block' : 'none';
+  el.textContent = `${count} online`;
 }
 
-function reuseTranslation(i) {
-  const item = translationHistory[i];
-  if (!item) return;
-  const input = document.getElementById('translate-input');
-  if (input) input.value = item.en;
+function showToast(text, duration = 2500) {
+  const toast = document.getElementById('joinToast');
+  const textEl = document.getElementById('joinToastText');
+  if (!toast || !textEl) return;
+  textEl.textContent = text;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, duration);
 }
 
-// Allow Ctrl+Enter / Cmd+Enter to translate
-document.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    const input = document.getElementById('translate-input');
-    if (document.activeElement === input) doTranslate();
-  }
-});
+// ─── SESSION CREATE / JOIN ─────────────────────────────
+function createSession() {
+  // Auto-generate tournament ID and connect immediately
+  const tid = 'pb_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
+  WS.tournamentId = tid;
+  WS.role = 'admin';
 
-async function updateDashboard() {
-  const home = getHome(), visit = getVisit();
-  document.getElementById('home-flag').textContent = home.flag;
-  document.getElementById('visit-flag').textContent = visit.flag;
-  // Persist selections
-  localStorage.setItem('voyage-home', home.code);
-  localStorage.setItem('voyage-visit', visit.code);
-  weatherData = null;
-  buildDashboard(null);
-  const weather = await fetchWeather(visit.code);
-  weatherData = weather;
-  buildDashboard(weather);
+  document.getElementById('createSessionBtn').style.display = 'none';
+  document.getElementById('shareBtn').style.display = 'inline-flex';
+
+  // Store in localStorage for recovery
+  localStorage.setItem('pb_ws_url', CONFIG.WEBSOCKET_URL);
+
+  // Update URL with tournament ID (no URL input needed)
+  const url = new URL(window.location.href);
+  url.searchParams.set('t', tid);
+  url.searchParams.set('ws', encodeURIComponent(CONFIG.WEBSOCKET_URL));
+  window.history.replaceState({}, '', url.toString());
+
+  wsConnect(CONFIG.WEBSOCKET_URL, tid, 'admin', null);
+  wsSetIndicator('syncing', '⟳ Creating tournament…');
 }
 
-// ── POPULATE SELECTS
-function populateSelects() {
-  const sorted = [...COUNTRIES].sort((a,b) => a.name.localeCompare(b.name));
-  const homeEl = document.getElementById('home-country');
-  const visitEl = document.getElementById('visit-country');
-  sorted.forEach(c => {
-    homeEl.innerHTML += `<option value="${c.code}">${c.flag} ${c.name}</option>`;
-    visitEl.innerHTML += `<option value="${c.code}">${c.flag} ${c.name}</option>`;
+function openShareModal() {
+  const base = window.location.href.split('?')[0];
+  const tid = WS.tournamentId || '';
+
+  // Admin link for sharing — WebSocket URL is auto-loaded from config
+  const adminUrl = `${base}?t=${tid}&role=admin`;
+  // Viewer link — viewer-only role
+  const viewerUrl = `${base}?t=${tid}&role=viewer`;
+
+  document.getElementById('shareAdminUrl').value = adminUrl;
+  document.getElementById('shareViewerUrl').value = viewerUrl;
+  document.getElementById('shareTournamentId').textContent = tid;
+  openModal('shareModal');
+}
+
+function copyUrl(inputId, confirmId) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  navigator.clipboard.writeText(el.value).then(() => {
+    const conf = document.getElementById(confirmId);
+    if (conf) { conf.textContent = '✓ Copied!'; setTimeout(() => conf.textContent = '', 2000); }
   });
-  // Restore saved selections, fall back to defaults
-  const savedHome = localStorage.getItem('voyage-home');
-  const savedVisit = localStorage.getItem('voyage-visit');
-  homeEl.value = (savedHome && COUNTRIES.find(c => c.code === savedHome)) ? savedHome : 'US';
-  visitEl.value = (savedVisit && COUNTRIES.find(c => c.code === savedVisit)) ? savedVisit : 'VN';
 }
 
-// ── CLOCK TICK
-function tickClocks() {
-  const homeClk = document.getElementById('home-clock');
-  const visitClk = document.getElementById('visit-clock');
-  const homeDate = document.getElementById('home-date');
-  const visitDate = document.getElementById('visit-date');
-  if (homeClk && visitClk) {
-    const home = getHome(), visit = getVisit();
-    homeClk.textContent = formatTime(home.tz);
-    visitClk.textContent = formatTime(visit.tz);
-    if (homeDate) homeDate.textContent = formatDate(home.tz);
-    if (visitDate) visitDate.textContent = formatDate(visit.tz);
-  }
-  // live date in header
-  const ld = document.getElementById('live-date');
-  if (ld) ld.textContent = new Date().toLocaleString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+// ─── AUTO-JOIN FROM URL ────────────────────────────────
+async function checkUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const tid = params.get('t');
+  const role = params.get('role') || 'viewer';
+
+  if (!tid) return;
+
+  // Always use the configured WebSocket URL
+  const wsUrl = CONFIG.WEBSOCKET_URL;
+  WS.tournamentId = tid;
+  WS.role = role;
+
+  document.getElementById('createSessionBtn').style.display = 'none';
+  document.getElementById('shareBtn').style.display = 'inline-flex';
+
+  if (role === 'viewer') WS._openSpectatorOnLoad = true;
+
+  wsConnect(wsUrl, tid, WS.role);
+  showToast(WS.role === 'viewer' ? '👀 Joining as viewer…' : '🔗 Joining as admin…', 3000);
 }
 
-// ── INIT
-populateSelects();
-updateDashboard();
-setInterval(tickClocks, 1000);
+// ─── PATCH STATE-MUTATING FUNCTIONS TO BROADCAST ──────
+// All writes go through wsBroadcast which enforces:
+// - role === 'admin' check
+// - 300ms debounce
+const _origSubmitScore = submitScore;
+window.submitScore = function() { _origSubmitScore(); wsBroadcast(); };
+
+const _origSubmitAddTeam = submitAddTeam;
+window.submitAddTeam = function() { _origSubmitAddTeam(); wsBroadcast(); };
+
+const _origRemoveTeam = removeTeam;
+window.removeTeam = function(id) { _origRemoveTeam(id); wsBroadcast(); };
+
+const _origAssignGroups = assignGroups;
+window.assignGroups = function() { _origAssignGroups(); wsBroadcast(); };
+
+const _origStartRR = startRR;
+window.startRR = function() { _origStartRR(); wsBroadcast(); };
+
+const _origGenerateBracket = generateBracket;
+window.generateBracket = function() { _origGenerateBracket(); wsBroadcast(); };
+
+const _origUndoLast = undoLast;
+window.undoLast = function() { _origUndoLast(); wsBroadcast(); };
+
+const _origSubmitAssignCourt = submitAssignCourt;
+window.submitAssignCourt = function() { _origSubmitAssignCourt(); wsBroadcast(); };
+
+const _origAutoSchedule = autoSchedule;
+window.autoSchedule = function() { _origAutoSchedule(); wsBroadcast(); };
+
+const _origDrop = drop;
+window.drop = function(e, toGid) { _origDrop(e, toGid); wsBroadcast(); };
+
+const _origAdj = adj;
+window.adj = function(k,d) { _origAdj(k,d); wsBroadcast(); };
+const _origSetSetting = setSetting;
+window.setSetting = function(k,v,btn) { _origSetSetting(k,v,btn); wsBroadcast(); };
+const _origSetSettingB = setSettingB;
+window.setSettingB = function(k,v,btn) { _origSetSettingB(k,v,btn); wsBroadcast(); };
+
+document.getElementById('tournamentName')?.addEventListener('input', wsBroadcast);
+
+// Viewers cannot close the spectator overlay
+const _origCloseSpectator = closeSpectator;
+window.closeSpectator = function() {
+  if (WS.role === 'viewer') return;
+  _origCloseSpectator();
+};
+
+// ─── INIT ─────────────────────────────────────────────
+syncPv();
+checkUrlParams();
 </script>
 </body>
 </html>
