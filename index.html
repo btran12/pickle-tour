@@ -447,18 +447,13 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="modal-overlay" id="wsConfigModal">
   <div class="modal">
     <div class="modal-title">☁ GO LIVE</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Enter the WebSocket URL from your CloudFormation stack to enable real-time sharing.</p>
-    <div class="form-row">
-      <label>WebSocket URL <span style="color:var(--text3)">(WebSocketURL output)</span></label>
-      <input type="text" id="wsUrlInput" placeholder="wss://xxxxxxxx.execute-api.us-east-1.amazonaws.com/prod">
-    </div>
-
-    <div class="alert alert-info" style="margin-bottom:0;font-size:12px">
-      Deploy <strong>pickleball-cfn.yaml</strong> to AWS CloudFormation, then copy the WebSocketURL output value above.
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Creating a new tournament session…</p>
+    
+    <div class="alert alert-info" style="margin-bottom:16px;font-size:12px">
+      You'll be the admin. Share the link below to invite others to join!
     </div>
     <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('wsConfigModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveWsConfig()">Connect & Go Live</button>
+      <button class="btn btn-primary btn-full" onclick="closeModal('wsConfigModal')">Got it, let's go!</button>
     </div>
   </div>
 </div>
@@ -1342,6 +1337,14 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
 
 // ═══════════════════════════════════════════
+// ─── CONFIG ─────────────────────────────────
+// ═══════════════════════════════════════════
+const CONFIG = {
+  // WebSocket URL from CloudFormation deployment
+  WEBSOCKET_URL: 'wss://mq8ptz92j9.execute-api.us-east-1.amazonaws.com/prod'
+};
+
+// ═══════════════════════════════════════════
 // ─── WEBSOCKET SYNC ENGINE (HARDENED) ────────────────
 // ═══════════════════════════════════════════
 const WS = {
@@ -1575,53 +1578,37 @@ function showToast(text, duration = 2500) {
 
 // ─── SESSION CREATE / JOIN ─────────────────────────────
 function createSession() {
-  const savedWs = localStorage.getItem('pb_ws_url');
-  if (savedWs) document.getElementById('wsUrlInput').value = savedWs;
-  openModal('wsConfigModal');
-}
-
-async function saveWsConfig() {
-  const wsUrl = document.getElementById('wsUrlInput')?.value.trim();
-
-  if (!wsUrl || !wsUrl.startsWith('wss://')) {
-    alert('Enter a valid WebSocket URL starting with wss://'); return;
-  }
-
-  localStorage.setItem('pb_ws_url', wsUrl);
-
-  // Generate tournament ID
+  // Auto-generate tournament ID and connect immediately
   const tid = 'pb_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
-  // No token minting — admin role without authentication
-  let adminToken = null;
-
   WS.tournamentId = tid;
-  WS.adminToken = adminToken;
-  closeModal('wsConfigModal');
+  WS.adminToken = null;
+  WS.role = 'admin';
+
   document.getElementById('createSessionBtn').style.display = 'none';
   document.getElementById('shareBtn').style.display = 'inline-flex';
 
-  // Store token & config in sessionStorage (not URL — tokens stay off the viewer link)
-  sessionStorage.setItem('pb_admin_token_' + tid, adminToken);
+  // Store in localStorage for recovery
+  localStorage.setItem('pb_ws_url', CONFIG.WEBSOCKET_URL);
 
-  // Update URL (token is NOT in the URL — only the IDs)
+  // Update URL with tournament ID (no URL input needed)
   const url = new URL(window.location.href);
   url.searchParams.set('t', tid);
-  url.searchParams.set('ws', encodeURIComponent(wsUrl));
+  url.searchParams.set('ws', encodeURIComponent(CONFIG.WEBSOCKET_URL));
   window.history.replaceState({}, '', url.toString());
 
-  wsConnect(wsUrl, tid, 'admin', adminToken);
+  wsConnect(CONFIG.WEBSOCKET_URL, tid, 'admin', null);
+  wsSetIndicator('syncing', '⟳ Creating tournament…');
 }
 
 function openShareModal() {
   const base = window.location.href.split('?')[0];
-  const wsEnc = encodeURIComponent(WS.url || '');
   const tid = WS.tournamentId || '';
 
-  // Admin link for sharing
-  const adminUrl = `${base}?t=${tid}&ws=${wsEnc}&role=admin`;
+  // Admin link for sharing — WebSocket URL is auto-loaded from config
+  const adminUrl = `${base}?t=${tid}&role=admin`;
   // Viewer link — viewer-only role
-  const viewerUrl = `${base}?t=${tid}&ws=${wsEnc}&role=viewer`;
+  const viewerUrl = `${base}?t=${tid}&role=viewer`;
 
   document.getElementById('shareAdminUrl').value = adminUrl;
   document.getElementById('shareViewerUrl').value = viewerUrl;
@@ -1642,12 +1629,12 @@ function copyUrl(inputId, confirmId) {
 async function checkUrlParams() {
   const params = new URLSearchParams(window.location.search);
   const tid = params.get('t');
-  const wsRaw = params.get('ws');
   const role = params.get('role') || 'viewer';
 
-  if (!tid || !wsRaw) return;
+  if (!tid) return;
 
-  const wsUrl = decodeURIComponent(wsRaw);
+  // Always use the configured WebSocket URL
+  const wsUrl = CONFIG.WEBSOCKET_URL;
   WS.tournamentId = tid;
   WS.role = role;
 
