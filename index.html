@@ -1352,7 +1352,6 @@ const WS = {
   url: null,
 
   tournamentId: null,
-  adminToken: null,      // HMAC-signed token — only admins hold this
   role: 'viewer',        // 'admin' | 'viewer' — confirmed by server on join response
   connected: false,
   reconnectTimer: null,
@@ -1370,11 +1369,10 @@ function wsSetIndicator(state, text) {
 }
 
 // ── Connect to WebSocket ───────────────────────────────
-function wsConnect(wsUrl, tournamentId, role, adminToken) {
+function wsConnect(wsUrl, tournamentId, role) {
   WS.url = wsUrl;
   WS.tournamentId = tournamentId;
   WS.role = role || 'viewer';
-  WS.adminToken = adminToken || null;
   wsSetIndicator('syncing', '⟳ Connecting…');
 
   try { WS.socket = new WebSocket(wsUrl); }
@@ -1385,9 +1383,8 @@ function wsConnect(wsUrl, tournamentId, role, adminToken) {
     WS.reconnectDelay = 2000;
     clearTimeout(WS.reconnectTimer);
     wsSetIndicator('connected', '● Live');
-    // Send join — include admin token if we have one
+    // Send join message with role
     const joinMsg = { action: 'join', tournamentId, role: WS.role };
-    if (WS.adminToken) joinMsg.adminToken = WS.adminToken;
     WS.socket.send(JSON.stringify(joinMsg));
   };
 
@@ -1417,7 +1414,7 @@ function wsConnect(wsUrl, tournamentId, role, adminToken) {
     WS.connected = false;
     wsSetIndicator('error', '✕ Disconnected');
     WS.reconnectTimer = setTimeout(() => {
-      if (WS.url) wsConnect(WS.url, WS.tournamentId, WS.role, WS.adminToken);
+      if (WS.url) wsConnect(WS.url, WS.tournamentId, WS.role);
     }, WS.reconnectDelay);
     WS.reconnectDelay = Math.min(WS.reconnectDelay * 2, 30000);
   };
@@ -1430,7 +1427,6 @@ function wsBroadcast() {
   if (!WS.connected || !WS.socket) return;
   if (WS.role !== 'admin') return;            // viewers never write
   if (WS.suppressBroadcast) return;
-  if (!WS.adminToken) return;                 // no token = no write
 
   clearTimeout(WS._broadcastDebounce);
   WS._broadcastDebounce = setTimeout(() => {
@@ -1438,7 +1434,7 @@ function wsBroadcast() {
     const payload = JSON.stringify({
       action: 'update',
       tournamentId: WS.tournamentId,
-      adminToken: WS.adminToken,             // signed token sent on every write
+      role: WS.role,                          // role-based access control
       state: getSerializableState(),
     });
     try {
@@ -1582,7 +1578,6 @@ function createSession() {
   const tid = 'pb_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
   WS.tournamentId = tid;
-  WS.adminToken = null;
   WS.role = 'admin';
 
   document.getElementById('createSessionBtn').style.display = 'none';
@@ -1641,18 +1636,15 @@ async function checkUrlParams() {
   document.getElementById('createSessionBtn').style.display = 'none';
   document.getElementById('shareBtn').style.display = 'inline-flex';
 
-  let adminToken = null;
-
   if (role === 'viewer') WS._openSpectatorOnLoad = true;
 
-  wsConnect(wsUrl, tid, WS.role, adminToken);
+  wsConnect(wsUrl, tid, WS.role);
   showToast(WS.role === 'viewer' ? '👀 Joining as viewer…' : '🔗 Joining as admin…', 3000);
 }
 
 // ─── PATCH STATE-MUTATING FUNCTIONS TO BROADCAST ──────
 // All writes go through wsBroadcast which enforces:
 // - role === 'admin' check
-// - adminToken present check
 // - 300ms debounce
 const _origSubmitScore = submitScore;
 window.submitScore = function() { _origSubmitScore(); wsBroadcast(); };
