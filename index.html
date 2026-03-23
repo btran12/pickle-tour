@@ -171,6 +171,7 @@ select option{background:var(--surface2)}
 .sync-indicator.error{background:var(--red-dim);border-color:rgba(224,85,85,.3);color:var(--red)}
 .spec-section{margin-bottom:24px}
 .spec-section-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--text2);margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.flex-row{display:flex;align-items:center}
 .flex-end{justify-content:flex-end}
 .flex-between{justify-content:space-between}
 .flex-wrap{flex-wrap:wrap}
@@ -564,6 +565,7 @@ function navTo(p){
   document.getElementById('phaseBadge').textContent=L[p]||p;
   if(p==='teams')renderTeams();
   if(p==='players')renderPlayersPage();
+  if(p==='groups')renderGroups();
   if(p==='roundrobin')renderRRPage();
   if(p==='bracket')renderBracketPage();
   if(p==='schedule')renderSchedulePage();
@@ -1677,10 +1679,10 @@ function serializeMatches(rrMatches) {
   for (const gi in rrMatches) {
     out[gi] = rrMatches[gi].map(m => ({
       ...m,
-      teamA: m.teamA ? { id: m.teamA.id } : null,
-      teamB: m.teamB ? { id: m.teamB.id } : null,
-      winner: m.winner ? { id: m.winner.id } : null,
-      loser: m.loser ? { id: m.loser.id } : null,
+      teamA: m.teamA ? (m.teamA.isBye ? m.teamA : { id: m.teamA.id }) : null,
+      teamB: m.teamB ? (m.teamB.isBye ? m.teamB : { id: m.teamB.id }) : null,
+      winner: m.winner ? (m.winner.isBye ? m.winner : { id: m.winner.id }) : null,
+      loser: m.loser ? (m.loser.isBye ? m.loser : { id: m.loser.id }) : null,
     }));
   }
   return out;
