@@ -211,6 +211,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <nav>
   <button class="active" data-page="setup">⚙ Setup</button>
   <button data-page="teams">👥 Teams</button>
+  <button data-page="players">🧑 Players</button>
   <button data-page="groups">🎯 Groups</button>
   <button data-page="schedule">🏟 Courts</button>
   <button data-page="roundrobin">🔄 Round Robin</button>
@@ -319,6 +320,17 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
       <button class="btn btn-primary" onclick="goToGroups()">Assign Groups →</button>
     </div>
   </div>
+</div>
+
+<!-- PLAYERS -->
+<div class="page" id="page-players">
+  <div class="flex-row flex-between mb12 flex-wrap">
+    <div><div class="section-title">Players</div><div class="section-sub" id="playersSubtext">All registered players</div></div>
+    <div class="flex-row no-print" style="gap:5px">
+      <input type="text" id="playerSearch" placeholder="Search players…" style="width:180px" oninput="renderPlayersPage()">
+    </div>
+  </div>
+  <div id="playersList"></div>
 </div>
 
 <!-- GROUPS -->
@@ -480,7 +492,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
     <div id="addTeamForm"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('addTeamModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="submitAddTeam()">Add</button>
+      <button class="btn btn-primary" id="addTeamSubmitBtn" onclick="submitAddTeam()">Add</button>
     </div>
   </div>
 </div>
@@ -529,7 +541,7 @@ const S={
   courts:[], schedule:{},  // matchId -> {courtId, time}
   history:[],
   bracketSeedGroups:{},   // teamId -> groupIdx (for group origin badges in bracket)
-  curRRGroup:0, scoringCtx:null, assignCtx:null,
+  curRRGroup:0, scoringCtx:null, assignCtx:null, _editTeamId:null,
   settings:{winScore:11,winBy2:true,rrBestOf:1,advanceCount:2,sfBestOf:3,finalsBestOf:5,thirdBestOf:3,numGroups:2,matchDuration:20},
 };
 let _tid=1,_mid=1,_cid=1;
@@ -545,9 +557,10 @@ function navTo(p){
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   document.querySelector(`nav button[data-page="${p}"]`).classList.add('active');
-  const L={setup:'Setup',teams:'Teams',groups:'Groups',schedule:'Courts',roundrobin:'Round Robin',bracket:'Bracket',history:'History'};
+  const L={setup:'Setup',teams:'Teams',players:'Players',groups:'Groups',schedule:'Courts',roundrobin:'Round Robin',bracket:'Bracket',history:'History'};
   document.getElementById('phaseBadge').textContent=L[p]||p;
   if(p==='teams')renderTeams();
+  if(p==='players')renderPlayersPage();
   if(p==='roundrobin')renderRRPage();
   if(p==='bracket')renderBracketPage();
   if(p==='schedule')renderSchedulePage();
@@ -577,6 +590,7 @@ function syncPv(){} // preview elements removed (settings merged into setup)
 
 // ─── TEAMS ───────────────────────────────────────────
 function openAddTeamModal(){
+  S._editTeamId=null;
   const isD=S.tType==='doubles';
   document.getElementById('addTeamTitle').textContent=isD?'ADD DOUBLES TEAM':'ADD PLAYER';
   document.getElementById('addTeamForm').innerHTML=isD?`
@@ -585,11 +599,35 @@ function openAddTeamModal(){
     <div class="form-row-inline mt8"><div><label>Player 2</label><input type="text" id="tm-p2" placeholder="Player 2"></div><div><label>Skill</label><select id="tm-s2">${skOpts()}</select></div></div>`:`
     <div class="form-row"><label>Player Name</label><input type="text" id="tm-p1" placeholder="Enter name"></div>
     <div class="form-row"><label>Skill Level</label><select id="tm-s1">${skOpts()}</select></div>`;
+  const sb=document.getElementById('addTeamSubmitBtn');if(sb)sb.textContent='Add';
   openModal('addTeamModal');
   setTimeout(()=>document.getElementById('tm-p1')?.focus(),50);
 }
+function openEditTeamModal(id){
+  const team=S.teams.find(t=>t.id===id);
+  if(!team)return;
+  S._editTeamId=id;
+  const isD=S.tType==='doubles';
+  const p1=team.players[0]||{},p2=team.players[1]||{};
+  document.getElementById('addTeamTitle').textContent=isD?'EDIT DOUBLES TEAM':'EDIT PLAYER';
+  document.getElementById('addTeamForm').innerHTML=isD?`
+    <div class="form-row"><label>Team Name</label><input type="text" id="tm-tn" value="${team.name.replace(/"/g,'&quot;')}"></div>
+    <div class="form-row-inline"><div><label>Player 1</label><input type="text" id="tm-p1" value="${(p1.name||'').replace(/"/g,'&quot;')}"></div><div><label>Skill</label><select id="tm-s1">${skOpts()}</select></div></div>
+    <div class="form-row-inline mt8"><div><label>Player 2</label><input type="text" id="tm-p2" value="${(p2.name||'').replace(/"/g,'&quot;')}"></div><div><label>Skill</label><select id="tm-s2">${skOpts()}</select></div></div>`:`
+    <div class="form-row"><label>Player Name</label><input type="text" id="tm-p1" value="${(p1.name||'').replace(/"/g,'&quot;')}"></div>
+    <div class="form-row"><label>Skill Level</label><select id="tm-s1">${skOpts()}</select></div>`;
+  const sb=document.getElementById('addTeamSubmitBtn');if(sb)sb.textContent='Save';
+  openModal('addTeamModal');
+  setTimeout(()=>{
+    const s1=document.getElementById('tm-s1');if(s1)s1.value=p1.skill||'';
+    const s2=document.getElementById('tm-s2');if(s2)s2.value=p2.skill||'';
+    document.getElementById('tm-p1')?.select();
+  },30);
+}
 function skOpts(){return `<option value="">Not specified</option><option value="1">2.0 — Beginner</option><option value="2">2.5–3.0 — Intermediate</option><option value="3">3.5 — Solid</option><option value="4">4.0 — Advanced</option><option value="5">4.5+ — Elite</option>`;}
 function submitAddTeam(){
+  // Delegate to edit flow if we're in edit mode
+  if(S._editTeamId!==null){submitEditTeam();return;}
   const p1=document.getElementById('tm-p1')?.value.trim();
   if(!p1){alert('Enter player name.');return;}
   const s1=parseInt(document.getElementById('tm-s1')?.value)||0;
@@ -604,9 +642,28 @@ function submitAddTeam(){
     const avg=skills.length?skills.reduce((a,b)=>a+b,0)/skills.length:0;
     team={id:_tid++,name:tn,players:[{name:p1,skill:s1},{name:p2,skill:s2}],avgSkill:avg};
   }
-  S.teams.push(team);closeModal('addTeamModal');renderTeams();
+  S.teams.push(team);closeModal('addTeamModal');renderTeams();renderPlayersPage();
 }
-function removeTeam(id){S.teams=S.teams.filter(t=>t.id!==id);renderTeams();}
+function submitEditTeam(){
+  const team=S.teams.find(t=>t.id===S._editTeamId);
+  if(!team)return;
+  const p1v=document.getElementById('tm-p1')?.value.trim();
+  if(!p1v){alert('Enter player name.');return;}
+  const s1=parseInt(document.getElementById('tm-s1')?.value)||0;
+  if(S.tType==='singles'){
+    team.name=p1v;team.players=[{name:p1v,skill:s1}];team.avgSkill=s1;
+  } else {
+    const p2v=document.getElementById('tm-p2')?.value.trim()||'Player 2';
+    const s2=parseInt(document.getElementById('tm-s2')?.value)||0;
+    const tn=document.getElementById('tm-tn')?.value.trim()||`${p1v} / ${p2v}`;
+    const skills=[s1,s2].filter(s=>s>0);
+    const avg=skills.length?skills.reduce((a,b)=>a+b,0)/skills.length:0;
+    team.name=tn;team.players=[{name:p1v,skill:s1},{name:p2v,skill:s2}];team.avgSkill=avg;
+  }
+  S._editTeamId=null;
+  closeModal('addTeamModal');renderTeams();renderPlayersPage();
+}
+function removeTeam(id){S.teams=S.teams.filter(t=>t.id!==id);renderTeams();renderPlayersPage();}
 function renderTeams(){
   const sub=document.getElementById('teamsSubtext');
   if(sub)sub.textContent=S.tType==='doubles'?'Adding doubles teams (2 players)':'Adding singles players';
@@ -617,8 +674,75 @@ function renderTeams(){
   list.innerHTML=S.teams.map(t=>{
     const sk=t.avgSkill?`<span class="skill-badge skill-${Math.round(t.avgSkill)}">${SKILL_LABELS[Math.round(t.avgSkill)]||'?'}</span>`:'';
     const meta=S.tType==='doubles'?t.players.map(p=>p.name+(p.skill?` (${SKILL_LABELS[p.skill]})`:'')).join(' & '):'';
-    return `<div class="team-item"><div><div class="team-name">${t.name}${sk}</div><div class="team-meta">${meta}</div></div><button class="btn btn-danger btn-sm no-print" onclick="removeTeam(${t.id})">✕</button></div>`;
+    return `<div class="team-item"><div><div class="team-name">${t.name}${sk}</div><div class="team-meta">${meta}</div></div>
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-outline btn-sm no-print" onclick="openEditTeamModal(${t.id})" title="Edit">✏</button>
+        <button class="btn btn-danger btn-sm no-print" onclick="removeTeam(${t.id})">✕</button>
+      </div></div>`;
   }).join('');
+}
+
+function renderPlayersPage(){
+  const content=document.getElementById('playersList');
+  if(!content)return;
+  const sub=document.getElementById('playersSubtext');
+  const isD=S.tType==='doubles';
+  const query=(document.getElementById('playerSearch')?.value||'').toLowerCase().trim();
+
+  if(!S.teams.length){
+    content.innerHTML=`<div class="empty-state"><div class="ei">🧑</div><strong>No players yet</strong>Add teams on the Teams tab first</div>`;
+    if(sub)sub.textContent='No players registered yet';
+    return;
+  }
+
+  // Build flat player list from all teams
+  const all=[];
+  S.teams.forEach(t=>{
+    t.players.forEach(p=>{
+      all.push({name:p.name||'',skill:p.skill||0,teamName:t.name,teamId:t.id});
+    });
+  });
+
+  const filtered=query?all.filter(p=>p.name.toLowerCase().includes(query)||p.teamName.toLowerCase().includes(query)):all;
+  // Sort: skill desc, then name asc
+  filtered.sort((a,b)=>(b.skill||0)-(a.skill||0)||a.name.localeCompare(b.name));
+
+  if(sub)sub.textContent=`${all.length} player${all.length!==1?'s':''} across ${S.teams.length} team${S.teams.length!==1?'s':''}`;
+
+  if(!filtered.length){
+    content.innerHTML=`<div class="empty-state"><div class="ei">🔍</div><strong>No players match</strong>Try a different search</div>`;
+    return;
+  }
+
+  // Group by skill tier for readability
+  const tiers=[5,4,3,2,1,0];
+  const tierLabel={5:'4.5+ — Elite',4:'4.0 — Advanced',3:'3.5 — Solid',2:'2.5–3.0 — Intermediate',1:'2.0 — Beginner',0:'Skill Not Set'};
+  const tierClass={5:'skill-5',4:'skill-4',3:'skill-3',2:'skill-2',1:'skill-1',0:''};
+  let html='';
+  tiers.forEach(sk=>{
+    const group=filtered.filter(p=>(p.skill||0)===sk);
+    if(!group.length)return;
+    html+=`<div class="card mb12">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        ${sk?`<span class="skill-badge ${tierClass[sk]}">${tierLabel[sk]}</span>`:`<span style="font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:1px">Skill Not Set</span>`}
+        <span style="font-size:12px;color:var(--text3)">${group.length} player${group.length!==1?'s':''}</span>
+      </div>
+      <table class="standings-table">
+        <thead><tr><th>#</th><th>Player</th>${isD?'<th>Team</th>':''}<th class="no-print" style="text-align:right">Actions</th></tr></thead>
+        <tbody>
+          ${group.map((p,i)=>`<tr>
+            <td><span class="rank-num">${i+1}</span></td>
+            <td style="font-weight:500">${p.name}</td>
+            ${isD?`<td style="font-size:12px;color:var(--text3)">${p.teamName}</td>`:''}
+            <td style="text-align:right" class="no-print">
+              <button class="btn btn-outline btn-sm" onclick="openEditTeamModal(${p.teamId})" title="Edit team">✏</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  });
+  content.innerHTML=html;
 }
 
 // ─── GROUPS + DRAG & DROP ────────────────────────────
@@ -1596,6 +1720,7 @@ function wsApplyRemoteState(remoteState) {
 
   const activePage = document.querySelector('.page.active')?.id?.replace('page-', '');
   if (activePage === 'teams') renderTeams();
+  else if (activePage === 'players') renderPlayersPage();
   else if (activePage === 'groups') renderGroups();
   else if (activePage === 'roundrobin') renderRRPage();
   else if (activePage === 'bracket') renderBracketPage();
@@ -1744,41 +1869,45 @@ async function checkUrlParams() {
 // - role === 'admin' check
 // - 300ms debounce
 const _origSubmitScore = submitScore;
-window.submitScore = function() { _origSubmitScore(); wsBroadcast(); };
+window.submitScore = function() { try{_origSubmitScore();}finally{wsBroadcast();} };
 
 const _origSubmitAddTeam = submitAddTeam;
-window.submitAddTeam = function() { _origSubmitAddTeam(); wsBroadcast(); };
+window.submitAddTeam = function() { try{_origSubmitAddTeam();}finally{wsBroadcast();} };
+
+// submitEditTeam delegates from submitAddTeam, but patch directly for safety
+const _origSubmitEditTeam = submitEditTeam;
+window.submitEditTeam = function() { try{_origSubmitEditTeam();}finally{wsBroadcast();} };
 
 const _origRemoveTeam = removeTeam;
-window.removeTeam = function(id) { _origRemoveTeam(id); wsBroadcast(); };
+window.removeTeam = function(id) { try{_origRemoveTeam(id);}finally{wsBroadcast();} };
 
 const _origAssignGroups = assignGroups;
-window.assignGroups = function() { _origAssignGroups(); wsBroadcast(); };
+window.assignGroups = function() { try{_origAssignGroups();}finally{wsBroadcast();} };
 
 const _origStartRR = startRR;
-window.startRR = function() { _origStartRR(); wsBroadcast(); };
+window.startRR = function() { try{_origStartRR();}finally{wsBroadcast();} };
 
 const _origGenerateBracket = generateBracket;
-window.generateBracket = function() { _origGenerateBracket(); wsBroadcast(); };
+window.generateBracket = function() { try{_origGenerateBracket();}finally{wsBroadcast();} };
 
 const _origUndoLast = undoLast;
-window.undoLast = function() { _origUndoLast(); wsBroadcast(); };
+window.undoLast = function() { try{_origUndoLast();}finally{wsBroadcast();} };
 
 const _origSubmitAssignCourt = submitAssignCourt;
-window.submitAssignCourt = function() { _origSubmitAssignCourt(); wsBroadcast(); };
+window.submitAssignCourt = function() { try{_origSubmitAssignCourt();}finally{wsBroadcast();} };
 
 const _origAutoSchedule = autoSchedule;
-window.autoSchedule = function() { _origAutoSchedule(); wsBroadcast(); };
+window.autoSchedule = function() { try{_origAutoSchedule();}finally{wsBroadcast();} };
 
 const _origDrop = drop;
-window.drop = function(e, toGid) { _origDrop(e, toGid); wsBroadcast(); };
+window.drop = function(e, toGid) { try{_origDrop(e, toGid);}finally{wsBroadcast();} };
 
 const _origAdj = adj;
-window.adj = function(k,d) { _origAdj(k,d); wsBroadcast(); };
+window.adj = function(k,d) { try{_origAdj(k,d);}finally{wsBroadcast();} };
 const _origSetSetting = setSetting;
-window.setSetting = function(k,v,btn) { _origSetSetting(k,v,btn); wsBroadcast(); };
+window.setSetting = function(k,v,btn) { try{_origSetSetting(k,v,btn);}finally{wsBroadcast();} };
 const _origSetSettingB = setSettingB;
-window.setSettingB = function(k,v,btn) { _origSetSettingB(k,v,btn); wsBroadcast(); };
+window.setSettingB = function(k,v,btn) { try{_origSetSettingB(k,v,btn);}finally{wsBroadcast();} };
 
 document.getElementById('tournamentName')?.addEventListener('input', wsBroadcast);
 
@@ -1791,16 +1920,16 @@ window.closeSpectator = function() {
 
 // ─── MISSING BROADCAST PATCHES ────────────────────────
 const _origSubmitAddCourt = submitAddCourt;
-window.submitAddCourt = function() { _origSubmitAddCourt(); wsBroadcast(); };
+window.submitAddCourt = function() { try{_origSubmitAddCourt();}finally{wsBroadcast();} };
 
 const _origRemoveCourt = removeCourt;
-window.removeCourt = function(id) { _origRemoveCourt(id); wsBroadcast(); };
+window.removeCourt = function(id) { try{_origRemoveCourt(id);}finally{wsBroadcast();} };
 
 const _origSetTType = setTType;
-window.setTType = function(t,btn) { _origSetTType(t,btn); wsBroadcast(); };
+window.setTType = function(t,btn) { try{_origSetTType(t,btn);}finally{wsBroadcast();} };
 
 const _origSetBMethod = setBMethod;
-window.setBMethod = function(m,btn) { _origSetBMethod(m,btn); wsBroadcast(); };
+window.setBMethod = function(m,btn) { try{_origSetBMethod(m,btn);}finally{wsBroadcast();} };
 
 // ─── THEME TOGGLE ─────────────────────────────────────
 function toggleTheme() {
