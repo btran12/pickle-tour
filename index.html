@@ -447,17 +447,14 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="modal-overlay" id="wsConfigModal">
   <div class="modal">
     <div class="modal-title">☁ GO LIVE</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Enter the two URLs from your CloudFormation stack outputs to enable real-time sharing.</p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Enter the WebSocket URL from your CloudFormation stack to enable real-time sharing.</p>
     <div class="form-row">
       <label>WebSocket URL <span style="color:var(--text3)">(WebSocketURL output)</span></label>
       <input type="text" id="wsUrlInput" placeholder="wss://xxxxxxxx.execute-api.us-east-1.amazonaws.com/prod">
     </div>
-    <div class="form-row">
-      <label>Token Minter URL <span style="color:var(--text3)">(TokenMinterURL output)</span></label>
-      <input type="text" id="minterUrlInput" placeholder="https://xxxxxxxx.lambda-url.us-east-1.on.aws/">
-    </div>
+
     <div class="alert alert-info" style="margin-bottom:0;font-size:12px">
-      Deploy <strong>pickleball-cfn.yaml</strong> to AWS CloudFormation, then copy the two output values above.
+      Deploy <strong>pickleball-cfn.yaml</strong> to AWS CloudFormation, then copy the WebSocketURL output value above.
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('wsConfigModal')">Cancel</button>
@@ -1350,7 +1347,7 @@ document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('cli
 const WS = {
   socket: null,
   url: null,
-  minterUrl: null,       // Token minter Lambda URL
+
   tournamentId: null,
   adminToken: null,      // HMAC-signed token — only admins hold this
   role: 'viewer',        // 'admin' | 'viewer' — confirmed by server on join response
@@ -1369,15 +1366,7 @@ function wsSetIndicator(state, text) {
   el.textContent = text;
 }
 
-// ── Mint an admin token from the server ───────────────
-async function mintAdminToken(tournamentId) {
-  if (!WS.minterUrl) throw new Error('No minter URL configured');
-  const resp = await fetch(WS.minterUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tournamentId }),
-  });
-  if (!resp.ok) throw new Error(`Token minter error: ${resp.status}`);
+// ── Token minting removed (no longer needed) ───────────────
   const data = await resp.json();
   if (!data.token) throw new Error('No token in response');
   return data.token;
@@ -1593,40 +1582,24 @@ function showToast(text, duration = 2500) {
 // ─── SESSION CREATE / JOIN ─────────────────────────────
 function createSession() {
   const savedWs = localStorage.getItem('pb_ws_url');
-  const savedMinter = localStorage.getItem('pb_minter_url');
   if (savedWs) document.getElementById('wsUrlInput').value = savedWs;
-  if (savedMinter) document.getElementById('minterUrlInput').value = savedMinter;
   openModal('wsConfigModal');
 }
 
 async function saveWsConfig() {
   const wsUrl = document.getElementById('wsUrlInput')?.value.trim();
-  const minterUrl = document.getElementById('minterUrlInput')?.value.trim();
 
   if (!wsUrl || !wsUrl.startsWith('wss://')) {
     alert('Enter a valid WebSocket URL starting with wss://'); return;
   }
-  if (!minterUrl || !minterUrl.startsWith('https://')) {
-    alert('Enter a valid Token Minter URL starting with https://'); return;
-  }
 
   localStorage.setItem('pb_ws_url', wsUrl);
-  localStorage.setItem('pb_minter_url', minterUrl);
 
   // Generate tournament ID
   const tid = 'pb_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
-  // Mint admin token from server before connecting
-  wsSetIndicator('syncing', '⟳ Minting token…');
-  WS.minterUrl = minterUrl;
-  let adminToken;
-  try {
-    adminToken = await mintAdminToken(tid);
-  } catch(e) {
-    wsSetIndicator('error', '✕ Token error');
-    alert('Could not reach token minter:\n' + e.message);
-    return;
-  }
+  // No token minting — admin role without authentication
+  let adminToken = null;
 
   WS.tournamentId = tid;
   WS.adminToken = adminToken;
@@ -1641,7 +1614,6 @@ async function saveWsConfig() {
   const url = new URL(window.location.href);
   url.searchParams.set('t', tid);
   url.searchParams.set('ws', encodeURIComponent(wsUrl));
-  url.searchParams.set('m', encodeURIComponent(minterUrl));
   window.history.replaceState({}, '', url.toString());
 
   wsConnect(wsUrl, tid, 'admin', adminToken);
@@ -1650,13 +1622,11 @@ async function saveWsConfig() {
 function openShareModal() {
   const base = window.location.href.split('?')[0];
   const wsEnc = encodeURIComponent(WS.url || '');
-  const mEnc = encodeURIComponent(WS.minterUrl || '');
   const tid = WS.tournamentId || '';
 
-  // Admin link includes role=admin — they still need to prove it with a token
-  // (token is fetched fresh from the minter when they load, NOT embedded in the URL)
-  const adminUrl = `${base}?t=${tid}&ws=${wsEnc}&m=${mEnc}&role=admin`;
-  // Viewer link — no token minter needed, server will confirm viewer role
+  // Admin link for sharing
+  const adminUrl = `${base}?t=${tid}&ws=${wsEnc}&role=admin`;
+  // Viewer link — viewer-only role
   const viewerUrl = `${base}?t=${tid}&ws=${wsEnc}&role=viewer`;
 
   document.getElementById('shareAdminUrl').value = adminUrl;
@@ -1679,7 +1649,6 @@ async function checkUrlParams() {
   const params = new URLSearchParams(window.location.search);
   const tid = params.get('t');
   const wsRaw = params.get('ws');
-  const mRaw = params.get('m');
   const role = params.get('role') || 'viewer';
 
   if (!tid || !wsRaw) return;
@@ -1687,31 +1656,11 @@ async function checkUrlParams() {
   const wsUrl = decodeURIComponent(wsRaw);
   WS.tournamentId = tid;
   WS.role = role;
-  WS.minterUrl = mRaw ? decodeURIComponent(mRaw) : null;
 
   document.getElementById('createSessionBtn').style.display = 'none';
   document.getElementById('shareBtn').style.display = 'inline-flex';
 
   let adminToken = null;
-
-  if (role === 'admin') {
-    // Check sessionStorage first (same-tab reload)
-    const cached = sessionStorage.getItem('pb_admin_token_' + tid);
-    if (cached) {
-      adminToken = cached;
-    } else if (WS.minterUrl) {
-      // Admin joining from shared admin link — mint a fresh token
-      wsSetIndicator('syncing', '⟳ Authenticating…');
-      try {
-        adminToken = await mintAdminToken(tid);
-        sessionStorage.setItem('pb_admin_token_' + tid, adminToken);
-      } catch(e) {
-        console.warn('Could not mint admin token, joining as viewer:', e);
-        WS.role = 'viewer';
-      }
-    }
-    WS.adminToken = adminToken;
-  }
 
   if (role === 'viewer') WS._openSpectatorOnLoad = true;
 
