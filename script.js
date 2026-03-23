@@ -1051,8 +1051,10 @@ function wsConnect(wsUrl, tournamentId, role) {
     clearTimeout(WS.reconnectTimer);
     wsSetIndicator('connected', '● Live');
     const joinMsg = { action: 'join', tournamentId, role: WS.role };
+    console.log('[WS] onopen — sending join', joinMsg);
     WS.socket.send(JSON.stringify(joinMsg));
     if (WS._pendingBroadcast) {
+      console.log('[WS] onopen — retrying pending broadcast');
       WS._pendingBroadcast = false;
       setTimeout(wsBroadcast, 200);
     }
@@ -1061,35 +1063,38 @@ function wsConnect(wsUrl, tournamentId, role) {
   WS.socket.onmessage = (evt) => {
     try {
       const msg = JSON.parse(evt.data);
+      console.log('[WS] onmessage', msg.action, msg.role || '', msg.code || '');
       if (msg.action === 'init') {
         if (msg.role) WS.role = msg.role;
         if (!WS._initialJoinComplete) {
-          // First join: apply server state, then mark complete
+          console.log('[WS] init — first join, applying remote state, role=' + WS.role);
           wsApplyRemoteState(msg.state);
           WS._initialJoinComplete = true;
         } else if (WS.role === 'admin') {
-          // Reconnect: admin is source of truth — push local state instead of applying stale server state
+          console.log('[WS] init — reconnect as admin, re-broadcasting local state');
           setTimeout(wsBroadcast, 200);
         } else {
+          console.log('[WS] init — reconnect as viewer, applying remote state');
           wsApplyRemoteState(msg.state);
         }
       } else if (msg.action === 'update') {
-        // Admin is the source of truth — skip echo of own broadcasts to avoid suppressBroadcast race
         if (WS.role !== 'admin') wsApplyRemoteState(msg.state);
+        else console.log('[WS] update — admin skipping echo');
       } else if (msg.action === 'empty') {
         if (msg.role) WS.role = msg.role;
         if (WS.role === 'admin') wsBroadcast();
       } else if (msg.action === 'error') {
-        console.warn('Server error:', msg.code, msg.message);
+        console.warn('[WS] server error:', msg.code, msg.message);
         if (msg.code === 'CONN_LIMIT') showToast('⚠️ Tournament is full (max connections reached)', 5000);
       } else if (msg.action === 'presence') {
         updatePresence(msg.count);
       }
-    } catch(e) { console.warn('WS parse error', e); }
+    } catch(e) { console.warn('[WS] parse error', e); }
   };
 
-  WS.socket.onclose = () => {
+  WS.socket.onclose = (evt) => {
     WS.connected = false;
+    console.log('[WS] onclose — code=' + evt.code + ' clean=' + evt.wasClean);
     wsSetIndicator('error', '✕ Disconnected');
     WS.reconnectTimer = setTimeout(() => {
       if (WS.url) wsConnect(WS.url, WS.tournamentId, WS.role);
@@ -1097,14 +1102,21 @@ function wsConnect(wsUrl, tournamentId, role) {
     WS.reconnectDelay = Math.min(WS.reconnectDelay * 2, 30000);
   };
 
-  WS.socket.onerror = () => wsSetIndicator('error', '✕ Error');
+  WS.socket.onerror = (e) => {
+    console.warn('[WS] onerror', e);
+    wsSetIndicator('error', '✕ Error');
+  };
 }
 
 // ── Broadcast state to server (admin only, debounced) ─
 function wsBroadcast() {
-  if (WS.role !== 'admin') return;
+  if (WS.role !== 'admin') {
+    console.log('[wsBroadcast] skipped — not admin (role=' + WS.role + ')');
+    return;
+  }
   if (!WS.connected || !WS.socket || WS.socket.readyState !== 1) {
     WS._pendingBroadcast = true;
+    console.log('[wsBroadcast] queued — socket not ready (connected=' + WS.connected + ' readyState=' + WS.socket?.readyState + ')');
     return;
   }
 
@@ -1112,6 +1124,7 @@ function wsBroadcast() {
   WS._broadcastDebounce = setTimeout(() => {
     if (!WS.socket || WS.socket.readyState !== 1) {
       WS._pendingBroadcast = true;
+      console.log('[wsBroadcast] queued after debounce — socket closed');
       return;
     }
     wsSetIndicator('syncing', '⟳ Syncing…');
@@ -1121,12 +1134,14 @@ function wsBroadcast() {
       role: WS.role,
       state: getSerializableState(),
     });
+    console.log('[wsBroadcast] sending', Math.round(payload.length / 1024) + 'KB');
     try {
       WS.socket.send(payload);
       WS._pendingBroadcast = false;
       setTimeout(() => { if (WS.connected) wsSetIndicator('connected', '● Live'); }, 600);
     } catch(e) {
       WS._pendingBroadcast = true;
+      console.warn('[wsBroadcast] send failed', e);
       wsSetIndicator('error', '✕ Send failed');
     }
   }, 300);
