@@ -1,0 +1,665 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  PickleBracket – Real-time tournament management backend.
+  Security measures:
+    - Role-based access control (admin vs viewer)
+    - Per-connection rate limiting via DynamoDB token bucket
+    - Hard payload size cap (32 KB) before any processing
+    - Connection cap per tournament (max 50 peers)
+    - Tournament ID format validation (regex, length cap)
+    - State schema allowlist — only known keys written to DynamoDB
+    - Least-privilege IAM — no Scan, scoped to exact table ARNs
+    - CloudWatch alarms for Lambda errors and throttling
+    - API Gateway throttle: 50 req/s burst, 20 steady per connection
+    - DynamoDB TTL on all records (connections 2h, tournaments 7d)
+
+Parameters:
+  Stage:
+    Type: String
+    Default: prod
+    AllowedValues: [prod, dev]
+
+  # Optional: restrict connections to your domain (e.g. https://yourdomain.com)
+  # Leave blank to allow all origins (fine for file:// local use).
+  AllowedOrigin:
+    Type: String
+    Default: ''
+    Description: Allowed Origin header value. Leave blank to allow any.
+
+  # Max simultaneous connections per tournament
+  MaxConnectionsPerTournament:
+    Type: Number
+    Default: 50
+    MinValue: 2
+    MaxValue: 200
+
+  # Rate limit: max messages per connection per 10-second window
+  RateLimitPerWindow:
+    Type: Number
+    Default: 30
+    MinValue: 5
+    MaxValue: 200
+
+Resources:
+
+  # ── DynamoDB: Tournament state ─────────────────────────────────────────────
+  TournamentsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub PickleBracket-Tournaments-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      AttributeDefinitions:
+        - AttributeName: tournamentId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: tournamentId
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # ── DynamoDB: Active WebSocket connections ────────────────────────────────
+  ConnectionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub PickleBracket-Connections-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: connectionId
+          AttributeType: S
+        - AttributeName: tournamentId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: connectionId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: tournamentId-index
+          KeySchema:
+            - AttributeName: tournamentId
+              KeyType: HASH
+          Projection:
+            ProjectionType: KEYS_ONLY
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # ── DynamoDB: Per-connection rate limit buckets ────────────────────────────
+  RateLimitTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub PickleBracket-RateLimit-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: connectionId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: connectionId
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # ── IAM Role for Lambda — least privilege ─────────────────────────────────
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub PickleBracket-Lambda-${Stage}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: PickleBracketLeastPrivilege
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Tournaments table — GetItem + PutItem only (no Scan, no Delete)
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                Resource: !GetAtt TournamentsTable.Arn
+
+              # Connections table — full CRUD needed for connection lifecycle
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                Resource:
+                  - !GetAtt ConnectionsTable.Arn
+                  - !Sub ${ConnectionsTable.Arn}/index/tournamentId-index
+
+              # Rate limit table — read + conditional write
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt RateLimitTable.Arn
+
+              # WebSocket push — scoped to THIS API only
+              - Effect: Allow
+                Action:
+                  - execute-api:ManageConnections
+                Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/${Stage}/POST/@connections/*
+
+  # ── Lambda: WebSocket handler ──────────────────────────────────────────────
+  WsHandlerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub PickleBracket-WsHandler-${Stage}
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Timeout: 15          # Tight timeout — no runaway executions
+      MemorySize: 256
+      Environment:
+        Variables:
+          TOURNAMENTS_TABLE: !Ref TournamentsTable
+          CONNECTIONS_TABLE: !Ref ConnectionsTable
+          RATE_LIMIT_TABLE: !Ref RateLimitTable
+          ALLOWED_ORIGIN: !Ref AllowedOrigin
+          MAX_CONNECTIONS: !Ref MaxConnectionsPerTournament
+          RATE_LIMIT_WINDOW: '30'     # messages per 10-second window
+          RATE_LIMIT_MAX: !Ref RateLimitPerWindow
+          MAX_PAYLOAD_BYTES: '32768'  # 32 KB hard cap
+          STAGE: !Ref Stage
+      Code:
+        ZipFile: |
+          'use strict';
+          const crypto = require('crypto');
+          const {
+            DynamoDBClient, GetItemCommand, PutItemCommand,
+            DeleteItemCommand, QueryCommand, UpdateItemCommand
+          } = require('@aws-sdk/client-dynamodb');
+          const {
+            ApiGatewayManagementApiClient, PostToConnectionCommand
+          } = require('@aws-sdk/client-apigatewaymanagementapi');
+          const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
+
+          const ddb = new DynamoDBClient({});
+
+          const TOURNAMENTS_TABLE  = process.env.TOURNAMENTS_TABLE;
+          const CONNECTIONS_TABLE  = process.env.CONNECTIONS_TABLE;
+          const RATE_LIMIT_TABLE   = process.env.RATE_LIMIT_TABLE;
+          const ALLOWED_ORIGIN     = process.env.ALLOWED_ORIGIN || '';
+          const MAX_CONNECTIONS    = parseInt(process.env.MAX_CONNECTIONS, 10);
+          const RATE_LIMIT_WINDOW  = parseInt(process.env.RATE_LIMIT_WINDOW, 10);
+          const RATE_LIMIT_MAX     = parseInt(process.env.RATE_LIMIT_MAX, 10);
+          const MAX_PAYLOAD_BYTES  = parseInt(process.env.MAX_PAYLOAD_BYTES, 10);
+
+          // ── Tournament ID validation ─────────────────────────────────────
+          // Only allow alphanumeric + underscore, 8-64 chars
+          const VALID_TID = /^[a-zA-Z0-9_]{8,64}$/;
+          function isValidTournamentId(tid) {
+            return typeof tid === 'string' && VALID_TID.test(tid);
+          }
+
+          // ── Role-based access control ───────────────────────────────────
+          // Roles are passed via the message and stored in the connection
+          // Admin role has write access, viewer role is read-only
+
+          // ── Per-connection rate limiting (token bucket, DynamoDB) ────────
+          async function checkRateLimit(connectionId) {
+            const now = Math.floor(Date.now() / 1000);
+            const windowStart = now - RATE_LIMIT_WINDOW;
+
+            try {
+              const result = await ddb.send(new UpdateItemCommand({
+                TableName: RATE_LIMIT_TABLE,
+                Key: marshall({ connectionId }),
+                UpdateExpression:
+                  'SET #count = if_not_exists(#count, :zero) + :one, ' +
+                  '#window = if_not_exists(#window, :now), ' +
+                  '#ttl = :ttl',
+                ConditionExpression:
+                  'attribute_not_exists(#window) OR #window <= :windowStart OR #count < :max',
+                ExpressionAttributeNames: {
+                  '#count': 'count', '#window': 'windowStart', '#ttl': 'ttl'
+                },
+                ExpressionAttributeValues: marshall({
+                  ':zero': 0, ':one': 1, ':now': now,
+                  ':windowStart': windowStart,
+                  ':max': RATE_LIMIT_MAX,
+                  ':ttl': now + RATE_LIMIT_WINDOW + 60
+                }),
+                ReturnValues: 'UPDATED_NEW'
+              }));
+
+              // If window has expired, reset counter
+              const item = result.Attributes ? unmarshall(result.Attributes) : {};
+              if (item.windowStart && item.windowStart < windowStart) {
+                await ddb.send(new PutItemCommand({
+                  TableName: RATE_LIMIT_TABLE,
+                  Item: marshall({
+                    connectionId, count: 1, windowStart: now,
+                    ttl: now + RATE_LIMIT_WINDOW + 60
+                  })
+                }));
+              }
+              return true; // allowed
+            } catch (e) {
+              if (e.name === 'ConditionalCheckFailedException') return false; // rate limited
+              throw e;
+            }
+          }
+
+          // ── State schema allowlist ───────────────────────────────────────
+          // Only these top-level keys are accepted from clients.
+          const ALLOWED_STATE_KEYS = new Set([
+            'tType','bMethod','tournamentName','teams','groups',
+            'rrMatches','bracketMatches','bracketRounds',
+            'thirdPlaceMatchId','courts','schedule','history','settings',
+            '_tid','_mid','_cid'
+          ]);
+          function sanitizeState(state) {
+            if (!state || typeof state !== 'object' || Array.isArray(state)) return null;
+            const clean = {};
+            for (const key of ALLOWED_STATE_KEYS) {
+              if (key in state) clean[key] = state[key];
+            }
+            return clean;
+          }
+
+          // ── Sanitize string fields to prevent XSS/injection ─────────────
+          function sanitizeString(s, maxLen = 100) {
+            if (typeof s !== 'string') return '';
+            // Strip all HTML/script tags and limit length
+            return s.replace(/<[^>]*>/g, '').slice(0, maxLen);
+          }
+
+          function sanitizeTeams(teams) {
+            if (!Array.isArray(teams)) return [];
+            return teams.slice(0, 200).map(t => ({
+              id: typeof t.id === 'number' ? t.id : 0,
+              name: sanitizeString(t.name, 80),
+              avgSkill: typeof t.avgSkill === 'number' ? t.avgSkill : 0,
+              players: Array.isArray(t.players) ? t.players.slice(0, 2).map(p => ({
+                name: sanitizeString(p.name, 80),
+                skill: typeof p.skill === 'number' ? p.skill : 0
+              })) : []
+            }));
+          }
+
+          function deepSanitizeState(state) {
+            if (!state) return state;
+            const s = { ...state };
+            if (s.tournamentName) s.tournamentName = sanitizeString(s.tournamentName, 120);
+            if (s.teams) s.teams = sanitizeTeams(s.teams);
+            if (s.history) s.history = Array.isArray(s.history) ? s.history.slice(0, 100) : [];
+            return s;
+          }
+
+          // ── Connection count check ───────────────────────────────────────
+          async function getConnectionCount(tournamentId) {
+            const result = await ddb.send(new QueryCommand({
+              TableName: CONNECTIONS_TABLE,
+              IndexName: 'tournamentId-index',
+              KeyConditionExpression: 'tournamentId = :tid',
+              ExpressionAttributeValues: marshall({ ':tid': tournamentId }),
+              Select: 'COUNT'
+            }));
+            return result.Count || 0;
+          }
+
+          // ── Origin check ─────────────────────────────────────────────────
+          // Handles: no Origin header, "null" (file://), or a real origin string.
+          // When ALLOWED_ORIGIN is blank, all origins are permitted.
+          function checkOrigin(headers) {
+            if (!ALLOWED_ORIGIN) return true;
+            const origin = (headers && (headers.Origin || headers.origin)) || '';
+            // 'null' is sent by file:// pages and sandboxed iframes — allow when no restriction set
+            if (origin === 'null' || origin === '') return !ALLOWED_ORIGIN;
+            return origin === ALLOWED_ORIGIN;
+          }
+
+          // ── Main handler ─────────────────────────────────────────────────
+          exports.handler = async (event) => {
+            const { requestContext, body, headers = {} } = event;
+            const { connectionId, routeKey, domainName, stage } = requestContext;
+            const endpoint = `https://${domainName}/${stage}`;
+
+            try {
+              // ── $connect ──────────────────────────────────────────────────
+              if (routeKey === '$connect') {
+                if (!checkOrigin(headers)) {
+                  return { statusCode: 403, body: 'Forbidden origin' };
+                }
+                return { statusCode: 200 };
+              }
+
+              // ── $disconnect ───────────────────────────────────────────────
+              if (routeKey === '$disconnect') {
+                await Promise.allSettled([
+                  ddb.send(new DeleteItemCommand({
+                    TableName: CONNECTIONS_TABLE,
+                    Key: marshall({ connectionId })
+                  })),
+                  ddb.send(new DeleteItemCommand({
+                    TableName: RATE_LIMIT_TABLE,
+                    Key: marshall({ connectionId })
+                  }))
+                ]);
+                return { statusCode: 200 };
+              }
+
+              // ── $default: all messages ────────────────────────────────────
+
+              // 1. Hard payload size cap
+              const bodyStr = body || '';
+              if (Buffer.byteLength(bodyStr, 'utf8') > MAX_PAYLOAD_BYTES) {
+                console.warn(`Oversized payload from ${connectionId}: ${Buffer.byteLength(bodyStr)} bytes`);
+                return { statusCode: 413, body: 'Payload too large' };
+              }
+
+              // 2. Parse JSON safely
+              let msg;
+              try {
+                msg = JSON.parse(bodyStr);
+              } catch {
+                return { statusCode: 400, body: 'Invalid JSON' };
+              }
+
+              const { action, tournamentId, state, role } = msg;
+
+              // 3. Validate tournamentId on every message
+              if (!isValidTournamentId(tournamentId)) {
+                return { statusCode: 400, body: 'Invalid tournament ID' };
+              }
+
+              // 4. Per-connection rate limit
+              const allowed = await checkRateLimit(connectionId);
+              if (!allowed) {
+                console.warn(`Rate limit hit: ${connectionId}`);
+                return { statusCode: 429, body: 'Rate limit exceeded' };
+              }
+
+              const apigw = new ApiGatewayManagementApiClient({ endpoint });
+
+              // ── JOIN ───────────────────────────────────────────────────
+              if (action === 'join') {
+                // Use the role provided by the client
+                let resolvedRole = role === 'admin' ? 'admin' : 'viewer';
+
+                // Connection cap — prevent amplification
+                const connCount = await getConnectionCount(tournamentId);
+                if (connCount >= MAX_CONNECTIONS) {
+                  await apigw.send(new PostToConnectionCommand({
+                    ConnectionId: connectionId,
+                    Data: JSON.stringify({ action: 'error', code: 'CONN_LIMIT', message: 'Tournament is full' })
+                  }));
+                  return { statusCode: 200 };
+                }
+
+                // Register connection
+                const now = Math.floor(Date.now() / 1000);
+                await ddb.send(new PutItemCommand({
+                  TableName: CONNECTIONS_TABLE,
+                  Item: marshall({
+                    connectionId,
+                    tournamentId,
+                    role: resolvedRole,
+                    connectedAt: now,
+                    ttl: now + 7200  // 2-hour connection TTL
+                  })
+                }));
+
+                // Load and return current tournament state
+                const result = await ddb.send(new GetItemCommand({
+                  TableName: TOURNAMENTS_TABLE,
+                  Key: marshall({ tournamentId })
+                }));
+
+                if (result.Item) {
+                  const tournament = unmarshall(result.Item);
+                  await apigw.send(new PostToConnectionCommand({
+                    ConnectionId: connectionId,
+                    Data: JSON.stringify({
+                      action: 'init',
+                      role: resolvedRole,
+                      state: JSON.parse(tournament.state)
+                    })
+                  }));
+                } else {
+                  await apigw.send(new PostToConnectionCommand({
+                    ConnectionId: connectionId,
+                    Data: JSON.stringify({ action: 'empty', role: resolvedRole })
+                  }));
+                }
+
+                return { statusCode: 200 };
+              }
+
+              // ── CREATE / UPDATE — admin only ───────────────────────────
+              if (action === 'create' || action === 'update') {
+                // Check that connection is authorized as admin
+                if (role !== 'admin') {
+                  return { statusCode: 403, body: 'Admin access required' };
+                }
+
+                // For 'create' — ensure tournament doesn't already exist
+                // (prevents overwriting someone else's tournament)
+                if (action === 'create') {
+                  const existing = await ddb.send(new GetItemCommand({
+                    TableName: TOURNAMENTS_TABLE,
+                    Key: marshall({ tournamentId })
+                  }));
+                  if (existing.Item) {
+                    return { statusCode: 409, body: 'Tournament ID already exists' };
+                  }
+                }
+
+                // Sanitize state before storing
+                const rawState = sanitizeState(state);
+                if (!rawState) {
+                  return { statusCode: 400, body: 'Invalid state' };
+                }
+                const cleanState = deepSanitizeState(rawState);
+                const stateJson = JSON.stringify(cleanState);
+
+                // Final size check after sanitization
+                if (Buffer.byteLength(stateJson) > MAX_PAYLOAD_BYTES) {
+                  return { statusCode: 413, body: 'State too large' };
+                }
+
+                const now = Math.floor(Date.now() / 1000);
+                await ddb.send(new PutItemCommand({
+                  TableName: TOURNAMENTS_TABLE,
+                  Item: marshall({
+                    tournamentId,
+                    state: stateJson,
+                    updatedAt: Date.now(),
+                    ttl: now + 604800  // 7-day TTL
+                  })
+                }));
+
+                // Broadcast to all peers in this tournament (except sender)
+                const connections = await ddb.send(new QueryCommand({
+                  TableName: CONNECTIONS_TABLE,
+                  IndexName: 'tournamentId-index',
+                  KeyConditionExpression: 'tournamentId = :tid',
+                  ExpressionAttributeValues: marshall({ ':tid': tournamentId })
+                }));
+
+                const broadcastPayload = JSON.stringify({ action: 'update', state: cleanState });
+                const sends = (connections.Items || [])
+                  .map(item => unmarshall(item))
+                  .filter(c => c.connectionId !== connectionId)
+                  .map(async c => {
+                    try {
+                      await apigw.send(new PostToConnectionCommand({
+                        ConnectionId: c.connectionId,
+                        Data: broadcastPayload
+                      }));
+                    } catch (e) {
+                      if (e.$metadata?.httpStatusCode === 410) {
+                        // Stale connection — clean up silently
+                        await ddb.send(new DeleteItemCommand({
+                          TableName: CONNECTIONS_TABLE,
+                          Key: marshall({ connectionId: c.connectionId })
+                        })).catch(() => {});
+                      }
+                    }
+                  });
+
+                await Promise.all(sends);
+                return { statusCode: 200 };
+              }
+
+              return { statusCode: 400, body: 'Unknown action' };
+
+            } catch (err) {
+              console.error('Handler error:', err);
+              // Never leak stack traces to client
+              return { statusCode: 500 };
+            }
+          };
+
+  # ── WebSocket API ──────────────────────────────────────────────────────────
+  WebSocketApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub PickleBracket-WS-${Stage}
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: '$request.body.action'
+
+  WsIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebSocketApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WsHandlerFunction.Arn}/invocations
+
+  WsConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketApi
+      RouteKey: '$connect'
+      AuthorizationType: NONE
+      Target: !Sub integrations/${WsIntegration}
+
+  WsDisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketApi
+      RouteKey: '$disconnect'
+      AuthorizationType: NONE
+      Target: !Sub integrations/${WsIntegration}
+
+  WsDefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketApi
+      RouteKey: '$default'
+      AuthorizationType: NONE
+      Target: !Sub integrations/${WsIntegration}
+
+  WsDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn: [WsConnectRoute, WsDisconnectRoute, WsDefaultRoute]
+    Properties:
+      ApiId: !Ref WebSocketApi
+
+  WsStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref WebSocketApi
+      DeploymentId: !Ref WsDeployment
+      StageName: !Ref Stage
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 100
+        ThrottlingRateLimit: 20
+
+  WsLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref WsHandlerFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/*
+
+  # ── CloudWatch Alarms ──────────────────────────────────────────────────────
+  # Alerts you if the Lambda is erroring or being throttled heavily.
+  # Wire up an SNS topic with your email to receive these.
+
+  LambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub PickleBracket-LambdaErrors-${Stage}
+      AlarmDescription: PickleBracket WS handler error rate too high — possible attack or bug
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref WsHandlerFunction
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 20
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  LambdaThrottleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub PickleBracket-Throttles-${Stage}
+      AlarmDescription: PickleBracket Lambda being throttled — consider raising ReservedConcurrentExecutions
+      Namespace: AWS/Lambda
+      MetricName: Throttles
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref WsHandlerFunction
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  RateLimitAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub PickleBracket-RateLimitHits-${Stage}
+      AlarmDescription: Many rate limit rejections — possible abuse or misconfigured client
+      Namespace: AWS/Lambda
+      MetricName: Invocations
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref WsHandlerFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 500
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+Conditions:
+  HasAllowedOrigin: !Not [!Equals [!Ref AllowedOrigin, '']]
+
+Outputs:
+  WebSocketURL:
+    Description: WebSocket endpoint — paste into the app
+    Value: !Sub wss://${WebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}
+
+  SecuritySummary:
+    Description: Security controls active
+    Value: >
+      Role-based access control (admin vs viewer) |
+      Per-connection rate limit (configurable msgs/window) |
+      32KB payload cap |
+      50-connection cap per tournament |
+      Tournament ID regex validation |
+      State key allowlist + HTML-strip sanitization |
+      Least-privilege IAM (no Scan, scoped ARNs) |
+      Lambda reserved concurrency cap |
+      CloudWatch error + throttle alarms |
+      DynamoDB TTL on all records

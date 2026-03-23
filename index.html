@@ -707,7 +707,7 @@ function loadSampleTeams(){
     const avg=skills.reduce((a,b)=>a+b,0)/skills.length;
     S.teams.push({id:_tid++,name:tn,players:[{name:p1,skill:s1},{name:p2,skill:s2}],avgSkill:avg});
   });
-  renderTeams();renderPlayersPage();
+  renderTeams();renderPlayersPage();wsBroadcast();
 }
 
 function renderPlayersPage(){
@@ -1398,7 +1398,7 @@ function openSpectator(){
   const panel=(title,body,accentColor='var(--text3)')=>`
     <div style="background:var(--surface);padding:16px;overflow:hidden;display:flex;flex-direction:column">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:${accentColor};margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);flex-shrink:0">${title}</div>
-      <div style="overflow:hidden;flex:1;min-height:0">${body}</div>
+      <div style="overflow-y:auto;overflow-x:hidden;flex:1;min-height:0">${body}</div>
     </div>`;
 
   // Panel 1: Standings
@@ -1604,7 +1604,8 @@ function wsConnect(wsUrl, tournamentId, role) {
         if (msg.role) WS.role = msg.role;
         wsApplyRemoteState(msg.state);
       } else if (msg.action === 'update') {
-        wsApplyRemoteState(msg.state);
+        // Admin is the source of truth — skip echo of own broadcasts to avoid suppressBroadcast race
+        if (WS.role !== 'admin') wsApplyRemoteState(msg.state);
       } else if (msg.action === 'empty') {
         if (msg.role) WS.role = msg.role;
         // New tournament — push our current state (only if admin)
