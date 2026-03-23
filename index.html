@@ -1454,7 +1454,7 @@ function getSerializableState() {
     teams: S.teams,
     groups: S.groups.map(g => ({ id: g.id, name: g.name, teamIds: g.teams.map(t => t.id) })),
     rrMatches: serializeMatches(S.rrMatches),
-    bracketMatches: S.bracketMatches,
+    bracketMatches: serializeMatches({'_': S.bracketMatches})['_'],
     bracketRounds: S.bracketRounds.map(r => ({ title: r.title, matchIds: r.matches.map(m => m.id) })),
     thirdPlaceMatchId: S.thirdPlaceMatch?.id || null,
     courts: S.courts,
@@ -1546,6 +1546,43 @@ function wsApplyRemoteState(remoteState) {
 
   syncSettingsUI();
   setTimeout(() => { WS.suppressBroadcast = false; }, 100);
+  
+  // Restrict UI for viewers
+  if (WS.role === 'viewer') restrictViewerUI();
+}
+
+// ─── Restrict UI for viewer-only mode ───────────────
+function restrictViewerUI() {
+  if (WS.role !== 'viewer') return;
+  
+  // Hide the settings panel
+  const settingsPanel = document.getElementById('settingsPanel');
+  if (settingsPanel) settingsPanel.style.display = 'none';
+  
+  // Hide editing buttons from nav
+  document.querySelectorAll('.nav-buttons button').forEach(btn => {
+    const text = btn.textContent;
+    // Keep only: Live View (📺), CSV export, Print, Go Live
+    // Hide: Share, Settings
+    if (text.includes('🔗') || text.includes('⚙')) {
+      btn.style.display = 'none';
+    }
+  });
+  
+  // Hide tab navigation for editing pages
+  document.querySelectorAll('.tab-nav button').forEach(btn => {
+    const text = btn.textContent;
+    if (text.includes('Settings') || text.includes('Teams') || text.includes('Groups') || 
+        text.includes('RR') || text.includes('Round') || text.includes('Brackets') || 
+        text.includes('Schedule') || text.includes('Courts')) {
+      btn.style.display = 'none';
+    }
+  });
+  
+  // Auto-open live view after a brief delay
+  setTimeout(() => openSpectator(), 500);
+}
+}
   showToast('🔄 Tournament updated');
 }
 
