@@ -6,7 +6,8 @@
 <title>PickleBracket — Tournament Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d0f0a;--surface:#141710;--surface2:#1c2016;--surface3:#242a1c;--border:#2e3826;--border2:#3d4f2a;--accent:#a8d44a;--accent2:#c8f060;--accent-dim:rgba(168,212,74,.12);--accent-dim2:rgba(168,212,74,.25);--text:#e8f0d8;--text2:#9aab80;--text3:#5a6b44;--red:#e05555;--red-dim:rgba(224,85,85,.15);--gold:#e8c84a;--gold-dim:rgba(232,200,74,.15);--blue:#4ab8e8;--blue-dim:rgba(74,184,232,.12);--purple:#b48ae8;--purple-dim:rgba(180,138,232,.12);--r:6px;--r2:10px}
+:root{--bg:#f4f6ef;--surface:#ffffff;--surface2:#edf1e6;--surface3:#e3e9d6;--border:#c8d6a8;--border2:#a0bb6a;--accent:#4a7a08;--accent2:#3d6606;--accent-dim:rgba(74,122,8,.12);--accent-dim2:rgba(74,122,8,.22);--text:#161c0c;--text2:#3a4d22;--text3:#6a7d4c;--red:#b82222;--red-dim:rgba(184,34,34,.12);--gold:#7a6000;--gold-dim:rgba(122,96,0,.13);--blue:#1a6898;--blue-dim:rgba(26,104,152,.12);--purple:#6b3db0;--purple-dim:rgba(107,61,176,.12);--r:6px;--r2:10px;--btn-text:#fff;--shadow:rgba(0,0,0,.08)}
+[data-theme="dark"]{--bg:#0d0f0a;--surface:#141710;--surface2:#1c2016;--surface3:#242a1c;--border:#2e3826;--border2:#3d4f2a;--accent:#a8d44a;--accent2:#c8f060;--accent-dim:rgba(168,212,74,.12);--accent-dim2:rgba(168,212,74,.25);--text:#e8f0d8;--text2:#9aab80;--text3:#5a6b44;--red:#e05555;--red-dim:rgba(224,85,85,.15);--gold:#e8c84a;--gold-dim:rgba(232,200,74,.15);--blue:#4ab8e8;--blue-dim:rgba(74,184,232,.12);--purple:#b48ae8;--purple-dim:rgba(180,138,232,.12);--btn-text:#0d0f0a;--shadow:rgba(0,0,0,.3)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 header{display:flex;align-items:center;justify-content:space-between;padding:13px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap}
@@ -22,7 +23,7 @@ main{padding:22px 24px;max-width:1280px;margin:0 auto}
 .page{display:none}.page.active{display:block}
 .section-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--text);margin-bottom:3px}
 .section-sub{font-size:13px;color:var(--text3);margin-bottom:18px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:12px;box-shadow:0 1px 4px var(--shadow)}
 .card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
@@ -35,7 +36,7 @@ select option{background:var(--surface2)}
 .form-row-inline{display:flex;gap:9px;align-items:flex-end}
 .form-row-inline>*{flex:1}
 .btn{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:8px 16px;border-radius:var(--r);border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
-.btn-primary{background:var(--accent);color:#0d0f0a}
+.btn-primary{background:var(--accent);color:var(--btn-text)}
 .btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
 .btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
 .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
@@ -48,7 +49,7 @@ select option{background:var(--surface2)}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 .toggle-group{display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:3px}
 .toggle-group button{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:5px 12px;border-radius:5px;border:none;cursor:pointer;background:transparent;color:var(--text3);transition:all .15s}
-.toggle-group button.active{background:var(--accent);color:#0d0f0a}
+.toggle-group button.active{background:var(--accent);color:var(--btn-text)}
 .skill-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:2px 6px;border-radius:4px;margin-left:5px}
 .skill-1,.skill-2{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(74,184,232,.25)}
 .skill-3{background:var(--accent-dim);color:var(--accent);border:1px solid var(--border2)}
@@ -99,16 +100,26 @@ select option{background:var(--surface2)}
 .rank-1{color:var(--gold)}.rank-2{color:var(--text2)}.rank-3{color:#cd7f32}
 .pts-cell{font-family:'DM Mono',monospace;font-weight:500;color:var(--accent)}
 .bracket-wrapper{overflow-x:auto;padding-bottom:12px}
-.bracket{display:flex;align-items:flex-start;min-width:max-content}
-.bracket-round{display:flex;flex-direction:column;justify-content:space-around}
+.bracket{display:flex;align-items:stretch;min-width:max-content;gap:0}
+.bracket-round{display:flex;flex-direction:column;justify-content:space-around;position:relative}
 .bracket-round-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--text3);text-align:center;padding:0 18px 9px}
-.bracket-match{margin:7px 0}
-.bracket-match-inner{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);width:180px;overflow:hidden}
-.bracket-match-inner.winner-decided{border-color:var(--accent)}
-.bracket-slot{padding:6px 9px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);font-size:12px;font-weight:500}
+.bracket-match{margin:7px 0;position:relative}
+.bracket-match-inner{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);width:190px;overflow:hidden;box-shadow:0 1px 4px var(--shadow);transition:border-color .2s,box-shadow .2s}
+.bracket-match-inner.winner-decided{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim),0 2px 8px var(--shadow)}
+.bracket-slot{padding:7px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;transition:background .15s,color .15s}
 .bracket-slot:last-child{border-bottom:none}
-.bracket-slot.winner-slot{background:var(--accent-dim);color:var(--accent)}
+.bracket-slot.winner-slot{background:var(--accent-dim);color:var(--accent);border-left:3px solid var(--accent)}
 .bracket-slot-score{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.bracket-slot.winner-slot .bracket-slot-score{color:var(--accent)}
+/* Connector arm CSS — right arm on non-final rounds */
+.bracket-connector-col{display:flex;flex-direction:column;width:28px;align-self:stretch;flex-shrink:0}
+.bc-group{display:flex;flex-direction:column;flex:1;position:relative}
+.bc-top-half{flex:1;border-right:2px solid var(--border2);border-bottom:2px solid var(--border2)}
+.bc-bottom-half{flex:1;border-right:2px solid var(--border2);border-top:2px solid var(--border2)}
+.bc-group::after{content:'';position:absolute;right:-1px;top:50%;width:14px;height:2px;background:var(--border2);transform:translateY(-50%)}
+/* Group origin badges in bracket */
+.bracket-group-badge{font-family:'DM Mono',monospace;font-size:9px;padding:1px 4px;border-radius:3px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);margin-left:4px;white-space:nowrap;flex-shrink:0}
+.bracket-slot.winner-slot .bracket-group-badge{background:var(--accent-dim2);color:var(--accent);border-color:var(--border2)}
 .schedule-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .court-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
 .court-header{padding:9px 13px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
@@ -190,6 +201,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
     <div id="presenceCount" style="display:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)"></div>
     <button class="btn btn-sm btn-outline no-print" id="shareBtn" onclick="openShareModal()" style="display:none">🔗 Share</button>
     <button class="btn btn-sm btn-primary no-print" id="createSessionBtn" onclick="createSession()">☁ Go Live</button>
+    <button class="btn btn-sm btn-outline no-print" id="themeToggle" onclick="toggleTheme()" title="Switch theme">🌙 Dark</button>
     <button class="btn btn-sm btn-outline no-print" onclick="exportCSV()" title="Export to CSV">⬇ CSV</button>
     <button class="btn btn-sm btn-outline no-print" onclick="openSpectator()" title="Spectator view">📺 Live View</button>
     <button class="btn btn-sm btn-outline no-print" onclick="window.print()" title="Print">🖨 Print</button>
@@ -516,6 +528,7 @@ const S={
   teams:[], groups:[], rrMatches:{}, bracketMatches:[], bracketRounds:[],
   courts:[], schedule:{},  // matchId -> {courtId, time}
   history:[],
+  bracketSeedGroups:{},   // teamId -> groupIdx (for group origin badges in bracket)
   curRRGroup:0, scoringCtx:null, assignCtx:null,
   settings:{winScore:11,winBy2:true,rrBestOf:1,advanceCount:2,sfBestOf:3,finalsBestOf:5,thirdBestOf:3,numGroups:2,matchDuration:20},
 };
@@ -974,7 +987,14 @@ function clearHistory(){if(!confirm('Clear all history?'))return;S.history=[];re
 // ─── BRACKET ─────────────────────────────────────────
 function generateBracket(){
   let teams=[];
-  S.groups.forEach((g,gi)=>{const st=computeStandings(gi);teams=teams.concat(st.slice(0,S.settings.advanceCount).map(s=>s.team));});
+  S.bracketSeedGroups={};
+  S.groups.forEach((g,gi)=>{
+    const st=computeStandings(gi);
+    st.slice(0,S.settings.advanceCount).forEach(s=>{
+      S.bracketSeedGroups[s.team.id]=gi;
+      teams.push(s.team);
+    });
+  });
   if(teams.length<2){alert('Need at least 2 teams to generate bracket.');return;}
   while(!isPow2(teams.length))teams.push(null);
   S._confettiShown=false;
@@ -1050,29 +1070,49 @@ function renderBracketPage(){
     🏆 <strong>Champion: ${champ.name}</strong>${third?` · 🥉 3rd: ${third.name}`:''}
     ${tournamentDone?`<button class="btn btn-sm btn-primary no-print" style="margin-left:12px" onclick="startConfetti()">🎉 Celebrate!</button>`:''}
   </div>`;
+  // Helper: group origin badge for a team in the bracket
+  function groupBadge(team){
+    if(!team||team.isBye)return '';
+    const gi=S.bracketSeedGroups[team.id];
+    if(gi===undefined)return '';
+    const g=S.groups[gi];
+    return g?`<span class="bracket-group-badge">${g.name}</span>`:'';
+  }
+
   // Visual bracket
   html+=`<div class="bracket-wrapper"><div class="bracket">`;
-  S.bracketRounds.forEach(round=>{
+  S.bracketRounds.forEach((round,ri)=>{
     html+=`<div class="bracket-round"><div class="bracket-round-title">${round.title}</div>`;
     round.matches.forEach(m=>{
       const isDone=m.status==='done';
       const sd=matchScoreDisplay(m,m.bestOf);
       const sA=sd?sd.scoreA.match(/>([\d]+)</)?.[1]||'?':'?';
       const sB=sd?sd.scoreB.match(/>([\d]+)</)?.[1]||'?':'?';
+      const isWinA=isDone&&m.winner?.id===m.teamA?.id;
+      const isWinB=isDone&&m.winner?.id===m.teamB?.id;
       html+=`<div class="bracket-match"><div class="bracket-match-inner ${isDone?'winner-decided':''}">
-        <div class="bracket-slot ${isDone&&m.winner?.id===m.teamA?.id?'winner-slot':''}">${m.teamA?.name||'?'}${m.games.length?` <span class="bracket-slot-score">${sA}</span>`:''}</div>
-        <div class="bracket-slot ${isDone&&m.winner?.id===m.teamB?.id?'winner-slot':''}">${m.teamB?.name||'?'}${m.games.length?` <span class="bracket-slot-score">${sB}</span>`:''}</div>
+        <div class="bracket-slot ${isWinA?'winner-slot':''}">${m.teamA?.isBye?'<span style="color:var(--text3);font-style:italic">BYE</span>':(m.teamA?.name||'<span style="color:var(--text3)">TBD</span>')}${groupBadge(m.teamA)}${m.games.length?` <span class="bracket-slot-score">${sA}</span>`:''}</div>
+        <div class="bracket-slot ${isWinB?'winner-slot':''}">${m.teamB?.isBye?'<span style="color:var(--text3);font-style:italic">BYE</span>':(m.teamB?.name||'<span style="color:var(--text3)">TBD</span>')}${groupBadge(m.teamB)}${m.games.length?` <span class="bracket-slot-score">${sB}</span>`:''}</div>
       </div>${!isDone&&m.teamA&&m.teamB&&!m.teamA.isBye&&!m.teamB.isBye?`<div style="margin-top:4px;text-align:center" class="no-print"><button class="btn btn-outline btn-sm" onclick="openScoreModal('bracket',${m.id})">Score</button></div>`:''}</div>`;
     });
     html+=`</div>`;
+    // Add connector column between rounds (not after the last round)
+    if(ri<S.bracketRounds.length-1){
+      const nextCount=S.bracketRounds[ri+1].matches.length;
+      html+=`<div class="bracket-connector-col">`;
+      for(let ci=0;ci<nextCount;ci++){
+        html+=`<div class="bc-group"><div class="bc-top-half"></div><div class="bc-bottom-half"></div></div>`;
+      }
+      html+=`</div>`;
+    }
   });
-  // 3rd place in bracket vis
+  // 3rd place in bracket vis (separate from main bracket flow)
   if(tp){
-    html+=`<div class="bracket-round"><div class="bracket-round-title" style="color:#cd7f32">🥉 3rd Place</div>
-      <div class="bracket-match" style="margin-top:40px"><div class="bracket-match-inner ${tp.status==='done'?'winner-decided':''}" style="border-color:rgba(205,127,50,.5)">
-        <div class="bracket-slot ${tp.status==='done'&&tp.winner?.id===tp.teamA?.id?'winner-slot':''}">${tp.teamA?.name||'?'}${tp.games.length?` <span class="bracket-slot-score">${matchScoreDisplay(tp,tp.bestOf)?.scoreA?.match(/>([\d]+)</)?.[1]||'?'}</span>`:''}</div>
-        <div class="bracket-slot ${tp.status==='done'&&tp.winner?.id===tp.teamB?.id?'winner-slot':''}">${tp.teamB?.name||'?'}${tp.games.length?` <span class="bracket-slot-score">${matchScoreDisplay(tp,tp.bestOf)?.scoreB?.match(/>([\d]+)</)?.[1]||'?'}</span>`:''}</div>
-      </div>${!tp.status==='done'&&tp.teamA&&tp.teamB?`<div style="margin-top:4px;text-align:center" class="no-print"><button class="btn btn-outline btn-sm" onclick="openScoreModal('bracket',${tp.id})">Score</button></div>`:''}</div>
+    html+=`<div class="bracket-round" style="margin-left:16px;border-left:2px dashed var(--border);padding-left:16px"><div class="bracket-round-title" style="color:var(--gold)">🥉 3rd Place</div>
+      <div class="bracket-match" style="margin-top:20px"><div class="bracket-match-inner ${tp.status==='done'?'winner-decided':''}" style="border-color:rgba(var(--gold),.5)">
+        <div class="bracket-slot ${tp.status==='done'&&tp.winner?.id===tp.teamA?.id?'winner-slot':''}">${tp.teamA?.name||'<span style="color:var(--text3)">TBD</span>'}${groupBadge(tp.teamA)}${tp.games.length?` <span class="bracket-slot-score">${matchScoreDisplay(tp,tp.bestOf)?.scoreA?.match(/>([\d]+)</)?.[1]||'?'}</span>`:''}</div>
+        <div class="bracket-slot ${tp.status==='done'&&tp.winner?.id===tp.teamB?.id?'winner-slot':''}">${tp.teamB?.name||'<span style="color:var(--text3)">TBD</span>'}${groupBadge(tp.teamB)}${tp.games.length?` <span class="bracket-slot-score">${matchScoreDisplay(tp,tp.bestOf)?.scoreB?.match(/>([\d]+)</)?.[1]||'?'}</span>`:''}</div>
+      </div>${tp.teamA&&tp.teamB&&tp.status!=='done'?`<div style="margin-top:4px;text-align:center" class="no-print"><button class="btn btn-outline btn-sm" onclick="openScoreModal('bracket',${tp.id})">Score</button></div>`:''}</div>
     </div>`;
   }
   html+=`</div></div><div style="margin-top:20px">`;
@@ -1228,20 +1268,36 @@ function openSpectator(){
   let p2='';
   if(champ)p2+=`<div style="background:var(--accent-dim);border:1px solid var(--border2);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:13px;font-weight:600;color:var(--accent)">🏆 Champion: ${champ.name}${third?` · 🥉 ${third.name}`:''}</div>`;
   if(S.bracketRounds.length){
-    p2+=`<div style="overflow-x:auto"><div style="display:flex;min-width:max-content">`;
-    S.bracketRounds.forEach(round=>{
+    const specGroupBadge=(team)=>{
+      if(!team||team.isBye)return '';
+      const gi=S.bracketSeedGroups[team.id];
+      if(gi===undefined)return '';
+      const g=S.groups[gi];
+      return g?`<span style="font-family:'DM Mono',monospace;font-size:8px;padding:1px 3px;border-radius:2px;background:var(--accent-dim);color:var(--text3);margin-left:3px">${g.name}</span>`:'';
+    };
+    p2+=`<div style="overflow-x:auto"><div style="display:flex;align-items:stretch;min-width:max-content;gap:0">`;
+    S.bracketRounds.forEach((round,ri)=>{
       p2+=`<div style="display:flex;flex-direction:column;justify-content:space-around"><div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--text3);text-align:center;padding:0 12px 6px">${round.title}</div>`;
       round.matches.forEach(m=>{
         const isDone=m.status==='done';
         const sd=matchScoreDisplay(m,m.bestOf);
         const sA=sd?sd.scoreA.match(/>([\d]+)</)?.[1]||'':'' ;
         const sB=sd?sd.scoreB.match(/>([\d]+)</)?.[1]||'':'' ;
-        p2+=`<div style="margin:5px;background:var(--surface2);border:1px solid ${isDone?'var(--accent)':'var(--border)'};border-radius:var(--r);width:150px;overflow:hidden">
-          <div style="padding:5px 8px;display:flex;justify-content:space-between;font-size:11px;font-weight:500;border-bottom:1px solid var(--border);${isDone&&m.winner?.id===m.teamA?.id?'background:var(--accent-dim);color:var(--accent)':''}">${m.teamA?.name||'?'}${sA?` <span style="font-family:\'DM Mono\',monospace">${sA}</span>`:''}</div>
-          <div style="padding:5px 8px;display:flex;justify-content:space-between;font-size:11px;font-weight:500;${isDone&&m.winner?.id===m.teamB?.id?'background:var(--accent-dim);color:var(--accent)':''}">${m.teamB?.name||'?'}${sB?` <span style="font-family:\'DM Mono\',monospace">${sB}</span>`:''}</div>
+        const winA=isDone&&m.winner?.id===m.teamA?.id;
+        const winB=isDone&&m.winner?.id===m.teamB?.id;
+        p2+=`<div style="margin:5px;background:var(--surface2);border:1px solid ${isDone?'var(--accent)':'var(--border)'};border-radius:var(--r);width:160px;overflow:hidden;${isDone?'box-shadow:0 0 0 1px var(--accent-dim)':''}">
+          <div style="padding:5px 8px;display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:500;border-bottom:1px solid var(--border);${winA?'background:var(--accent-dim);color:var(--accent);border-left:2px solid var(--accent)':''}">${m.teamA?.name||'TBD'}${specGroupBadge(m.teamA)}${sA?` <span style="font-family:'DM Mono',monospace;font-size:11px">${sA}</span>`:''}</div>
+          <div style="padding:5px 8px;display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:500;${winB?'background:var(--accent-dim);color:var(--accent);border-left:2px solid var(--accent)':''}">${m.teamB?.name||'TBD'}${specGroupBadge(m.teamB)}${sB?` <span style="font-family:'DM Mono',monospace;font-size:11px">${sB}</span>`:''}</div>
         </div>`;
       });
       p2+=`</div>`;
+      // Connector columns between rounds
+      if(ri<S.bracketRounds.length-1){
+        const nc=S.bracketRounds[ri+1].matches.length;
+        p2+=`<div class="bracket-connector-col">`;
+        for(let ci=0;ci<nc;ci++)p2+=`<div class="bc-group"><div class="bc-top-half"></div><div class="bc-bottom-half"></div></div>`;
+        p2+=`</div>`;
+      }
     });
     p2+=`</div></div>`;
   } else p2+='<div style="color:var(--text3);font-size:13px">Bracket not generated yet</div>';
@@ -1461,6 +1517,7 @@ function getSerializableState() {
     schedule: S.schedule,
     history: S.history.slice(-50),
     settings: S.settings,
+    bracketSeedGroups: S.bracketSeedGroups || {},
     _tid, _mid, _cid,
   };
 }
@@ -1526,6 +1583,7 @@ function wsApplyRemoteState(remoteState) {
   }));
 
   S.thirdPlaceMatch = remoteState.thirdPlaceMatchId ? matchById[remoteState.thirdPlaceMatchId] || null : null;
+  S.bracketSeedGroups = remoteState.bracketSeedGroups || {};
 
   S.rrMatches = {};
   for (const gi in remoteState.rrMatches || {}) {
@@ -1560,31 +1618,22 @@ function wsApplyRemoteState(remoteState) {
 // ─── Restrict UI for viewer-only mode ───────────────
 function restrictViewerUI() {
   if (WS.role !== 'viewer') return;
-  
-  // Hide the settings panel
-  const settingsPanel = document.getElementById('settingsPanel');
-  if (settingsPanel) settingsPanel.style.display = 'none';
-  
-  // Hide editing buttons from nav
-  document.querySelectorAll('.nav-buttons button').forEach(btn => {
-    const text = btn.textContent;
-    // Keep only: Live View (📺), CSV export, Print, Go Live
-    // Hide: Share, Settings
-    if (text.includes('🔗') || text.includes('⚙')) {
+
+  // Hide all nav tabs (viewers only see the spectator overlay)
+  document.querySelectorAll('nav button').forEach(btn => {
+    btn.style.display = 'none';
+  });
+
+  // Hide header action buttons that are edit-only
+  document.querySelectorAll('.header-actions .btn').forEach(btn => {
+    const t = btn.textContent.trim();
+    // Keep: 📺 Live View, ⬇ CSV, 🖨 Print, theme toggle
+    // Hide: ☁ Go Live, 🔗 Share
+    if (t.includes('Go Live') || t.includes('Share')) {
       btn.style.display = 'none';
     }
   });
-  
-  // Hide tab navigation for editing pages
-  document.querySelectorAll('.tab-nav button').forEach(btn => {
-    const text = btn.textContent;
-    if (text.includes('Settings') || text.includes('Teams') || text.includes('Groups') || 
-        text.includes('RR') || text.includes('Round') || text.includes('Brackets') || 
-        text.includes('Schedule') || text.includes('Courts')) {
-      btn.style.display = 'none';
-    }
-  });
-  
+
   // Hide close button in spectator so viewers cannot exit the live view
   document.querySelectorAll('#spectatorOverlay button').forEach(btn => {
     if (btn.textContent.includes('Close')) btn.style.display = 'none';
@@ -1739,6 +1788,43 @@ window.closeSpectator = function() {
   if (WS.role === 'viewer') return;
   _origCloseSpectator();
 };
+
+// ─── MISSING BROADCAST PATCHES ────────────────────────
+const _origSubmitAddCourt = submitAddCourt;
+window.submitAddCourt = function() { _origSubmitAddCourt(); wsBroadcast(); };
+
+const _origRemoveCourt = removeCourt;
+window.removeCourt = function(id) { _origRemoveCourt(id); wsBroadcast(); };
+
+const _origSetTType = setTType;
+window.setTType = function(t,btn) { _origSetTType(t,btn); wsBroadcast(); };
+
+const _origSetBMethod = setBMethod;
+window.setBMethod = function(m,btn) { _origSetBMethod(m,btn); wsBroadcast(); };
+
+// ─── THEME TOGGLE ─────────────────────────────────────
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('pb_theme', 'light');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = '🌙 Dark';
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('pb_theme', 'dark');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = '☀ Light';
+  }
+}
+// Restore saved theme on load (default is light, so only apply if saved dark)
+(function initTheme() {
+  if (localStorage.getItem('pb_theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = '☀ Light';
+  }
+})();
 
 // ─── INIT ─────────────────────────────────────────────
 syncPv();
