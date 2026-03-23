@@ -1366,12 +1366,6 @@ function wsSetIndicator(state, text) {
   el.textContent = text;
 }
 
-// ── Token minting removed (no longer needed) ───────────────
-  const data = await resp.json();
-  if (!data.token) throw new Error('No token in response');
-  return data.token;
-}
-
 // ── Connect to WebSocket ───────────────────────────────
 function wsConnect(wsUrl, tournamentId, role, adminToken) {
   WS.url = wsUrl;
