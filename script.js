@@ -1067,19 +1067,23 @@ function wsConnect(wsUrl, tournamentId, role) {
       if (msg.action === 'init') {
         if (msg.role) WS.role = msg.role;
         if (!WS._initialJoinComplete) {
-          console.log('[WS] init — first join, applying remote state, role=' + WS.role);
+          console.log('[WS] init — first join as ' + WS.role + ' —', stateSummary(msg.state));
           wsApplyRemoteState(msg.state);
           WS._initialJoinComplete = true;
         } else if (WS.role === 'admin') {
           console.log('[WS] init — reconnect as admin, re-broadcasting local state');
           setTimeout(wsBroadcast, 200);
         } else {
-          console.log('[WS] init — reconnect as viewer, applying remote state');
+          console.log('[WS] init — reconnect as viewer —', stateSummary(msg.state));
           wsApplyRemoteState(msg.state);
         }
       } else if (msg.action === 'update') {
-        if (WS.role !== 'admin') wsApplyRemoteState(msg.state);
-        else console.log('[WS] update — admin skipping echo');
+        if (WS.role !== 'admin') {
+          console.log('[WS] update received —', stateSummary(msg.state));
+          wsApplyRemoteState(msg.state);
+        } else {
+          console.log('[WS] update — admin skipping echo');
+        }
       } else if (msg.action === 'empty') {
         if (msg.role) WS.role = msg.role;
         if (WS.role === 'admin') wsBroadcast();
@@ -1108,12 +1112,28 @@ function wsConnect(wsUrl, tournamentId, role) {
   };
 }
 
+// ── Summarize state for logging ───────────────────────
+function stateSummary(state) {
+  if (!state) return '(empty)';
+  const teams = (state.teams || []).length;
+  const groups = (state.groups || []).length;
+  const rrMatches = Object.values(state.rrMatches || {}).flat();
+  const rrDone = rrMatches.filter(m => m.status === 'done').length;
+  const bDone = (state.bracketMatches || []).filter(m => m.status === 'done').length;
+  const bTotal = (state.bracketMatches || []).length;
+  return `teams=${teams} groups=${groups} rr=${rrDone}/${rrMatches.length} bracket=${bDone}/${bTotal}`;
+}
+
 // ── Broadcast state to server (admin only, debounced) ─
 function wsBroadcast() {
   if (WS.role !== 'admin') {
     console.log('[wsBroadcast] skipped — not admin (role=' + WS.role + ')');
     return;
   }
+  // Refresh spectator overlay immediately with updated local state (don't wait for debounce)
+  const _ov = document.getElementById('spectatorOverlay');
+  if (_ov && _ov.style.display !== 'none') openSpectator();
+
   if (!WS.connected || !WS.socket || WS.socket.readyState !== 1) {
     WS._pendingBroadcast = true;
     console.log('[wsBroadcast] queued — socket not ready (connected=' + WS.connected + ' readyState=' + WS.socket?.readyState + ')');
@@ -1134,7 +1154,7 @@ function wsBroadcast() {
       role: WS.role,
       state: getSerializableState(),
     });
-    console.log('[wsBroadcast] sending', Math.round(payload.length / 1024) + 'KB');
+    console.log('[wsBroadcast] sending', Math.round(payload.length / 1024) + 'KB —', stateSummary(state));
     try {
       WS.socket.send(payload);
       WS._pendingBroadcast = false;
@@ -1307,23 +1327,78 @@ function showToast(text, duration = 2500) {
 }
 
 // ─── SESSION CREATE / JOIN ─────────────────────────────
-function createSession() {
-  const tid = 'pb_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+function hideWelcome() {
+  const el = document.getElementById('welcomeOverlay');
+  if (el) el.style.display = 'none';
+}
+
+function _activateAdminSession(tid) {
+  hideWelcome();
   WS.tournamentId = tid;
   WS.role = 'admin';
-
-  document.getElementById('createSessionBtn').style.display = 'none';
-  document.getElementById('shareBtn').style.display = 'inline-flex';
-
+  localStorage.setItem('pb_lastTournamentId', tid);
   localStorage.setItem('pb_ws_url', CONFIG.WEBSOCKET_URL);
+  document.getElementById('createSessionBtn').style.display = 'none';
+  document.getElementById('resumeSessionBtn').style.display = 'none';
+  document.getElementById('shareBtn').style.display = 'inline-flex';
+  const disp = document.getElementById('tournamentIdDisplay');
+  if (disp) { disp.textContent = tid; disp.style.display = 'inline'; }
+}
+
+function createSession() {
+  const tid = 'pb_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  _activateAdminSession(tid);
 
   const url = new URL(window.location.href);
   url.searchParams.set('t', tid);
-  url.searchParams.set('ws', encodeURIComponent(CONFIG.WEBSOCKET_URL));
+  url.searchParams.set('role', 'admin');
   window.history.replaceState({}, '', url.toString());
 
-  wsConnect(CONFIG.WEBSOCKET_URL, tid, 'admin', null);
+  wsConnect(CONFIG.WEBSOCKET_URL, tid, 'admin');
   wsSetIndicator('syncing', '⟳ Creating tournament…');
+  console.log('[session] created tournament', tid);
+}
+
+function resumeSession() {
+  const tid = localStorage.getItem('pb_lastTournamentId');
+  if (!tid) return;
+  _activateAdminSession(tid);
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('t', tid);
+  url.searchParams.set('role', 'admin');
+  window.history.replaceState({}, '', url.toString());
+
+  wsConnect(CONFIG.WEBSOCKET_URL, tid, 'admin');
+  wsSetIndicator('syncing', '⟳ Resuming tournament…');
+  showToast('Resuming ' + tid + '…', 3000);
+  console.log('[session] resuming tournament', tid);
+}
+
+function openById() {
+  const input = document.getElementById('openIdInput');
+  const errorEl = document.getElementById('openIdError');
+  const tid = (input?.value || '').trim();
+  if (errorEl) errorEl.textContent = '';
+  if (!tid) {
+    if (errorEl) errorEl.textContent = 'Enter a tournament ID';
+    return;
+  }
+  if (!/^[a-zA-Z0-9_]{8,64}$/.test(tid)) {
+    if (errorEl) errorEl.textContent = 'Invalid ID — must be 8–64 alphanumeric characters';
+    return;
+  }
+  _activateAdminSession(tid);
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('t', tid);
+  url.searchParams.set('role', 'admin');
+  window.history.replaceState({}, '', url.toString());
+
+  wsConnect(CONFIG.WEBSOCKET_URL, tid, 'admin');
+  wsSetIndicator('syncing', '⟳ Loading tournament…');
+  showToast('Opening tournament…', 2500);
+  console.log('[session] opening existing tournament', tid);
 }
 
 function openShareModal() {
@@ -1336,6 +1411,15 @@ function openShareModal() {
   document.getElementById('shareViewerUrl').value = viewerUrl;
   document.getElementById('shareTournamentId').textContent = tid;
   openModal('shareModal');
+}
+
+function copyTournamentId() {
+  const tid = WS.tournamentId || '';
+  if (!tid) return;
+  navigator.clipboard.writeText(tid).then(() => {
+    const el = document.getElementById('tidCopied');
+    if (el) { el.textContent = '✓ Copied!'; setTimeout(() => el.textContent = '', 2000); }
+  });
 }
 
 function copyUrl(inputId, confirmId) {
@@ -1353,15 +1437,35 @@ async function checkUrlParams() {
   const tid = params.get('t');
   const role = params.get('role') || 'viewer';
 
-  if (!tid) return;
+  if (!tid) {
+    // No URL params — show welcome screen; populate last-session row if available
+    const savedId = localStorage.getItem('pb_lastTournamentId');
+    if (savedId) {
+      const row = document.getElementById('lastSessionRow');
+      const idEl = document.getElementById('lastSessionId');
+      if (row) row.style.display = 'block';
+      if (idEl) idEl.textContent = savedId;
+      // Also keep the header resume button in sync
+      const resumeBtn = document.getElementById('resumeSessionBtn');
+      if (resumeBtn) { resumeBtn.style.display = 'inline-flex'; resumeBtn.title = savedId; }
+    }
+    return;  // leave welcome overlay visible
+  }
+
+  // Has URL params — hide welcome and connect
+  hideWelcome();
 
   const wsUrl = CONFIG.WEBSOCKET_URL;
   WS.tournamentId = tid;
   WS.role = role;
 
   document.getElementById('createSessionBtn').style.display = 'none';
+  document.getElementById('resumeSessionBtn').style.display = 'none';
   document.getElementById('shareBtn').style.display = 'inline-flex';
+  const disp = document.getElementById('tournamentIdDisplay');
+  if (disp) { disp.textContent = tid; disp.style.display = 'inline'; }
 
+  if (role === 'admin') localStorage.setItem('pb_lastTournamentId', tid);
   if (role === 'viewer') WS._openSpectatorOnLoad = true;
 
   wsConnect(wsUrl, tid, WS.role);

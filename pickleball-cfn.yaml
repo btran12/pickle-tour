@@ -259,7 +259,7 @@ Resources:
             'tType','bMethod','tournamentName','teams','groups',
             'rrMatches','bracketMatches','bracketRounds',
             'thirdPlaceMatchId','courts','schedule','history','settings',
-            '_tid','_mid','_cid'
+            'bracketSeedGroups','_tid','_mid','_cid'
           ]);
           function sanitizeState(state) {
             if (!state || typeof state !== 'object' || Array.isArray(state)) return null;
@@ -478,7 +478,7 @@ Resources:
                     tournamentId,
                     state: stateJson,
                     updatedAt: Date.now(),
-                    ttl: now + 604800  // 7-day TTL
+                    ttl: now + 2592000  // 30-day TTL
                   })
                 }));
 
