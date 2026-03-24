@@ -846,6 +846,9 @@ function openSpectator(){
   document.getElementById('specDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
   const overlay=document.getElementById('spectatorOverlay');
   overlay.style.display='flex';
+  // Viewers cannot close the overlay — enforce on every open
+  const closeBtn = overlay.querySelector('[onclick*="closeSpectator"]');
+  if (closeBtn) closeBtn.style.display = WS.role === 'viewer' ? 'none' : '';
 
   // Build the 4 panels
   const fin=S.bracketRounds[S.bracketRounds.length-1]?.matches[0];
@@ -1265,13 +1268,15 @@ function wsApplyRemoteState(remoteState) {
 
   syncSettingsUI();
 
-  // Refresh spectator overlay if it's already open
-  const _specOverlay = document.getElementById('spectatorOverlay');
-  if (_specOverlay && _specOverlay.style.display !== 'none') {
+  if (WS.role === 'viewer') {
+    // Viewers always see the live view — open/refresh it immediately
     openSpectator();
+    restrictViewerUI();
+  } else {
+    // Admin: only refresh if overlay is already open
+    const _specOverlay = document.getElementById('spectatorOverlay');
+    if (_specOverlay && _specOverlay.style.display !== 'none') openSpectator();
   }
-
-  if (WS.role === 'viewer') restrictViewerUI();
 }
 
 // ─── Restrict UI for viewer-only mode ───────────────
@@ -1293,10 +1298,6 @@ function restrictViewerUI() {
     if (btn.textContent.includes('Close')) btn.style.display = 'none';
   });
 
-  const _ov = document.getElementById('spectatorOverlay');
-  if (!_ov || _ov.style.display === 'none') {
-    setTimeout(() => openSpectator(), 500);
-  }
 }
 
 function syncSettingsUI() {
