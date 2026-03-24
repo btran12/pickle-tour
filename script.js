@@ -1148,12 +1148,8 @@ function wsBroadcast() {
       return;
     }
     wsSetIndicator('syncing', '⟳ Syncing…');
-    const payload = JSON.stringify({
-      action: 'update',
-      tournamentId: WS.tournamentId,
-      role: WS.role,
-      state: getSerializableState(),
-    });
+    const state = getSerializableState();
+    const payload = JSON.stringify({ action: 'update', tournamentId: WS.tournamentId, role: WS.role, state });
     console.log('[wsBroadcast] sending', Math.round(payload.length / 1024) + 'KB —', stateSummary(state));
     try {
       WS.socket.send(payload);
