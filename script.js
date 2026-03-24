@@ -857,6 +857,7 @@ function openSpectator(){
   const third=tp?.status==='done'?tp.winner:null;
   const pending=allMatchesFlat().filter(m=>m.status!=='done'&&m.teamA&&m.teamB&&!m.teamA.isBye&&!m.teamB.isBye);
   const done=allMatchesFlat().filter(m=>m.status==='done'&&!m.teamA?.isBye&&!m.teamB?.isBye).slice(-4).reverse();
+  console.log('[spectator] rendering — done=' + done.length + ' pending=' + pending.length + ' role=' + WS.role);
 
   const panel=(title,body,accentColor='var(--text3)')=>`
     <div style="background:var(--surface);padding:16px;overflow:hidden;display:flex;flex-direction:column">
@@ -947,7 +948,7 @@ function openSpectator(){
   let p4='';
   if(done.length){
     p4+=done.map(m=>{
-      const sd=matchScoreDisplay(m,m.bestOf);
+      const sd=matchScoreDisplay(m, m.bestOf || S.settings.rrBestOf);
       const sA=sd?sd.scoreA.match(/>([\d]+)</)?.[1]||gamesWon(m,'A'):gamesWon(m,'A');
       const sB=sd?sd.scoreB.match(/>([\d]+)</)?.[1]||gamesWon(m,'B'):gamesWon(m,'B');
       return `<div style="padding:9px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:7px">
