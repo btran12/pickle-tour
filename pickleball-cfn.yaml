@@ -477,7 +477,7 @@ Resources:
                   Item: marshall({
                     tournamentId,
                     state: stateJson,
-                    updatedAt: Date.now(),
+                    updatedAt: new Date().toISOString(),
                     ttl: now + 2592000  // 30-day TTL
                   })
                 }));

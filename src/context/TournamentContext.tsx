@@ -66,8 +66,14 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
   // ── Broadcast (admin only, debounced 300ms) ─────────
   const broadcast = useCallback((stateSnap: TournamentState) => {
     const w = ws.current
-    if (w.role !== 'admin') return
+    // Use stateSnap.role (not w.role) — w.role is synced asynchronously via useEffect and may
+    // lag behind state.role by one render. If we send role:'viewer' the server rejects the update.
+    if (stateSnap.role !== 'admin') {
+      console.warn('[WS] broadcast skipped — not admin', { stateRole: stateSnap.role, wsRole: w.role })
+      return
+    }
     if (!w.connected || !w.socket || w.socket.readyState !== 1) {
+      console.log('[WS] broadcast queued — not connected, will send on reconnect')
       w.pendingBroadcast = true
       return
     }
@@ -76,7 +82,18 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       if (!w.socket || w.socket.readyState !== 1) { w.pendingBroadcast = true; return }
       dispatch({ type: 'SET_WS_STATUS', status: 'syncing', text: '⟳ Syncing…' })
       const wireState = getSerializableState(stateSnap)
-      const payload = JSON.stringify({ action: 'update', tournamentId: w.tournamentId, role: w.role, state: wireState })
+      const payload = JSON.stringify({ action: 'update', tournamentId: w.tournamentId, role: stateSnap.role, state: wireState })
+      console.group(`[WS] ▲ SEND update — tid=${w.tournamentId}`)
+      console.log('teams:', wireState.teams.length, wireState.teams.map(t => t.name))
+      console.log('groups:', wireState.groups.map(g => `${g.name}(${g.teamIds.length})`).join(', '))
+      console.log('rrMatches:', Object.entries(wireState.rrMatches).map(([gi, ms]) => `g${gi}:${ms.length}matches`).join(', '))
+      console.log('bracketMatches:', wireState.bracketMatches.length)
+      console.log('schedule:', Object.keys(wireState.schedule).length, 'entries')
+      console.log('history:', wireState.history.length, 'entries')
+      console.log('settings:', wireState.settings)
+      console.log('wireState:', wireState)
+      console.log('payload:', payload)
+      console.groupEnd()
       try {
         w.socket.send(payload)
         w.pendingBroadcast = false
@@ -107,11 +124,13 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
   const connect = useCallback((tournamentId: string, role: Role) => {
     const w = ws.current
 
-    // Clean up old socket
+    // Clean up old socket — only close if OPEN (readyState 1), not CONNECTING (0).
+    // Closing a CONNECTING socket triggers a browser error; nulling handlers abandons it silently.
     if (w.socket) {
       w.socket.onopen = null; w.socket.onmessage = null
       w.socket.onclose = null; w.socket.onerror = null
-      if (w.socket.readyState <= 1) w.socket.close()
+      if (w.socket.readyState === 1) w.socket.close()
+      w.socket = null
     }
     clearInterval(w.pingInterval ?? undefined)
     w.pingInterval = null
@@ -130,6 +149,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       w.reconnectDelay = 2000
       clearTimeout(w.reconnectTimer ?? undefined)
       dispatch({ type: 'SET_WS_STATUS', status: 'connected', text: '● Live' })
+      console.log(`[WS] ▲ SEND join — tid=${tournamentId} role=${role}`)
       socket.send(JSON.stringify({ action: 'join', tournamentId, role }))
 
       if (w.pendingBroadcast) {
@@ -148,28 +168,63 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
         const msg = JSON.parse(evt.data as string) as {
           action: string; role?: Role; state?: WireState; count?: number; code?: string; message?: string
         }
+
         if (msg.action === 'init') {
-          if (msg.role) dispatch({ type: 'SET_ROLE', role: msg.role })
+          console.group(`[WS] ▼ RECV init — role=${role} initialJoinComplete=${w.initialJoinComplete}`)
+          console.log('server-assigned role:', msg.role)
+          if (msg.state) {
+            console.log('teams:', msg.state.teams.length, msg.state.teams.map(t => t.name))
+            console.log('groups:', msg.state.groups.map(g => `${g.name}(${g.teamIds.length})`).join(', '))
+            console.log('rrMatches:', Object.entries(msg.state.rrMatches).map(([gi, ms]) => `g${gi}:${ms.length}matches`).join(', '))
+            console.log('bracketMatches:', msg.state.bracketMatches.length)
+            console.log('full state:', msg.state)
+          } else {
+            console.log('no state payload')
+          }
+          console.groupEnd()
+          // Do NOT apply msg.role — role is set from URL params or session helpers before connect().
+          // Applying it here could cause a viewer to adopt 'admin' if the server echoes the
+          // tournament creator's role, which would then cause update messages to be ignored.
           if (!w.initialJoinComplete) {
             if (msg.state) dispatch({ type: 'APPLY_REMOTE_STATE', wireState: msg.state })
             w.initialJoinComplete = true
-          } else if (w.role === 'admin') {
+          } else if (role === 'admin') {
             setTimeout(() => broadcast(stateRef.current), 200)
           } else {
             if (msg.state) dispatch({ type: 'APPLY_REMOTE_STATE', wireState: msg.state })
           }
+
         } else if (msg.action === 'update') {
-          if (w.role !== 'admin' && msg.state) {
+          console.group(`[WS] ▼ RECV update — role=${role}`)
+          if (msg.state) {
+            console.log('teams:', msg.state.teams.length, msg.state.teams.map(t => t.name))
+            console.log('groups:', msg.state.groups.map(g => `${g.name}(${g.teamIds.length})`).join(', '))
+            console.log('rrMatches:', Object.entries(msg.state.rrMatches).map(([gi, ms]) => `g${gi}:${ms.length}matches`).join(', '))
+            console.log('bracketMatches:', msg.state.bracketMatches.length)
+            console.log('full state:', msg.state)
+          }
+          if (role === 'admin') {
+            console.log('→ ignored (admin does not apply remote updates)')
+          }
+          console.groupEnd()
+          if (role !== 'admin' && msg.state) {
             dispatch({ type: 'APPLY_REMOTE_STATE', wireState: msg.state })
           }
+
         } else if (msg.action === 'empty') {
-          if (msg.role) dispatch({ type: 'SET_ROLE', role: msg.role })
-          if (w.role === 'admin') setTimeout(() => broadcast(stateRef.current), 200)
+          console.log(`[WS] ▼ RECV empty — role=${role}, server-assigned role=${msg.role}`)
+          if (role === 'admin') setTimeout(() => broadcast(stateRef.current), 200)
+
         } else if (msg.action === 'error') {
-          console.warn('[WS] server error:', msg.code, msg.message)
+          console.warn('[WS] ▼ RECV error:', msg.code, msg.message)
           if (msg.code === 'CONN_LIMIT') dispatch({ type: 'SHOW_TOAST', text: '⚠️ Tournament is full (max connections reached)' })
+
         } else if (msg.action === 'presence') {
+          console.log(`[WS] ▼ RECV presence — count=${msg.count}`)
           dispatch({ type: 'SET_PRESENCE', count: msg.count ?? 0 })
+
+        } else {
+          console.log('[WS] ▼ RECV unknown action:', msg.action, msg)
         }
       } catch (e) { console.warn('[WS] parse error', e) }
     }
@@ -199,6 +254,21 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_ROLE', role })
       if (role === 'admin') localStorage.setItem('pb_lastTournamentId', tid)
       connect(tid, role)
+    }
+    return () => {
+      // Cleanup on unmount (also runs on React StrictMode double-invoke)
+      const w = ws.current
+      clearTimeout(w.reconnectTimer ?? undefined)
+      clearInterval(w.pingInterval ?? undefined)
+      w.reconnectTimer = null
+      w.pingInterval = null
+      if (w.socket) {
+        w.socket.onopen = null; w.socket.onmessage = null
+        w.socket.onclose = null; w.socket.onerror = null
+        if (w.socket.readyState === 1) w.socket.close()
+        w.socket = null
+      }
+      w.connected = false
     }
   }, [connect])
 

@@ -101,7 +101,7 @@ export function ScoreModal() {
               <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 4, minHeight: 13 }}>
                 {res === 0 && <span style={{ color: 'var(--accent)' }}>✓ {tA?.name} wins this game</span>}
                 {res === 1 && <span style={{ color: 'var(--accent)' }}>✓ {tB?.name} wins this game</span>}
-                {res === -1 && games[i]?.a !== '' && <span>In progress ({games[i].a}–{games[i].b})</span>}
+                {res === -1 && games[i] && games[i].a !== '' && <span>In progress ({games[i].a}–{games[i].b})</span>}
               </div>
             </div>
           )
