@@ -515,6 +515,11 @@ Resources:
                 return { statusCode: 200 };
               }
 
+              // ── PING — keepalive from client ──────────────────────────
+              if (action === 'ping') {
+                return { statusCode: 200 };
+              }
+
               return { statusCode: 400, body: 'Unknown action' };
 
             } catch (err) {

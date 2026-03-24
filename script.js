@@ -1030,6 +1030,7 @@ const WS = {
   _pendingBroadcast: false,
   _initialJoinComplete: false,
   _openSpectatorOnLoad: false,
+  _pingInterval: null,
 };
 
 function wsSetIndicator(state, text) {
@@ -1045,6 +1046,17 @@ function wsConnect(wsUrl, tournamentId, role) {
   WS.tournamentId = tournamentId;
   WS.role = role || 'viewer';
   wsSetIndicator('syncing', '⟳ Connecting…');
+
+  // Clean up existing socket to prevent stale event handlers firing
+  if (WS.socket) {
+    WS.socket.onopen = null;
+    WS.socket.onmessage = null;
+    WS.socket.onclose = null;
+    WS.socket.onerror = null;
+    if (WS.socket.readyState === 0 || WS.socket.readyState === 1) WS.socket.close();
+  }
+  clearInterval(WS._pingInterval);
+  WS._pingInterval = null;
 
   try { WS.socket = new WebSocket(wsUrl); }
   catch(e) { wsSetIndicator('error', '✕ Bad URL'); return; }
@@ -1062,6 +1074,12 @@ function wsConnect(wsUrl, tournamentId, role) {
       WS._pendingBroadcast = false;
       setTimeout(wsBroadcast, 200);
     }
+    // Keepalive ping every 30s — API Gateway closes idle connections at 10 min
+    WS._pingInterval = setInterval(() => {
+      if (WS.socket && WS.socket.readyState === 1) {
+        WS.socket.send(JSON.stringify({ action: 'ping', tournamentId: WS.tournamentId }));
+      }
+    }, 30000);
   };
 
   WS.socket.onmessage = (evt) => {
@@ -1084,7 +1102,8 @@ function wsConnect(wsUrl, tournamentId, role) {
       } else if (msg.action === 'update') {
         if (WS.role !== 'admin') {
           console.log('[WS] update received —', stateSummary(msg.state));
-          wsApplyRemoteState(msg.state);
+          try { wsApplyRemoteState(msg.state); }
+          catch(e) { console.error('[WS] wsApplyRemoteState error on update:', e); }
         } else {
           console.log('[WS] update — admin skipping echo');
         }
@@ -1102,6 +1121,8 @@ function wsConnect(wsUrl, tournamentId, role) {
 
   WS.socket.onclose = (evt) => {
     WS.connected = false;
+    clearInterval(WS._pingInterval);
+    WS._pingInterval = null;
     console.log('[WS] onclose — code=' + evt.code + ' clean=' + evt.wasClean);
     wsSetIndicator('error', '✕ Disconnected');
     WS.reconnectTimer = setTimeout(() => {
@@ -1135,8 +1156,10 @@ function wsBroadcast() {
     return;
   }
   // Refresh spectator overlay immediately with updated local state (don't wait for debounce)
-  const _ov = document.getElementById('spectatorOverlay');
-  if (_ov && _ov.style.display !== 'none') openSpectator();
+  try {
+    const _ov = document.getElementById('spectatorOverlay');
+    if (_ov && _ov.style.display !== 'none') openSpectator();
+  } catch(e) { console.warn('[wsBroadcast] openSpectator error (non-fatal):', e); }
 
   if (!WS.connected || !WS.socket || WS.socket.readyState !== 1) {
     WS._pendingBroadcast = true;
