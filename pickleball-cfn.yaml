@@ -592,6 +592,152 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/*
 
+  # ── HTTP API for REST-based state sync ────────────────────────────────────
+  HttpHandlerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub PickleBracket-HttpHandler-${Stage}
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          TOURNAMENTS_TABLE: !Ref TournamentsTable
+          MAX_PAYLOAD_BYTES: '32768'
+      Code:
+        ZipFile: |
+          'use strict';
+          const { DynamoDBClient, GetItemCommand, PutItemCommand } = require('@aws-sdk/client-dynamodb');
+          const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
+
+          const ddb = new DynamoDBClient({});
+          const TOURNAMENTS_TABLE = process.env.TOURNAMENTS_TABLE;
+          const MAX_PAYLOAD_BYTES = parseInt(process.env.MAX_PAYLOAD_BYTES, 10);
+
+          const VALID_TID = /^[a-zA-Z0-9_]{8,64}$/;
+          const ALLOWED_STATE_KEYS = new Set([
+            'tType','bMethod','tournamentName','teams','groups',
+            'rrMatches','bracketMatches','bracketRounds',
+            'thirdPlaceMatchId','courts','schedule','history','settings',
+            'bracketSeedGroups','_tid','_mid','_cid'
+          ]);
+
+          function sanitizeState(state) {
+            if (!state || typeof state !== 'object' || Array.isArray(state)) return null;
+            const clean = {};
+            for (const key of ALLOWED_STATE_KEYS) {
+              if (key in state) clean[key] = state[key];
+            }
+            return clean;
+          }
+
+          exports.handler = async (event) => {
+            const method = event.requestContext?.http?.method;
+            const id = event.pathParameters?.id;
+
+            if (!id || !VALID_TID.test(id)) {
+              return { statusCode: 400, body: JSON.stringify({ error: 'Invalid tournament ID' }) };
+            }
+
+            try {
+              if (method === 'GET') {
+                const result = await ddb.send(new GetItemCommand({
+                  TableName: TOURNAMENTS_TABLE,
+                  Key: marshall({ tournamentId: id })
+                }));
+                if (!result.Item) {
+                  return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };
+                }
+                const item = unmarshall(result.Item);
+                return {
+                  statusCode: 200,
+                  body: JSON.stringify({ state: JSON.parse(item.state), updatedAt: item.updatedAt })
+                };
+              }
+
+              if (method === 'PUT') {
+                const bodyStr = event.body || '';
+                if (Buffer.byteLength(bodyStr, 'utf8') > MAX_PAYLOAD_BYTES) {
+                  return { statusCode: 413, body: JSON.stringify({ error: 'Payload too large' }) };
+                }
+                let parsed;
+                try { parsed = JSON.parse(bodyStr); } catch { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) }; }
+
+                const rawState = sanitizeState(parsed.state);
+                if (!rawState) return { statusCode: 400, body: JSON.stringify({ error: 'Invalid state' }) };
+
+                const stateJson = JSON.stringify(rawState);
+                if (Buffer.byteLength(stateJson) > MAX_PAYLOAD_BYTES) {
+                  return { statusCode: 413, body: JSON.stringify({ error: 'State too large' }) };
+                }
+
+                const updatedAt = new Date().toISOString();
+                const now = Math.floor(Date.now() / 1000);
+                await ddb.send(new PutItemCommand({
+                  TableName: TOURNAMENTS_TABLE,
+                  Item: marshall({ tournamentId: id, state: stateJson, updatedAt, ttl: now + 2592000 })
+                }));
+
+                return { statusCode: 200, body: JSON.stringify({ updatedAt }) };
+              }
+
+              return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+            } catch (err) {
+              console.error('HTTP handler error:', err);
+              return { statusCode: 500, body: JSON.stringify({ error: 'Internal error' }) };
+            }
+          };
+
+  HttpHandlerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt HttpHandlerFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
+
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub PickleBracket-HTTP-${Stage}
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins: ['*']
+        AllowMethods: [GET, PUT, OPTIONS]
+        AllowHeaders: [content-type]
+        MaxAge: 300
+
+  HttpApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt HttpHandlerFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  GetTournamentRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: GET /tournaments/{id}
+      Target: !Sub integrations/${HttpApiIntegration}
+
+  PutTournamentRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: PUT /tournaments/{id}
+      Target: !Sub integrations/${HttpApiIntegration}
+
+  HttpApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: !Ref Stage
+      AutoDeploy: true
+
   # ── CloudWatch Alarms ──────────────────────────────────────────────────────
   # Alerts you if the Lambda is erroring or being throttled heavily.
   # Wire up an SNS topic with your email to receive these.
@@ -651,8 +797,12 @@ Conditions:
   HasAllowedOrigin: !Not [!Equals [!Ref AllowedOrigin, '']]
 
 Outputs:
+  HttpApiUrl:
+    Description: REST API endpoint — paste into src/config.ts as API_URL
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}
+
   WebSocketURL:
-    Description: WebSocket endpoint — paste into the app
+    Description: WebSocket endpoint (kept for reference, no longer used by client)
     Value: !Sub wss://${WebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}
 
   SecuritySummary:
