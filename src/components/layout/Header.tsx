@@ -1,8 +1,18 @@
+import { useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 import { useTheme } from '../../hooks/useTheme'
 import { exportCSV } from '../../utils/export'
 import type { WsStatus } from '../../types'
+
+function useClock() {
+  const [time, setTime] = useState(() => new Date())
+  useEffect(() => {
+    const id = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  return time
+}
 
 const PAGE_LABELS: Record<string, string> = {
   setup: 'Setup', teams: 'Teams', players: 'Players', groups: 'Groups',
@@ -21,6 +31,7 @@ export function Header() {
   const { openShare } = useModal()
   const { dark, toggleTheme } = useTheme()
   const { wsStatus, wsStatusText, tournamentId, role, activePage, presenceCount } = state
+  const now = useClock()
   const hasSession = !!tournamentId
   const lastTid = localStorage.getItem('pb_lastTournamentId')
 
@@ -40,9 +51,15 @@ export function Header() {
       </div>
 
       <div className="header-actions">
+        <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, color: 'var(--text2)', letterSpacing: 1 }}>
+          {now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </span>
         {wsStatus !== 'offline' && (
-          <span className={indicatorClass(wsStatus)}>
-            {wsStatusText || (wsStatus === 'connected' ? '● Live' : wsStatus)}
+          <span className={indicatorClass(wsStatus)} style={wsStatus === 'connected' ? { display: 'flex', alignItems: 'center', gap: 6 } : undefined}>
+            {wsStatus === 'connected'
+              ? <><span className="live-dot" /><span style={{ color: 'var(--red)', fontWeight: 700 }}>LIVE</span></>
+              : (wsStatusText || wsStatus)
+            }
           </span>
         )}
         {presenceCount > 1 && (

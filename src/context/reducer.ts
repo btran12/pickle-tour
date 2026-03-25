@@ -29,6 +29,8 @@ export type Action =
   | { type: 'EDIT_TEAM'; team: Team }
   | { type: 'REMOVE_TEAM'; id: number }
   | { type: 'LOAD_SAMPLE_TEAMS' }
+  | { type: 'LOAD_SAMPLE_TEAMS_16' }
+  | { type: 'LOAD_SAMPLE_TEAMS_32' }
   // Groups
   | { type: 'ASSIGN_GROUPS' }
   | { type: 'MOVE_TEAM'; teamId: number; fromGroupId: number | null; toGroupId: number | null }
@@ -124,6 +126,78 @@ export function reducer(state: TournamentState, action: Action): TournamentState
         { tn: 'Kitchen Kings',   p1: 'Blake Thompson', s1: 2, p2: 'Reese Davis',    s2: 3 },
         { tn: 'Serve & Protect', p1: 'Taylor Brown',   s1: 2, p2: 'Jamie Wilson',   s2: 2 },
         { tn: 'The Bangers',     p1: 'Charlie Moore',  s1: 2, p2: 'Finley Taylor',  s2: 2 },
+      ]
+      let tid = state._tid
+      const newTeams = samples.map(({ tn, p1, s1, p2, s2 }) => {
+        const skills = [s1, s2].filter(s => s > 0)
+        const avg = skills.reduce((a, b) => a + b, 0) / skills.length
+        return { id: tid++, name: tn, players: [{ name: p1, skill: s1 }, { name: p2, skill: s2 }], avgSkill: avg }
+      })
+      return { ...state, tType: 'doubles', teams: [...state.teams, ...newTeams], _tid: tid }
+    }
+
+    case 'LOAD_SAMPLE_TEAMS_16': {
+      const samples = [
+        { tn: 'The Picklers',      p1: 'Alex Rivera',    s1: 5, p2: 'Sam Torres',     s2: 5 },
+        { tn: 'Dink Dynasty',      p1: 'Jordan Lee',     s1: 5, p2: 'Morgan Kim',     s2: 4 },
+        { tn: 'Net Dominators',    p1: 'Casey Patel',    s1: 4, p2: 'Riley Chen',     s2: 4 },
+        { tn: 'Spin Doctors',      p1: 'Drew Martinez',  s1: 4, p2: 'Quinn Nguyen',   s2: 4 },
+        { tn: 'Drop Shot Duo',     p1: 'Avery Johnson',  s1: 4, p2: 'Sage Williams',  s2: 3 },
+        { tn: 'Kitchen Kings',     p1: 'Blake Thompson', s1: 3, p2: 'Reese Davis',    s2: 3 },
+        { tn: 'Serve & Protect',   p1: 'Taylor Brown',   s1: 3, p2: 'Jamie Wilson',   s2: 3 },
+        { tn: 'The Bangers',       p1: 'Charlie Moore',  s1: 3, p2: 'Finley Taylor',  s2: 3 },
+        { tn: 'Lob Squad',         p1: 'Dana Scott',     s1: 3, p2: 'Parker Hayes',   s2: 3 },
+        { tn: 'Third Kitchen',     p1: 'Robin Ellis',    s1: 3, p2: 'Skylar Brooks',  s2: 2 },
+        { tn: 'Poach Masters',     p1: 'Lane Foster',    s1: 2, p2: 'Peyton Reed',    s2: 3 },
+        { tn: 'Reset & Rip',       p1: 'Elliot Carr',    s1: 2, p2: 'Harley Stone',   s2: 2 },
+        { tn: 'Fault Finders',     p1: 'Addison Hunt',   s1: 2, p2: 'Emery Nash',     s2: 2 },
+        { tn: 'Erne Experts',      p1: 'Dallas Cross',   s1: 2, p2: 'Avon Paige',     s2: 2 },
+        { tn: 'Backhand Bandits',  p1: 'Kendall Fox',    s1: 2, p2: 'Remy Holt',      s2: 2 },
+        { tn: 'Soft Game Gang',    p1: 'Sloane Perry',   s1: 1, p2: 'Winter Cole',    s2: 2 },
+      ]
+      let tid = state._tid
+      const newTeams = samples.map(({ tn, p1, s1, p2, s2 }) => {
+        const skills = [s1, s2].filter(s => s > 0)
+        const avg = skills.reduce((a, b) => a + b, 0) / skills.length
+        return { id: tid++, name: tn, players: [{ name: p1, skill: s1 }, { name: p2, skill: s2 }], avgSkill: avg }
+      })
+      return { ...state, tType: 'doubles', teams: [...state.teams, ...newTeams], _tid: tid }
+    }
+
+    case 'LOAD_SAMPLE_TEAMS_32': {
+      const samples = [
+        { tn: 'The Picklers',      p1: 'Alex Rivera',    s1: 5, p2: 'Sam Torres',     s2: 5 },
+        { tn: 'Dink Dynasty',      p1: 'Jordan Lee',     s1: 5, p2: 'Morgan Kim',     s2: 5 },
+        { tn: 'Net Dominators',    p1: 'Casey Patel',    s1: 5, p2: 'Riley Chen',     s2: 4 },
+        { tn: 'Spin Doctors',      p1: 'Drew Martinez',  s1: 4, p2: 'Quinn Nguyen',   s2: 4 },
+        { tn: 'Drop Shot Duo',     p1: 'Avery Johnson',  s1: 4, p2: 'Sage Williams',  s2: 4 },
+        { tn: 'Kitchen Kings',     p1: 'Blake Thompson', s1: 4, p2: 'Reese Davis',    s2: 4 },
+        { tn: 'Serve & Protect',   p1: 'Taylor Brown',   s1: 4, p2: 'Jamie Wilson',   s2: 3 },
+        { tn: 'The Bangers',       p1: 'Charlie Moore',  s1: 4, p2: 'Finley Taylor',  s2: 3 },
+        { tn: 'Lob Squad',         p1: 'Dana Scott',     s1: 3, p2: 'Parker Hayes',   s2: 3 },
+        { tn: 'Third Kitchen',     p1: 'Robin Ellis',    s1: 3, p2: 'Skylar Brooks',  s2: 3 },
+        { tn: 'Poach Masters',     p1: 'Lane Foster',    s1: 3, p2: 'Peyton Reed',    s2: 3 },
+        { tn: 'Reset & Rip',       p1: 'Elliot Carr',    s1: 3, p2: 'Harley Stone',   s2: 3 },
+        { tn: 'Fault Finders',     p1: 'Addison Hunt',   s1: 3, p2: 'Emery Nash',     s2: 3 },
+        { tn: 'Erne Experts',      p1: 'Dallas Cross',   s1: 3, p2: 'Avon Paige',     s2: 2 },
+        { tn: 'Backhand Bandits',  p1: 'Kendall Fox',    s1: 3, p2: 'Remy Holt',      s2: 2 },
+        { tn: 'Soft Game Gang',    p1: 'Sloane Perry',   s1: 3, p2: 'Winter Cole',    s2: 2 },
+        { tn: 'Cross Court Crew',  p1: 'Baylor Price',   s1: 2, p2: 'Camden Diaz',    s2: 3 },
+        { tn: 'No Man\'s Land',    p1: 'Tatum Walsh',    s1: 2, p2: 'Sawyer Flynn',   s2: 2 },
+        { tn: 'Flick & Run',       p1: 'Rowan Marsh',    s1: 2, p2: 'Oakley Dunn',    s2: 2 },
+        { tn: 'Paddle Pros',       p1: 'Soren Webb',     s1: 2, p2: 'Leighton Gray',  s2: 2 },
+        { tn: 'Transition Zone',   p1: 'Marlow Reid',    s1: 2, p2: 'Zephyr Cole',    s2: 2 },
+        { tn: 'The Dinksters',     p1: 'Caden Voss',     s1: 2, p2: 'Nolan Pierce',   s2: 2 },
+        { tn: 'Court Jesters',     p1: 'Ainsley Knox',   s1: 2, p2: 'Ryder Moss',     s2: 2 },
+        { tn: 'Angle Grinders',    p1: 'Emerson Frey',   s1: 2, p2: 'Sterling Hale',  s2: 2 },
+        { tn: 'Dink or Swim',      p1: 'Quincy Ash',     s1: 1, p2: 'Wren Daley',     s2: 2 },
+        { tn: 'The Side Outs',     p1: 'Hollis Vance',   s1: 1, p2: 'Indie Rowe',     s2: 2 },
+        { tn: 'Smash Bros',        p1: 'Beckett Lane',   s1: 1, p2: 'Easton Crow',    s2: 2 },
+        { tn: 'Out of Bounds',     p1: 'Harlow Penn',    s1: 1, p2: 'Finch Blair',    s2: 1 },
+        { tn: 'Power Drives',      p1: 'Keaton Marsh',   s1: 1, p2: 'Arden Reeves',   s2: 1 },
+        { tn: 'Paddle Smashers',   p1: 'Colby Yates',    s1: 1, p2: 'Shiloh Bauer',   s2: 1 },
+        { tn: 'Wild Cards',        p1: 'Phoenix Stark',  s1: 1, p2: 'Ember Quinn',    s2: 1 },
+        { tn: 'First Timers',      p1: 'River Stone',    s1: 1, p2: 'Willa Dean',     s2: 1 },
       ]
       let tid = state._tid
       const newTeams = samples.map(({ tn, p1, s1, p2, s2 }) => {

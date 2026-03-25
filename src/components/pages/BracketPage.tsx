@@ -72,80 +72,94 @@ export function BracketPage() {
       {/* Visual bracket */}
       <div className="bracket-wrapper">
         <div className="bracket">
-          {bracketRounds.map((round, ri) => (
+          {bracketRounds.map((round, ri) => {
+            const nextCount = bracketRounds[ri + 1]?.matches.length ?? 0
+            return (
+              <>
+                <div key={round.title} className="bracket-round-col">
+                  <div className="bracket-round-title">{round.title}</div>
+                  <div className="bracket-round-body">
+                    {round.matches.map(m => {
+                      const isDone = m.status === 'done'
+                      const tA = m.teamA as Team | null
+                      const tB = m.teamB as Team | null
+                      const winner = m.winner as Team | null
+                      const isWinA = isDone && winner?.id === tA?.id
+                      const isWinB = isDone && winner?.id === tB?.id
+                      const hasScore = m.games.length > 0
+                      const canScore = !isDone && tA && tB && !tA.isBye && !tB.isBye
+                      return (
+                        <div key={m.id} className="bracket-match">
+                          <div className={`bracket-match-inner ${isDone ? 'winner-decided' : ''}`}>
+                            <div className={`bracket-slot ${isWinA ? 'winner-slot' : ''}`}>
+                              {tA?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
+                                : tA ? <>{tA.name}{groupBadge(tA)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                              {hasScore && <span className="bracket-slot-score">{getScore(m, 'A')}</span>}
+                            </div>
+                            <div className={`bracket-slot ${isWinB ? 'winner-slot' : ''}`}>
+                              {tB?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
+                                : tB ? <>{tB.name}{groupBadge(tB)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                              {hasScore && <span className="bracket-slot-score">{getScore(m, 'B')}</span>}
+                            </div>
+                            {canScore && (
+                              <div className="bracket-match-action no-print">
+                                <button className="btn btn-outline btn-sm" onClick={() => openScore({ type: 'bracket', matchId: m.id })}>Score</button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {ri < bracketRounds.length - 1 && (
+                  <div key={`conn-${ri}`} className="bracket-connector-col">
+                    <div className="bracket-connector-header" />
+                    <div className="bracket-connector-body">
+                      {Array.from({ length: nextCount }, (_, ci) => (
+                        <div key={ci} className="bc-group">
+                          <div className="bc-top-half" />
+                          <div className="bc-bottom-half" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )
+          })}
+
+          {/* 3rd place */}
+          {tp && (
             <>
-              <div key={round.title} className="bracket-round">
-                <div className="bracket-round-title">{round.title}</div>
-                {round.matches.map(m => {
-                  const isDone = m.status === 'done'
-                  const tA = m.teamA as Team | null
-                  const tB = m.teamB as Team | null
-                  const winner = m.winner as Team | null
-                  const isWinA = isDone && winner?.id === tA?.id
-                  const isWinB = isDone && winner?.id === tB?.id
-                  const hasScore = m.games.length > 0
-                  return (
-                    <div key={m.id} className="bracket-match">
-                      <div className={`bracket-match-inner ${isDone ? 'winner-decided' : ''}`}>
-                        <div className={`bracket-slot ${isWinA ? 'winner-slot' : ''}`}>
-                          {tA?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
-                            : tA ? <>{tA.name}{groupBadge(tA)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
-                          {hasScore && <span className="bracket-slot-score">{getScore(m, 'A')}</span>}
-                        </div>
-                        <div className={`bracket-slot ${isWinB ? 'winner-slot' : ''}`}>
-                          {tB?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
-                            : tB ? <>{tB.name}{groupBadge(tB)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
-                          {hasScore && <span className="bracket-slot-score">{getScore(m, 'B')}</span>}
-                        </div>
-                      </div>
-                      {!isDone && tA && tB && !tA.isBye && !tB.isBye && (
-                        <div style={{ marginTop: 4, textAlign: 'center' }} className="no-print">
-                          <button className="btn btn-outline btn-sm" onClick={() => openScore({ type: 'bracket', matchId: m.id })}>Score</button>
+              <div className="bracket-3p-sep" />
+              <div className="bracket-round-col">
+                <div className="bracket-round-title" style={{ color: 'var(--gold)' }}>🥉 3rd Place</div>
+                <div className="bracket-round-body">
+                  <div className="bracket-match">
+                    <div className={`bracket-match-inner ${tp.status === 'done' ? 'winner-decided' : ''}`} style={{ borderColor: 'rgba(205,127,50,.5)' }}>
+                      {([tp.teamA, tp.teamB] as (Team | null)[]).map((t, idx) => {
+                        const isDone = tp.status === 'done'
+                        const isWin = isDone && (tp.winner as Team | null)?.id === t?.id
+                        const score = matchScoreDisplay(tp, tp.bestOf ?? settings.thirdBestOf, settings.winScore, settings.winBy2)
+                        return (
+                          <div key={idx} className={`bracket-slot ${isWin ? 'winner-slot' : ''}`}>
+                            {t ? <>{t.name}{groupBadge(t)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                            {score && <span className="bracket-slot-score">{idx === 0 ? score.scoreA : score.scoreB}</span>}
+                          </div>
+                        )
+                      })}
+                      {tp.teamA && tp.teamB && tp.status !== 'done' && (
+                        <div className="bracket-match-action no-print">
+                          <button className="btn btn-outline btn-sm" onClick={() => openScore({ type: 'bracket', matchId: tp.id })}>Score</button>
                         </div>
                       )}
                     </div>
-                  )
-                })}
-              </div>
-              {ri < bracketRounds.length - 1 && (
-                <div key={`conn-${ri}`} className="bracket-connector-col">
-                  {Array.from({ length: bracketRounds[ri + 1].matches.length }, (_, ci) => (
-                    <div key={ci} className="bc-group">
-                      <div className="bc-top-half" />
-                      <div className="bc-bottom-half" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ))}
-
-          {/* 3rd place in bracket visual */}
-          {tp && (
-            <div className="bracket-round" style={{ marginLeft: 16, borderLeft: '2px dashed var(--border)', paddingLeft: 16 }}>
-              <div className="bracket-round-title" style={{ color: 'var(--gold)' }}>🥉 3rd Place</div>
-              <div className="bracket-match" style={{ marginTop: 20 }}>
-                <div className={`bracket-match-inner ${tp.status === 'done' ? 'winner-decided' : ''}`} style={{ borderColor: 'rgba(205,127,50,.5)' }}>
-                  {[tp.teamA, tp.teamB].map((team, idx) => {
-                    const t = team as Team | null
-                    const isDone = tp.status === 'done'
-                    const isWin = isDone && (tp.winner as Team | null)?.id === t?.id
-                    const score = matchScoreDisplay(tp, tp.bestOf ?? settings.thirdBestOf, settings.winScore, settings.winBy2)
-                    return (
-                      <div key={idx} className={`bracket-slot ${isWin ? 'winner-slot' : ''}`}>
-                        {t ? <>{t.name}{groupBadge(t)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
-                        {score && <span className="bracket-slot-score">{idx === 0 ? score.scoreA : score.scoreB}</span>}
-                      </div>
-                    )
-                  })}
-                </div>
-                {tp.teamA && tp.teamB && tp.status !== 'done' && (
-                  <div style={{ marginTop: 4, textAlign: 'center' }} className="no-print">
-                    <button className="btn btn-outline btn-sm" onClick={() => openScore({ type: 'bracket', matchId: tp.id })}>Score</button>
                   </div>
-                )}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>

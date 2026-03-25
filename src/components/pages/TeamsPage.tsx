@@ -18,10 +18,20 @@ export function TeamsPage() {
         <div className="flex-row" style={{ gap: 7 }}>
           <button className="btn btn-primary btn-sm" onClick={openAddTeam}>+ Add Team</button>
           <button className="btn btn-outline btn-sm" onClick={() => {
-            if (!teams.length || confirm('This will add sample doubles teams. Continue?')) {
+            if (!teams.length || confirm('This will add 8 sample doubles teams. Continue?')) {
               dispatch({ type: 'LOAD_SAMPLE_TEAMS' })
             }
-          }}>Load Sample Teams</button>
+          }}>Sample 8</button>
+          <button className="btn btn-outline btn-sm" onClick={() => {
+            if (!teams.length || confirm('This will add 16 sample doubles teams. Continue?')) {
+              dispatch({ type: 'LOAD_SAMPLE_TEAMS_16' })
+            }
+          }}>Sample 16</button>
+          <button className="btn btn-outline btn-sm" onClick={() => {
+            if (!teams.length || confirm('This will add 32 sample doubles teams. Continue?')) {
+              dispatch({ type: 'LOAD_SAMPLE_TEAMS_32' })
+            }
+          }}>Sample 32</button>
         </div>
         {teams.length >= 2 && (
           <button className="btn btn-outline btn-sm" onClick={() => {
