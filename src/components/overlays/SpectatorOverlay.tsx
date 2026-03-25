@@ -94,7 +94,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
       )}
 
       {/* 4-panel grid */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: 1, background: 'var(--border)', overflow: 'hidden', minHeight: 0 }}>
+      <div className="spectator-panels" style={{ flex: 1, gap: 1, background: 'var(--border)', overflow: 'hidden', minHeight: 0 }}>
 
         {/* Panel 1: Standings */}
         <Panel title="📊 Standings" accent="var(--blue)">

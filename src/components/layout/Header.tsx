@@ -51,7 +51,7 @@ export function Header() {
       </div>
 
       <div className="header-actions">
-        <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, color: 'var(--text2)', letterSpacing: 1 }}>
+        <span className="header-clock" style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, color: 'var(--text2)', letterSpacing: 1 }}>
           {now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </span>
         {wsStatus !== 'offline' && (
@@ -86,12 +86,12 @@ export function Header() {
           </>
         )}
 
-        <button className="btn btn-sm btn-outline no-print" onClick={() => exportCSV(state)} title="Export CSV">↓ CSV</button>
+        <button className="btn btn-sm btn-outline no-print no-mobile" onClick={() => exportCSV(state)} title="Export CSV">↓ CSV</button>
         <button className="btn btn-sm btn-outline no-print" onClick={() => dispatch({ type: 'SET_PAGE', page: 'bracket' })} title="Live View">📺 Live</button>
         <button className="btn btn-sm btn-outline no-print" onClick={toggleTheme} title="Toggle theme">
           {dark ? '☀' : '🌙'}
         </button>
-        <button className="btn btn-sm btn-outline no-print" onClick={() => window.print()} title="Print">🖨</button>
+        <button className="btn btn-sm btn-outline no-print no-mobile" onClick={() => window.print()} title="Print">🖨</button>
       </div>
     </header>
   )

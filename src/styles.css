@@ -242,6 +242,64 @@ select option{background:var(--surface2)}
 /* ─── ANIMATIONS ────────────────────────────────────── */
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
+/* ─── SPECTATOR PANELS GRID ─────────────────────────── */
+.spectator-panels{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+
+/* ─── MOBILE RESPONSIVE ─────────────────────────────── */
+@media(max-width:640px){
+  /* Header */
+  header{padding:10px 14px;gap:6px}
+  .header-clock{display:none}
+  .header-actions{gap:4px}
+  .header-actions .btn-sm{padding:5px 8px;font-size:12px}
+  /* Hide print button on mobile (no-mobile utility) */
+  .no-mobile{display:none!important}
+
+  /* Nav */
+  nav{padding:8px 12px;gap:2px}
+  nav button{padding:5px 9px;font-size:13px}
+
+  /* Main */
+  main{padding:14px}
+  .section-title{font-size:24px}
+
+  /* Grids → single column */
+  .grid-2,.grid-3{grid-template-columns:1fr}
+
+  /* Setting rows: stack label + control vertically */
+  .setting-item{flex-wrap:wrap;gap:8px}
+
+  /* Form inline → stack */
+  .form-row-inline{flex-direction:column}
+
+  /* Groups: full width cards */
+  .group-card{min-width:100%;max-width:100%}
+
+  /* Teams page: wrap button row */
+  .flex-between{flex-wrap:wrap;gap:6px}
+
+  /* Match card teams row: smaller score on mobile */
+  .team-slot-score{font-size:26px}
+
+  /* Modals */
+  .modal{padding:16px;margin:8px}
+  .modal-overlay{padding:8px;align-items:flex-end}
+  .modal{border-radius:var(--r2) var(--r2) 0 0;max-height:95vh}
+  .modal-actions{flex-direction:column-reverse}
+  .modal-actions .btn{width:100%;justify-content:center}
+
+  /* Score inputs */
+  .score-inputs input{font-size:24px;height:46px}
+
+  /* Spectator overlay: single column */
+  .spectator-panels{grid-template-columns:1fr;grid-template-rows:unset}
+}
+
+@media(max-width:400px){
+  .logo{font-size:20px;letter-spacing:2px}
+  .phase-badge{display:none}
+}
+
 /* ─── PRINT ─────────────────────────────────────────── */
 @media print{
   body{background:#fff;color:#000}

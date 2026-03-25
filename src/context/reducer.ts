@@ -369,6 +369,8 @@ export function reducer(state: TournamentState, action: Action): TournamentState
             if (tp.feedLoserFrom![0] === matchId && !tp.teamA) tp.teamA = loser
             else if (tp.feedLoserFrom![1] === matchId && !tp.teamB) tp.teamB = loser
             thirdPlaceMatch = tp
+            // Keep bracketMatches in sync so serialization preserves the updated teams
+            bracketMatches = bracketMatches.map(m => m.id === tp.id ? tp : m)
           }
         }
         return { ...state, bracketMatches, thirdPlaceMatch, history: entry ? [...state.history, entry] : state.history }
