@@ -232,7 +232,7 @@ select option{background:var(--surface2)}
 .welcome-card{background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r2);padding:36px;max-width:480px;width:100%;text-align:center}
 
 /* ─── SPECTATOR OVERLAY ─────────────────────────────── */
-.spectator-overlay{position:fixed;inset:0;background:var(--bg);z-index:120;display:none;flex-direction:column;overflow:auto}
+.spectator-overlay{position:fixed;inset:0;background:var(--bg);z-index:120;display:none;flex-direction:column;overflow:auto;box-sizing:border-box;width:100%;max-width:100vw}
 .spectator-overlay.open{display:flex}
 
 /* ─── CELEBRATION OVERLAY ───────────────────────────── */
@@ -243,7 +243,13 @@ select option{background:var(--surface2)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* ─── SPECTATOR PANELS GRID ─────────────────────────── */
-.spectator-panels{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.spectator-panels{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto;max-width:100%}
+.spectator-panels > div{word-break:break-word;overflow-wrap:break-word;max-width:100%;box-sizing:border-box}
+
+/* Spectator overlay bracket: responsive layout */
+.spectator-overlay .bracket-round-col{flex-shrink:1;min-width:auto}
+.spectator-overlay .bracket-match-inner{width:100%!important;max-width:200px;word-break:break-word}
+.spectator-overlay .bracket-slot{word-break:break-word;overflow-wrap:break-word;white-space:normal}
 
 /* ─── MOBILE RESPONSIVE ─────────────────────────────── */
 @media(max-width:640px){
@@ -291,8 +297,16 @@ select option{background:var(--surface2)}
   /* Score inputs */
   .score-inputs input{font-size:24px;height:46px}
 
-  /* Spectator overlay: single column */
+  /* Spectator overlay: single column, no boxes */
   .spectator-panels{grid-template-columns:1fr;grid-template-rows:unset}
+  .spectator-panels > div{background:white!important;padding:0!important;border:none!important}
+  .spectator-panels > div > div:first-child{border-bottom:none!important;padding-bottom:10px!important;margin-bottom:16px!important}
+}
+
+@media(max-width:640px){
+  /* Standings: single column */
+  .spectator-standings{flex-direction:column!important}
+  .spectator-standings > div{flex:none!important;width:100%!important;min-width:unset!important}
 }
 
 @media(max-width:400px){

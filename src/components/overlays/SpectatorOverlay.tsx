@@ -105,12 +105,12 @@ export function SpectatorOverlay({ forceOpen }: Props) {
       )}
 
       {/* 4-panel grid */}
-      <div className="spectator-panels" style={{ flex: 1, gap: 1, background: 'var(--border)', overflow: 'hidden', minHeight: 0 }}>
+      <div className="spectator-panels" style={{ gap: 1, background: 'var(--border)', overflow: 'visible' }}>
 
         {/* Panel 1: Standings */}
         <Panel title="📊 Standings" accent="var(--blue)">
           {Object.keys(rrMatches).length ? (
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <div className="spectator-standings" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               {groups.map((g, gi) => {
                 const st = computeStandings(gi, state)
                 return (
@@ -148,8 +148,8 @@ export function SpectatorOverlay({ forceOpen }: Props) {
         {/* Panel 2: Bracket */}
         <Panel title="🏆 Bracket" accent="var(--gold)">
           {bracketRounds.length ? (
-            <div style={{ overflowX: 'auto' }}>
-              <div style={{ display: 'flex', alignItems: 'stretch', minWidth: 'max-content', gap: 0 }}>
+            <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, flexWrap: 'wrap', minHeight: 'auto' }}>
                 {bracketRounds.map((round, ri) => (
                   <>
                     <div key={round.title} style={{ display: 'flex', flexDirection: 'column' }}>
@@ -314,11 +314,11 @@ export function SpectatorOverlay({ forceOpen }: Props) {
 
 function Panel({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: 'var(--surface)', padding: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--surface)', padding: 16, overflow: 'visible', display: 'flex', flexDirection: 'column', width: '100%' }}>
       <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 16, letterSpacing: 2, color: accent, marginBottom: 10, paddingBottom: 7, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         {title}
       </div>
-      <div style={{ overflowY: 'auto', overflowX: 'hidden', flex: 1, minHeight: 0 }}>
+      <div style={{ overflow: 'visible', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
         {children}
       </div>
     </div>
