@@ -4,7 +4,7 @@ import type {
 } from '../types'
 import { S_CONSTRAINTS, ODD_ONLY } from '../types'
 import { computeStandings, gameWin } from '../utils/scoring'
-import { buildBracket } from '../utils/bracket'
+import { buildBracket, rebuildBracketRounds } from '../utils/bracket'
 import { hydrateState } from '../utils/serialization'
 
 // ─── Action Types ────────────────────────────────────
@@ -375,7 +375,8 @@ export function reducer(state: TournamentState, action: Action): TournamentState
             bracketMatches = bracketMatches.map(m => m.id === tp.id ? tp : m)
           }
         }
-        return { ...state, bracketMatches, thirdPlaceMatch, history: entry ? [...state.history, entry] : state.history }
+        const bracketRounds = rebuildBracketRounds(bracketMatches)
+        return { ...state, bracketMatches, bracketRounds, thirdPlaceMatch, history: entry ? [...state.history, entry] : state.history }
       }
     }
 

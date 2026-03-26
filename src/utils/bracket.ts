@@ -92,3 +92,24 @@ export function rndTitle(i: number, t: number, matchCount?: number): string {
   if (matchCount === 8) return 'Round of 8'
   return `Round ${i + 1}`
 }
+
+export function rebuildBracketRounds(bracketMatches: Match[]): BracketRound[] {
+  const bracketOnlyMatches = bracketMatches.filter(m => m.roundIdx !== undefined && m.roundIdx >= 0)
+  if (bracketOnlyMatches.length === 0) return []
+  
+  const maxRound = Math.max(...bracketOnlyMatches.map(m => m.roundIdx as number))
+  const total = maxRound + 1
+  const rounds: BracketRound[] = []
+  
+  for (let ri = 0; ri <= maxRound; ri++) {
+    const roundMatches = bracketOnlyMatches.filter(m => m.roundIdx === ri).sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
+    if (roundMatches.length > 0) {
+      rounds.push({
+        title: rndTitle(ri, total, roundMatches.length),
+        matches: roundMatches,
+      })
+    }
+  }
+  
+  return rounds
+}
