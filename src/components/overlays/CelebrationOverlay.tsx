@@ -3,13 +3,14 @@ import { useTournament } from '../../context/TournamentContext'
 import type { Team } from '../../types'
 
 export function CelebrationOverlay() {
-  const { state } = useTournament()
+  const { state, dispatch } = useTournament()
   const { bracketRounds, thirdPlaceMatch, confettiShown } = state
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number>(0)
 
   const fin = bracketRounds[bracketRounds.length - 1]?.matches[0]
   const champ = fin?.status === 'done' ? (fin.winner as Team | null) : null
+  const runnerUp = fin?.status === 'done' ? (fin.loser as Team | null) : null
   const tp = thirdPlaceMatch
   const third = tp?.status === 'done' ? (tp.winner as Team | null) : null
   const isOpen = confettiShown && !!champ
@@ -65,18 +66,20 @@ export function CelebrationOverlay() {
       onClick={() => cancelAnimationFrame(rafRef.current)}
     >
       <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
-      <div style={{ position: 'relative', textAlign: 'center', background: 'var(--surface)', border: '2px solid var(--accent)', borderRadius: 'var(--r2)', padding: '32px 40px', maxWidth: 440 }}>
-        <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 48, letterSpacing: 4, color: 'var(--accent)', lineHeight: 1 }}>🏆 CHAMPION</div>
-        <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 32, letterSpacing: 2, color: 'var(--text)', marginTop: 6 }}>{champ.name}</div>
+      <div style={{ position: 'relative', textAlign: 'center', background: 'transparent', padding: '32px 40px', maxWidth: 440 }}>
+        <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 48, letterSpacing: 2, color: 'white', marginTop: 6 }}>🏆 {champ.name}</div>
+        {runnerUp && (
+          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 32, color: 'white', marginTop: 10 }}>🥈 {runnerUp.name}</div>
+        )}
         {third && (
-          <div style={{ fontSize: 14, color: 'var(--gold)', marginTop: 10 }}>🥉 3rd Place: {third.name}</div>
+          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 24, color: 'white', marginTop: 10 }}>🥉 {third.name}</div>
         )}
         <button
           className="btn btn-outline btn-sm"
-          style={{ marginTop: 20 }}
-          onClick={e => { e.stopPropagation(); cancelAnimationFrame(rafRef.current) }}
+          style={{ marginTop: 20, width: 40, height: 40, borderRadius: '50%', borderColor: 'white', color: 'white', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+          onClick={e => { e.stopPropagation(); cancelAnimationFrame(rafRef.current); dispatch({ type: 'CLEAR_CONFETTI_SHOWN' }) }}
         >
-          Close
+          X
         </button>
       </div>
     </div>

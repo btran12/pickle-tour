@@ -36,7 +36,7 @@ export function buildBracket(
     return m
   })
 
-  bracketRounds.push({ title: rndTitle(0, total), matches: cur })
+  bracketRounds.push({ title: rndTitle(0, total, cur.length), matches: cur })
 
   let ri = 1
   while (cur.length > 1) {
@@ -57,7 +57,7 @@ export function buildBracket(
       bracketMatches.push(m)
       next.push(m)
     }
-    bracketRounds.push({ title: rndTitle(ri, total), matches: next })
+    bracketRounds.push({ title: rndTitle(ri, total, next.length), matches: next })
     cur = next
     ri++
   }
@@ -83,9 +83,12 @@ export function buildBracket(
   return { bracketMatches, bracketRounds, thirdPlaceMatch, _mid: mid }
 }
 
-export function rndTitle(i: number, t: number): string {
+export function rndTitle(i: number, t: number, matchCount?: number): string {
   if (i === t - 1) return '🏆 Final'
   if (i === t - 2) return '🥈 Semi-Finals'
   if (t >= 4 && i === t - 3) return 'Quarter-Finals'
+  // For early rounds, show "Round of X" based on number of matches
+  if (matchCount === 16) return 'Round of 16'
+  if (matchCount === 8) return 'Round of 8'
   return `Round ${i + 1}`
 }

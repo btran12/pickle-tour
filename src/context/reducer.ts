@@ -51,6 +51,7 @@ export type Action =
   | { type: 'CLEAR_HISTORY' }
   // Confetti
   | { type: 'SET_CONFETTI_SHOWN' }
+  | { type: 'CLEAR_CONFETTI_SHOWN' }
   // Toast
   | { type: 'SHOW_TOAST'; text: string }
   | { type: 'CLEAR_TOAST'; id: number }
@@ -441,6 +442,9 @@ export function reducer(state: TournamentState, action: Action): TournamentState
     // ── Confetti ─────────────────────────────────────
     case 'SET_CONFETTI_SHOWN':
       return { ...state, confettiShown: true }
+
+    case 'CLEAR_CONFETTI_SHOWN':
+      return { ...state, confettiShown: false }
 
     // ── Toast ────────────────────────────────────────
     case 'SHOW_TOAST':

@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 import { MatchCard } from '../shared/MatchCard'
@@ -8,20 +7,14 @@ import type { Team } from '../../types'
 export function BracketPage() {
   const { state, dispatch } = useTournament()
   const { openScore } = useModal()
-  const { bracketRounds, bracketMatches, thirdPlaceMatch, bracketSeedGroups, groups, settings, confettiShown } = state
+  const { bracketRounds, bracketMatches, thirdPlaceMatch, bracketSeedGroups, groups, settings } = state
 
   const fin = bracketRounds[bracketRounds.length - 1]?.matches[0]
   const champ = fin?.status === 'done' ? (fin.winner as Team | null) : null
+  const runnerUp = fin?.status === 'done' ? (fin.loser as Team | null) : null
   const tp = thirdPlaceMatch
   const third = tp?.status === 'done' ? (tp.winner as Team | null) : null
   const tournamentDone = !!champ && (!tp || tp.status === 'done')
-
-  // Auto-trigger confetti
-  useEffect(() => {
-    if (tournamentDone && !confettiShown) {
-      dispatch({ type: 'SET_CONFETTI_SHOWN' })
-    }
-  }, [tournamentDone, confettiShown, dispatch])
 
   if (!bracketRounds.length) return (
     <div>
@@ -54,13 +47,34 @@ export function BracketPage() {
       <div className="section-title">Bracket</div>
 
       {champ && (
-        <div className="alert alert-success" style={{ fontSize: 15, marginBottom: 18 }}>
-          🏆 <strong>Champion: {champ.name}</strong>
-          {third && ` · 🥉 3rd: ${third.name}`}
+        <div 
+          style={{ 
+            fontSize: 20,
+            fontWeight: 600,
+            marginBottom: 24,
+            padding: '16px 0',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            color: 'var(--text1)'
+          }}
+        >
+          <div style={{ fontSize: 28 }}>🏆 <span style={{ letterSpacing: 1 }}>{champ.name}</span></div>
+          {runnerUp && (
+            <div style={{ fontSize: 22, color: 'var(--text2)' }}>
+              🥈 <span style={{ letterSpacing: 0.5 }}>{runnerUp.name}</span>
+            </div>
+          )}
+          {third && (
+            <div style={{ fontSize: 22, color: 'var(--text3)' }}>
+              🥉 <span style={{ letterSpacing: 0.5 }}>{third.name}</span>
+            </div>
+          )}
           {tournamentDone && (
             <button
               className="btn btn-sm btn-primary no-print"
-              style={{ marginLeft: 12 }}
+              style={{ marginTop: 8, alignSelf: 'center' }}
               onClick={() => dispatch({ type: 'SET_CONFETTI_SHOWN' })}
             >
               🎉 Celebrate!
@@ -88,24 +102,54 @@ export function BracketPage() {
                       const isWinB = isDone && winner?.id === tB?.id
                       const hasScore = m.games.length > 0
                       const canScore = !isDone && tA && tB && !tA.isBye && !tB.isBye
+                      const canOpenModal = !state.testingMode && tA && tB && !tA.isBye && !tB.isBye
+                      
+                      const handleQuickScore = (teamId: number) => {
+                        if (isDone || !state.testingMode) return
+                        const winnerIsA = teamId === tA?.id
+                        dispatch({
+                          type: 'SUBMIT_SCORE',
+                          matchType: 'bracket',
+                          matchId: m.id,
+                          games: [{ scoreA: winnerIsA ? 11 : 0, scoreB: winnerIsA ? 0 : 11 }]
+                        })
+                      }
+                      
                       return (
                         <div key={m.id} className="bracket-match">
-                          <div className={`bracket-match-inner ${isDone ? 'winner-decided' : ''}`}>
-                            <div className={`bracket-slot ${isWinA ? 'winner-slot' : ''}`}>
+                          <div 
+                            className={`bracket-match-inner ${isDone ? 'winner-decided' : ''}`}
+                            onClick={() => canOpenModal ? openScore({ type: 'bracket', matchId: m.id }) : undefined}
+                            style={canOpenModal ? { cursor: 'pointer' } : undefined}
+                          >
+                            <div 
+                              className={`bracket-slot ${isWinA ? 'winner-slot' : ''}`}
+                              onClick={(e) => {
+                                if (state.testingMode) {
+                                  e.stopPropagation()
+                                  handleQuickScore(tA?.id ?? 0)
+                                }
+                              }}
+                              style={state.testingMode && !isDone && tA ? { cursor: 'pointer' } : undefined}
+                            >
                               {tA?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
                                 : tA ? <>{tA.name}{groupBadge(tA)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                               {hasScore && <span className="bracket-slot-score">{getScore(m, 'A')}</span>}
                             </div>
-                            <div className={`bracket-slot ${isWinB ? 'winner-slot' : ''}`}>
+                            <div 
+                              className={`bracket-slot ${isWinB ? 'winner-slot' : ''}`}
+                              onClick={(e) => {
+                                if (state.testingMode) {
+                                  e.stopPropagation()
+                                  handleQuickScore(tB?.id ?? 0)
+                                }
+                              }}
+                              style={state.testingMode && !isDone && tB ? { cursor: 'pointer' } : undefined}
+                            >
                               {tB?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
                                 : tB ? <>{tB.name}{groupBadge(tB)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                               {hasScore && <span className="bracket-slot-score">{getScore(m, 'B')}</span>}
                             </div>
-                            {canScore && (
-                              <div className="bracket-match-action no-print">
-                                <button className="btn btn-outline btn-sm" onClick={() => openScore({ type: 'bracket', matchId: m.id })}>Score</button>
-                              </div>
-                            )}
                           </div>
                         </div>
                       )
@@ -138,23 +182,45 @@ export function BracketPage() {
                 <div className="bracket-round-title" style={{ color: 'var(--gold)' }}>🥉 3rd Place</div>
                 <div className="bracket-round-body">
                   <div className="bracket-match">
-                    <div className={`bracket-match-inner ${tp.status === 'done' ? 'winner-decided' : ''}`} style={{ borderColor: 'rgba(205,127,50,.5)' }}>
+                    <div 
+                      className={`bracket-match-inner ${tp.status === 'done' ? 'winner-decided' : ''}`} 
+                      onClick={() => tp.teamA && tp.teamB && !state.testingMode ? openScore({ type: 'bracket', matchId: tp.id }) : undefined}
+                      style={{ borderColor: 'rgba(205,127,50,.5)', cursor: tp.teamA && tp.teamB && !state.testingMode ? 'pointer' : undefined }}
+                    >
                       {([tp.teamA, tp.teamB] as (Team | null)[]).map((t, idx) => {
                         const isDone = tp.status === 'done'
                         const isWin = isDone && (tp.winner as Team | null)?.id === t?.id
                         const score = matchScoreDisplay(tp, tp.bestOf ?? settings.thirdBestOf, settings.winScore, settings.winBy2)
+                        
+                        const handleQuickScore = () => {
+                          if (isDone || !state.testingMode || !t) return
+                          const otherTeam = idx === 0 ? tp.teamB : tp.teamA
+                          const winnerIsA = idx === 0
+                          dispatch({
+                            type: 'SUBMIT_SCORE',
+                            matchType: 'bracket',
+                            matchId: tp.id,
+                            games: [{ scoreA: winnerIsA ? 11 : 0, scoreB: winnerIsA ? 0 : 11 }]
+                          })
+                        }
+                        
                         return (
-                          <div key={idx} className={`bracket-slot ${isWin ? 'winner-slot' : ''}`}>
+                          <div 
+                            key={idx} 
+                            className={`bracket-slot ${isWin ? 'winner-slot' : ''}`}
+                            onClick={(e) => {
+                              if (state.testingMode) {
+                                e.stopPropagation()
+                                handleQuickScore()
+                              }
+                            }}
+                            style={state.testingMode && !isDone && t ? { cursor: 'pointer' } : undefined}
+                          >
                             {t ? <>{t.name}{groupBadge(t)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                             {score && <span className="bracket-slot-score">{idx === 0 ? score.scoreA : score.scoreB}</span>}
                           </div>
                         )
                       })}
-                      {tp.teamA && tp.teamB && tp.status !== 'done' && (
-                        <div className="bracket-match-action no-print">
-                          <button className="btn btn-outline btn-sm" onClick={() => openScore({ type: 'bracket', matchId: tp.id })}>Score</button>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -162,27 +228,6 @@ export function BracketPage() {
             </>
           )}
         </div>
-      </div>
-
-      {/* Match detail cards */}
-      <div style={{ marginTop: 20 }}>
-        {tp && tp.teamA && tp.teamB && (
-          <>
-            <div className="card-title mb8">🥉 3rd Place Match</div>
-            <MatchCard match={tp} matchType="bracket" bestOf={tp.bestOf ?? settings.thirdBestOf} is3rdPlace testingMode={state.testingMode} />
-          </>
-        )}
-        {bracketRounds.map(round => (
-          <div key={round.title}>
-            <div className="card-title mb8">{round.title}</div>
-            {round.matches
-              .filter(m => m.teamA && m.teamB && !(m.teamA as Team).isBye && !(m.teamB as Team).isBye)
-              .map(m => (
-                <MatchCard key={m.id} match={m} matchType="bracket" bestOf={m.bestOf ?? settings.sfBestOf} testingMode={state.testingMode} />
-              ))
-            }
-          </div>
-        ))}
       </div>
     </div>
   )
