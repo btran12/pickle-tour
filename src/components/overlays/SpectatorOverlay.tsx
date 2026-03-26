@@ -47,6 +47,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
 
   const fin = bracketRounds[bracketRounds.length - 1]?.matches[0]
   const champ = fin?.status === 'done' ? (fin.winner as Team | null) : null
+  const runnerUp = fin?.status === 'done' ? (fin.loser as Team | null) : null
   const tp = thirdPlaceMatch
   const third = tp?.status === 'done' ? (tp.winner as Team | null) : null
   const allMatches = allMatchesFlat(state)
@@ -89,7 +90,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
       {/* Champion banner */}
       {champ && (
         <div style={{ background: 'var(--accent-dim)', borderBottom: '1px solid var(--border2)', padding: '10px 20px', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textAlign: 'center' }}>
-          🏆 Champion: {champ.name}{third ? ` · 🥉 3rd: ${third.name}` : ''}
+          🏆 {champ.name}{runnerUp ? ` · 🥈 ${runnerUp.name}` : ''}{third ? ` · 🥉 ${third.name}` : ''}
         </div>
       )}
 
@@ -103,24 +104,24 @@ export function SpectatorOverlay({ forceOpen }: Props) {
               {groups.map((g, gi) => {
                 const st = computeStandings(gi, state)
                 return (
-                  <div key={g.id} style={{ flex: 1, minWidth: 160 }}>
-                    <div style={{ fontSize: 16, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 10 }}>{g.name}</div>
-                    <table className="standings-table" style={{ fontSize: 17 }}>
+                  <div key={g.id} style={{ flex: 1, minWidth: 160, border: '2px solid var(--border2)', borderRadius: 'var(--r)', padding: 12, background: 'var(--surface2)' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 10 }}>{g.name}</div>
+                    <table className="standings-table" style={{ fontSize: 14 }}>
                       <thead>
                         <tr>
-                          <th style={{ fontSize: 13 }}>#</th>
-                          <th style={{ fontSize: 13 }}>Team</th>
-                          <th style={{ fontSize: 13 }}>W</th>
-                          <th style={{ fontSize: 13 }}>L</th>
+                          <th style={{ fontSize: 11 }}>#</th>
+                          <th style={{ fontSize: 11 }}>Team</th>
+                          <th style={{ fontSize: 11 }}>W</th>
+                          <th style={{ fontSize: 11 }}>L</th>
                         </tr>
                       </thead>
                       <tbody>
                         {st.map((s, i) => (
                           <tr key={s.team.id}>
-                            <td><span className={`rank-num rank-${i + 1}`} style={{ fontSize: 17 }}>{i + 1}</span></td>
-                            <td style={{ fontSize: 17, fontWeight: 600 }}>{getTeamDisplayName(s.team)}</td>
-                            <td style={{ color: 'var(--accent)', fontSize: 17, fontWeight: 700 }}>{s.wins}</td>
-                            <td style={{ color: 'var(--red)', fontSize: 17, fontWeight: 700 }}>{s.losses}</td>
+                            <td><span className={`rank-num rank-${i + 1}`} style={{ fontSize: 14 }}>{i + 1}</span></td>
+                            <td style={{ fontSize: 14, fontWeight: 600 }}>{getTeamDisplayName(s.team)}</td>
+                            <td style={{ color: 'var(--accent)', fontSize: 14, fontWeight: 700 }}>{s.wins}</td>
+                            <td style={{ color: 'var(--red)', fontSize: 14, fontWeight: 700 }}>{s.losses}</td>
                           </tr>
                         ))}
                       </tbody>
