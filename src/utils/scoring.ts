@@ -98,6 +98,22 @@ export function computeStandings(gi: number, state: TournamentState): Standing[]
   return Object.values(map).sort((a, b) => b.wins - a.wins || b.gamesWon - a.gamesWon || b.pd - a.pd)
 }
 
+export function getTeamDisplayName(team: Team): string {
+  // If team has a proper name, use it
+  if (team.name && team.name.trim()) return team.name
+  
+  // Otherwise, generate from players: "FirstName LastInitial / FirstName LastInitial"
+  return team.players
+    .map(p => {
+      const parts = p.name.trim().split(' ')
+      if (parts.length < 2) return parts[0] // If no last name, just use first name
+      const firstName = parts[0]
+      const lastInitial = parts[parts.length - 1][0]
+      return `${firstName} ${lastInitial}`
+    })
+    .join(' / ')
+}
+
 export function fmtTime(t: string): string {
   if (!t) return ''
   const [h, m] = t.split(':')

@@ -1,6 +1,6 @@
 import { useTournament } from '../../context/TournamentContext'
 import { MatchCard } from '../shared/MatchCard'
-import { computeStandings } from '../../utils/scoring'
+import { computeStandings, getTeamDisplayName } from '../../utils/scoring'
 
 export function RoundRobinPage() {
   const { state, dispatch } = useTournament()
@@ -57,7 +57,7 @@ export function RoundRobinPage() {
                 <tr key={s.team.id}>
                   <td><span className={`rank-num rank-${i + 1}`}>{i + 1}</span></td>
                   <td style={{ fontWeight: 500 }}>
-                    {s.team.name}
+                    {getTeamDisplayName(s.team)}
                     {i < settings.advanceCount && <span style={{ fontSize: 10, color: 'var(--accent)', marginLeft: 4 }}>↑</span>}
                   </td>
                   <td style={{ color: 'var(--accent)' }}>{s.wins}</td>

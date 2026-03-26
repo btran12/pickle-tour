@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
-import { computeStandings, matchScoreDisplay, gamesWon, fmtTime, gameWin } from '../../utils/scoring'
+import { computeStandings, matchScoreDisplay, gamesWon, fmtTime, gameWin, getTeamDisplayName } from '../../utils/scoring'
 import { allMatchesFlat } from '../../context/reducer'
 import type { Match, Team } from '../../types'
 
@@ -118,7 +118,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                         {st.map((s, i) => (
                           <tr key={s.team.id}>
                             <td><span className={`rank-num rank-${i + 1}`} style={{ fontSize: 17 }}>{i + 1}</span></td>
-                            <td style={{ fontSize: 17, fontWeight: 600 }}>{s.team.name}</td>
+                            <td style={{ fontSize: 17, fontWeight: 600 }}>{getTeamDisplayName(s.team)}</td>
                             <td style={{ color: 'var(--accent)', fontSize: 17, fontWeight: 700 }}>{s.wins}</td>
                             <td style={{ color: 'var(--red)', fontSize: 17, fontWeight: 700 }}>{s.losses}</td>
                           </tr>
@@ -210,12 +210,12 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ flex: 1, textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{tA.name}</div>
+                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{getTeamDisplayName(tA)}</div>
                       {m.games.length > 0 && <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'A', settings.winScore, settings.winBy2)}</div>}
                     </div>
                     <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, color: 'var(--text3)', flexShrink: 0 }}>VS</div>
                     <div style={{ flex: 1, textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{tB.name}</div>
+                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{getTeamDisplayName(tB)}</div>
                       {m.games.length > 0 && <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'B', settings.winScore, settings.winBy2)}</div>}
                     </div>
                   </div>
@@ -267,7 +267,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                   {/* Scoreboard: TEAM A  score — score  TEAM B */}
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{ flex: 1, textAlign: 'right', paddingRight: 12, overflow: 'hidden' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, color: winA ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tA.name}</div>
+                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, color: winA ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tA)}</div>
                       {winA && <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 2, fontWeight: 600 }}>Winner</div>}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
@@ -276,7 +276,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                       <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, lineHeight: 1, color: winB ? 'var(--accent)' : 'var(--text3)' }}>{scoreB}</span>
                     </div>
                     <div style={{ flex: 1, paddingLeft: 12, overflow: 'hidden' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, color: winB ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tB.name}</div>
+                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, color: winB ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tB)}</div>
                       {winB && <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 2, fontWeight: 600 }}>Winner</div>}
                     </div>
                   </div>

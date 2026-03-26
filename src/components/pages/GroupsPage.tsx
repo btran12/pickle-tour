@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { SKILL_LABELS } from '../../types'
+import { getTeamDisplayName } from '../../utils/scoring'
 import type { Team } from '../../types'
 
 export function GroupsPage() {
@@ -134,7 +135,7 @@ function GroupTeamItem({ team, isDragging, draggable, onDragStart }: {
       draggable={draggable}
       onDragStart={draggable ? onDragStart : undefined}
     >
-      <span>{team.name}</span>
+      <span>{getTeamDisplayName(team)}</span>
       {team.avgSkill > 0 && (
         <span className={`skill-badge skill-${skillRound}`}>{SKILL_LABELS[skillRound]}</span>
       )}

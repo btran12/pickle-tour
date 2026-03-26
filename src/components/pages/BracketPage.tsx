@@ -1,7 +1,7 @@
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 import { MatchCard } from '../shared/MatchCard'
-import { matchScoreDisplay } from '../../utils/scoring'
+import { matchScoreDisplay, getTeamDisplayName } from '../../utils/scoring'
 import type { Team } from '../../types'
 
 export function BracketPage() {
@@ -133,7 +133,7 @@ export function BracketPage() {
                               style={state.testingMode && !isDone && tA ? { cursor: 'pointer' } : undefined}
                             >
                               {tA?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
-                                : tA ? tA.name : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                                : tA ? getTeamDisplayName(tA) : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                               {hasScore && <span className="bracket-slot-score">{getScore(m, 'A')}</span>}
                             </div>
                             <div 
@@ -147,7 +147,7 @@ export function BracketPage() {
                               style={state.testingMode && !isDone && tB ? { cursor: 'pointer' } : undefined}
                             >
                               {tB?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
-                                : tB ? tB.name : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                                : tB ? getTeamDisplayName(tB) : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                               {hasScore && <span className="bracket-slot-score">{getScore(m, 'B')}</span>}
                             </div>
                           </div>
@@ -216,7 +216,7 @@ export function BracketPage() {
                             }}
                             style={state.testingMode && !isDone && t ? { cursor: 'pointer' } : undefined}
                           >
-                            {t ? <>{t.name}{groupBadge(t)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                            {t ? getTeamDisplayName(t) : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                             {score && <span className="bracket-slot-score">{idx === 0 ? score.scoreA : score.scoreB}</span>}
                           </div>
                         )
