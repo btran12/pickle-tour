@@ -63,7 +63,6 @@ export function CelebrationOverlay() {
   return (
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.6)' }}
-      onClick={() => cancelAnimationFrame(rafRef.current)}
     >
       <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
       <div style={{ position: 'relative', textAlign: 'center', background: 'transparent', padding: '32px 40px', maxWidth: 440 }}>
@@ -76,7 +75,7 @@ export function CelebrationOverlay() {
         )}
         <button
           className="btn btn-outline btn-sm"
-          style={{ marginTop: 20, width: 40, height: 40, borderRadius: '50%', borderColor: 'white', color: 'white', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+          style={{ marginTop: 40, width: 40, height: 40, borderRadius: '50%', borderColor: 'white', color: 'white', fontSize: 20, alignItems: 'center', justifyContent: 'center', padding: 0 }}
           onClick={e => { e.stopPropagation(); cancelAnimationFrame(rafRef.current); dispatch({ type: 'CLEAR_CONFETTI_SHOWN' }) }}
         >
           X
