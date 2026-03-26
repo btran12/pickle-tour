@@ -62,6 +62,16 @@ export function SpectatorOverlay({ forceOpen }: Props) {
     return g ? <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 8, padding: '1px 3px', borderRadius: 2, background: 'var(--accent-dim)', color: 'var(--text3)', marginLeft: 3 }}>{g.name}</span> : null
   }
 
+  const getBracketRoundTitle = (ri: number, matchCount: number): string => {
+    const t = totalBracketRounds
+    if (ri === t - 1) return '🏆 Final'
+    if (ri === t - 2) return '🥈 Semi-Finals'
+    if (ri === t - 3) return 'Quarter-Finals'
+    if (matchCount === 16) return 'Round of 16'
+    if (matchCount === 8) return 'Round of 8'
+    return `Round ${ri + 1}`
+  }
+
   return (
     <div className="spectator-overlay open" style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
@@ -143,7 +153,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                 {bracketRounds.map((round, ri) => (
                   <>
                     <div key={round.title} style={{ display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 17, letterSpacing: 1, color: 'var(--text3)', textAlign: 'center', padding: '0 14px 8px', flexShrink: 0 }}>{round.title}</div>
+                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 17, letterSpacing: 1, color: 'var(--text3)', textAlign: 'center', padding: '0 14px 8px', flexShrink: 0 }}>{getBracketRoundTitle(ri, round.matches.length)}</div>
                       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
                         {round.matches.map(m => {
                           const isDone = m.status === 'done'
@@ -157,7 +167,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                                 const isWin = isDone && winner?.id === t?.id
                                 return (
                                   <div key={idx} style={{ padding: '8px 11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 15, fontWeight: 600, borderBottom: idx === 0 ? '1px solid var(--border)' : undefined, background: isWin ? 'var(--accent-dim)' : undefined, color: isWin ? 'var(--accent)' : 'var(--text)', borderLeft: isWin ? '3px solid var(--accent)' : undefined }}>
-                                    <span>{t?.name ?? 'TBD'}{groupBadge(t)}</span>
+                                    <span>{t?.name ?? 'TBD'}</span>
                                     {sd && m.games.length > 0 && <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 15, fontWeight: 700 }}>{score}</span>}
                                   </div>
                                 )
@@ -268,17 +278,15 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                   {/* Scoreboard: TEAM A  score — score  TEAM B */}
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{ flex: 1, textAlign: 'right', paddingRight: 12, overflow: 'hidden' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, color: winA ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tA)}</div>
-                      {winA && <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 2, fontWeight: 600 }}>Winner</div>}
+                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, color: winA ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tA)}</div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                      <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, lineHeight: 1, color: winA ? 'var(--accent)' : 'var(--text3)' }}>{scoreA}</span>
+                      <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, lineHeight: 1, color: winA ? 'var(--accent)' : 'var(--text3)' }}>{scoreA}</span>
                       <span style={{ fontSize: 22, color: 'var(--text3)', fontWeight: 300, lineHeight: 1 }}>–</span>
-                      <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, lineHeight: 1, color: winB ? 'var(--accent)' : 'var(--text3)' }}>{scoreB}</span>
+                      <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, lineHeight: 1, color: winB ? 'var(--accent)' : 'var(--text3)' }}>{scoreB}</span>
                     </div>
                     <div style={{ flex: 1, paddingLeft: 12, overflow: 'hidden' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 42, color: winB ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tB)}</div>
-                      {winB && <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 2, fontWeight: 600 }}>Winner</div>}
+                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, color: winB ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tB)}</div>
                     </div>
                   </div>
 
