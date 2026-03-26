@@ -43,6 +43,7 @@ export type Action =
   | { type: 'START_RR' }
   // Score
   | { type: 'SUBMIT_SCORE'; matchType: MatchType; matchId: number; games: Array<{ scoreA: number; scoreB: number }> }
+  | { type: 'SET_TESTING_MODE'; enabled: boolean }
   // Bracket
   | { type: 'GENERATE_BRACKET' }
   // History
@@ -307,7 +308,7 @@ export function reducer(state: TournamentState, action: Action): TournamentState
       const { matchType, matchId, games } = action
       const wn = Math.ceil(
         (matchType === 'rr'
-          ? state.settings.rrBestOf
+          ? state.settings.groupStageBestOf
           : (findMatch(state, matchType, matchId)?.bestOf ?? state.settings.sfBestOf)
         ) / 2
       )
@@ -447,6 +448,10 @@ export function reducer(state: TournamentState, action: Action): TournamentState
 
     case 'CLEAR_TOAST':
       return state.toast?.id === action.id ? { ...state, toast: null } : state
+
+    // ── Testing mode ─────────────────────────────────
+    case 'SET_TESTING_MODE':
+      return { ...state, testingMode: action.enabled }
 
     // ── WS sync ──────────────────────────────────────
     case 'APPLY_REMOTE_STATE':

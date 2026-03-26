@@ -72,8 +72,9 @@ export interface BracketRound {
 export interface Settings {
   winScore: number
   winBy2: boolean
-  rrBestOf: number
+  groupStageBestOf: number
   advanceCount: number
+  quarterFinalsBestOf: number
   sfBestOf: number
   finalsBestOf: number
   thirdBestOf: number
@@ -165,6 +166,7 @@ export interface TournamentState {
   curRRGroup: number
   confettiShown: boolean
   toast: { text: string; id: number } | null
+  testingMode: boolean
 }
 
 export const SKILL_LABELS: Record<number, string> = {
@@ -177,12 +179,13 @@ export const SKILL_LABELS: Record<number, string> = {
 
 export const S_CONSTRAINTS: Record<string, { min: number; max: number }> = {
   numGroups: { min: 1, max: 8 },
-  rrBestOf: { min: 1, max: 5 },
+  groupStageBestOf: { min: 1, max: 5 },
   advanceCount: { min: 1, max: 8 },
+  quarterFinalsBestOf: { min: 1, max: 7 },
   sfBestOf: { min: 1, max: 7 },
   finalsBestOf: { min: 1, max: 7 },
   thirdBestOf: { min: 1, max: 7 },
   matchDuration: { min: 5, max: 120 },
 }
 
-export const ODD_ONLY = ['rrBestOf', 'sfBestOf', 'finalsBestOf', 'thirdBestOf']
+export const ODD_ONLY = ['groupStageBestOf', 'quarterFinalsBestOf', 'sfBestOf', 'finalsBestOf', 'thirdBestOf']

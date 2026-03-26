@@ -16,7 +16,8 @@ export function buildBracket(
   const getBO = (ri: number): number => {
     if (ri === total - 1) return settings.finalsBestOf
     if (ri === total - 2) return settings.sfBestOf
-    return settings.rrBestOf
+    if (total >= 4 && ri === total - 3) return settings.quarterFinalsBestOf
+    return settings.groupStageBestOf
   }
 
   const pairs: [(Team | null), (Team | null)][] = []
@@ -85,6 +86,6 @@ export function buildBracket(
 export function rndTitle(i: number, t: number): string {
   if (i === t - 1) return '🏆 Final'
   if (i === t - 2) return '🥈 Semi-Finals'
-  if (i === t - 3) return 'Quarter-Finals'
+  if (t >= 4 && i === t - 3) return 'Quarter-Finals'
   return `Round ${i + 1}`
 }

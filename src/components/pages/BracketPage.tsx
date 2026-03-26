@@ -169,7 +169,7 @@ export function BracketPage() {
         {tp && tp.teamA && tp.teamB && (
           <>
             <div className="card-title mb8">🥉 3rd Place Match</div>
-            <MatchCard match={tp} matchType="bracket" bestOf={tp.bestOf ?? settings.thirdBestOf} is3rdPlace />
+            <MatchCard match={tp} matchType="bracket" bestOf={tp.bestOf ?? settings.thirdBestOf} is3rdPlace testingMode={state.testingMode} />
           </>
         )}
         {bracketRounds.map(round => (
@@ -178,7 +178,7 @@ export function BracketPage() {
             {round.matches
               .filter(m => m.teamA && m.teamB && !(m.teamA as Team).isBye && !(m.teamB as Team).isBye)
               .map(m => (
-                <MatchCard key={m.id} match={m} matchType="bracket" bestOf={m.bestOf ?? settings.sfBestOf} />
+                <MatchCard key={m.id} match={m} matchType="bracket" bestOf={m.bestOf ?? settings.sfBestOf} testingMode={state.testingMode} />
               ))
             }
           </div>

@@ -79,14 +79,20 @@ export function SetupPage() {
             </div>
             <div className="setting-item">
               <div>
-                <div className="setting-label">Round Robin Best Of</div>
+                <div className="setting-label">Group Stage Best Of</div>
               </div>
-              <NumControl settingKey="rrBestOf" />
+              <NumControl settingKey="groupStageBestOf" />
             </div>
           </div>
 
           <div className="card">
             <div className="card-title">Bracket</div>
+            <div className="setting-item">
+              <div>
+                <div className="setting-label">Quarter Finals Best Of</div>
+              </div>
+              <NumControl settingKey="quarterFinalsBestOf" />
+            </div>
             <div className="setting-item">
               <div>
                 <div className="setting-label">Semifinals Best Of</div>

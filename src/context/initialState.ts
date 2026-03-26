@@ -7,8 +7,9 @@ export const initialState: TournamentState = {
   settings: {
     winScore: 11,
     winBy2: true,
-    rrBestOf: 1,
+    groupStageBestOf: 1,
     advanceCount: 2,
+    quarterFinalsBestOf: 1,
     sfBestOf: 3,
     finalsBestOf: 5,
     thirdBestOf: 3,
@@ -37,4 +38,5 @@ export const initialState: TournamentState = {
   curRRGroup: 0,
   confettiShown: false,
   toast: null,
+  testingMode: false,
 }

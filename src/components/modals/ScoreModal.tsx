@@ -17,7 +17,7 @@ export function ScoreModal() {
 
   const bestOf = scoreCtx
     ? scoreCtx.type === 'rr'
-      ? settings.rrBestOf
+      ? settings.groupStageBestOf
       : (match?.bestOf ?? settings.sfBestOf)
     : 1
 

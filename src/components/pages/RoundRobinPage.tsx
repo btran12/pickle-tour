@@ -87,7 +87,7 @@ export function RoundRobinPage() {
 
       <div className="card-title mb8">Matches</div>
       {matches.map(m => (
-        <MatchCard key={m.id} match={m} matchType="rr" bestOf={settings.rrBestOf} />
+        <MatchCard key={m.id} match={m} matchType="rr" bestOf={settings.groupStageBestOf} testingMode={state.testingMode} />
       ))}
     </div>
   )

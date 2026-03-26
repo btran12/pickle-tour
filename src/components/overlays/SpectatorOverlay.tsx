@@ -234,7 +234,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
               const tA = m.teamA as Team
               const tB = m.teamB as Team
               const winner = m.winner as Team | null
-              const bestOf = m.bestOf ?? settings.rrBestOf
+              const bestOf = m.bestOf ?? settings.groupStageBestOf
               const isRR = rrMatchGroupMap.has(m.id)
               const groupName = rrMatchGroupMap.get(m.id)
               const stageLabel = getStageLabel(m)

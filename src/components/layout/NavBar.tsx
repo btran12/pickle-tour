@@ -14,7 +14,7 @@ const PAGES: { id: Page; label: string }[] = [
 
 export function NavBar() {
   const { state, dispatch } = useTournament()
-  const { activePage, role } = state
+  const { activePage, role, testingMode } = state
 
   if (role === 'viewer') return null
 
@@ -30,6 +30,23 @@ export function NavBar() {
           {p.label}
         </button>
       ))}
+      <button
+        style={{
+          marginLeft: 'auto',
+          padding: '6px 12px',
+          fontSize: 12,
+          fontWeight: 600,
+          borderRadius: 4,
+          border: `1.5px solid ${testingMode ? 'var(--accent)' : 'var(--border2)'}`,
+          background: testingMode ? 'rgba(37,99,235,.1)' : 'transparent',
+          color: testingMode ? 'var(--accent)' : 'var(--text3)',
+          cursor: 'pointer',
+          transition: 'all 0.15s',
+        }}
+        onClick={() => dispatch({ type: 'SET_TESTING_MODE', enabled: !testingMode })}
+      >
+        {testingMode ? '🧪 Testing ON' : '🧪 Testing'}
+      </button>
     </nav>
   )
 }

@@ -8,10 +8,11 @@ interface MatchCardProps {
   matchType: MatchType
   bestOf: number
   is3rdPlace?: boolean
+  testingMode?: boolean
 }
 
-export function MatchCard({ match, matchType, bestOf, is3rdPlace }: MatchCardProps) {
-  const { state } = useTournament()
+export function MatchCard({ match, matchType, bestOf, is3rdPlace, testingMode }: MatchCardProps) {
+  const { state, dispatch } = useTournament()
   const { openScore } = useModal()
   const isDone = match.status === 'done'
   const sc = state.schedule[match.id]
@@ -21,6 +22,17 @@ export function MatchCard({ match, matchType, bestOf, is3rdPlace }: MatchCardPro
   const teamB = match.teamB as Team | null
   const winner = match.winner as Team | null
   const cardStyle = is3rdPlace ? { borderColor: 'rgba(205,127,50,.4)' } : undefined
+
+  const handleQuickScore = (teamId: number) => {
+    if (isDone || !testingMode) return
+    const winnerIsA = teamId === teamA?.id
+    dispatch({
+      type: 'SUBMIT_SCORE',
+      matchType,
+      matchId: match.id,
+      games: [{ scoreA: winnerIsA ? 11 : 0, scoreB: winnerIsA ? 0 : 11 }]
+    })
+  }
 
   return (
     <div className={`match-card ${match.status === 'live' ? 'active-match' : ''} ${isDone ? 'completed' : ''}`} style={cardStyle}>
@@ -41,12 +53,20 @@ export function MatchCard({ match, matchType, bestOf, is3rdPlace }: MatchCardPro
       </div>
 
       <div className="teams-row">
-        <div className={`team-slot ${isDone && winner?.id === teamA?.id ? 'winner' : ''}`}>
+        <div
+          className={`team-slot ${isDone && winner?.id === teamA?.id ? 'winner' : ''}`}
+          onClick={() => handleQuickScore(teamA?.id ?? 0)}
+          style={testingMode && !isDone && teamA ? { cursor: 'pointer' } : undefined}
+        >
           <div className="team-slot-name">{teamA?.name ?? 'TBD'}</div>
           {sd && <div className={`team-slot-score ${sd.loserA ? 'loser-score' : ''}`}>{sd.scoreA}</div>}
         </div>
         <div className="vs-sep">VS</div>
-        <div className={`team-slot ${isDone && winner?.id === teamB?.id ? 'winner' : ''}`}>
+        <div
+          className={`team-slot ${isDone && winner?.id === teamB?.id ? 'winner' : ''}`}
+          onClick={() => handleQuickScore(teamB?.id ?? 0)}
+          style={testingMode && !isDone && teamB ? { cursor: 'pointer' } : undefined}
+        >
           <div className="team-slot-name">{teamB?.name ?? 'TBD'}</div>
           {sd && <div className={`team-slot-score ${sd.loserB ? 'loser-score' : ''}`}>{sd.scoreB}</div>}
         </div>
