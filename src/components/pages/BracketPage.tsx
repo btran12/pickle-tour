@@ -133,7 +133,7 @@ export function BracketPage() {
                               style={state.testingMode && !isDone && tA ? { cursor: 'pointer' } : undefined}
                             >
                               {tA?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
-                                : tA ? <>{tA.name}{groupBadge(tA)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                                : tA ? tA.name : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                               {hasScore && <span className="bracket-slot-score">{getScore(m, 'A')}</span>}
                             </div>
                             <div 
@@ -147,7 +147,7 @@ export function BracketPage() {
                               style={state.testingMode && !isDone && tB ? { cursor: 'pointer' } : undefined}
                             >
                               {tB?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
-                                : tB ? <>{tB.name}{groupBadge(tB)}</> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                                : tB ? tB.name : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                               {hasScore && <span className="bracket-slot-score">{getScore(m, 'B')}</span>}
                             </div>
                           </div>
