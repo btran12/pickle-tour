@@ -66,7 +66,7 @@ export function TeamsPage() {
                   {meta && <div className="team-meta">{meta}</div>}
                 </div>
                 <div style={{ display: 'flex', gap: 5 }}>
-                  <button className="btn btn-outline btn-sm no-print" onClick={() => openEditTeam(t.id)} title="Edit">✏</button>
+                  <button className="btn btn-outline btn-sm no-print" onClick={() => openEditTeam(t.id)} title="Edit">✏️</button>
                   <button className="btn btn-danger btn-sm no-print" onClick={() => dispatch({ type: 'REMOVE_TEAM', id: t.id })}>✕</button>
                 </div>
               </div>

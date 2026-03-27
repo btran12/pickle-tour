@@ -76,7 +76,7 @@ export function PlayersPage() {
                       <td style={{ fontWeight: 500 }}>{p.name}</td>
                       {isD && <td style={{ fontSize: 12, color: 'var(--text3)' }}>{p.teamName}</td>}
                       <td style={{ textAlign: 'right' }} className="no-print">
-                        <button className="btn btn-outline btn-sm" onClick={() => openEditTeam(p.teamId)} title="Edit team">✏</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => openEditTeam(p.teamId)} title="Edit team">✏️</button>
                       </td>
                     </tr>
                   ))}
