@@ -162,7 +162,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                           const winner = m.winner as Team | null
                           const sd = matchScoreDisplay(m, m.bestOf ?? settings.sfBestOf, settings.winScore, settings.winBy2)
                           return (
-                            <div key={m.id} style={{ margin: 6, background: 'var(--surface2)', border: `1.5px solid ${isDone ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 'var(--r)', width: 220, overflow: 'hidden' }}>
+                            <div key={m.id} className="spectator-bracket-match-card" style={{ margin: 6, background: 'var(--surface2)', border: `1.5px solid ${isDone ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 'var(--r)', overflow: 'hidden' }}>
                               {[{ team: tA, score: sd ? String(sd.scoreA) : '' }, { team: tB, score: sd ? String(sd.scoreB) : '' }].map(({ team: t, score }, idx) => {
                                 const isWin = isDone && winner?.id === t?.id
                                 return (

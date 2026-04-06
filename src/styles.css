@@ -1,5 +1,5 @@
 /* ─── THEME VARIABLES ───────────────────────────────── */
-:root{--bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;--surface3:#e2e8f0;--border:#cbd5e1;--border2:#94a3b8;--accent:#2563eb;--accent2:#1d4ed8;--accent-dim:rgba(37,99,235,.10);--accent-dim2:rgba(37,99,235,.22);--text:#0f172a;--text2:#334155;--text3:#64748b;--red:#dc2626;--red-dim:rgba(220,38,38,.10);--gold:#92400e;--gold-dim:rgba(146,64,14,.12);--blue:#0369a1;--blue-dim:rgba(3,105,161,.10);--purple:#7c3aed;--purple-dim:rgba(124,58,237,.10);--r:6px;--r2:10px;--btn-text:#fff;--shadow:rgba(0,0,0,.07)}
+:root{--bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;--surface3:#e2e8f0;--border:#cbd5e1;--border2:#94a3b8;--accent:#2563eb;--accent2:#1d4ed8;--accent-dim:rgba(37,99,235,.10);--accent-dim2:rgba(37,99,235,.22);--text:#0f172a;--text2:#334155;--text3:#64748b;--red:#dc2626;--red-dim:rgba(220,38,38,.10);--gold:#92400e;--gold-dim:rgba(146,64,14,.12);--blue:#0369a1;--blue-dim:rgba(3,105,161,.10);--purple:#7c3aed;--purple-dim:rgba(124,58,237,.10);--r:6px;--r2:10px;--btn-text:#fff;--shadow:rgba(0,0,0,.07);--spectator-bracket-card-width:220px}
 [data-theme="dark"]{--bg:#0d0f0a;--surface:#141710;--surface2:#1c2016;--surface3:#242a1c;--border:#2e3826;--border2:#3d4f2a;--accent:#a8d44a;--accent2:#c8f060;--accent-dim:rgba(168,212,74,.12);--accent-dim2:rgba(168,212,74,.25);--text:#e8f0d8;--text2:#9aab80;--text3:#5a6b44;--red:#e05555;--red-dim:rgba(224,85,85,.15);--gold:#e8c84a;--gold-dim:rgba(232,200,74,.15);--blue:#4ab8e8;--blue-dim:rgba(74,184,232,.12);--purple:#b48ae8;--purple-dim:rgba(180,138,232,.12);--btn-text:#0d0f0a;--shadow:rgba(0,0,0,.3)}
 
 /* ─── RESET & BASE ──────────────────────────────────── */
@@ -253,7 +253,8 @@ select option{background:var(--surface2)}
 
 /* Spectator overlay bracket: responsive layout */
 .spectator-overlay .spectator-bracket-track .bracket-round-col{flex-shrink:0;min-width:auto}
-.spectator-overlay .spectator-bracket-track .bracket-match-inner{width:220px!important;max-width:none;word-break:normal}
+.spectator-overlay .spectator-bracket-track .spectator-bracket-match-card{width:var(--spectator-bracket-card-width);max-width:none}
+.spectator-overlay .spectator-bracket-track .bracket-match-inner{max-width:none;word-break:normal}
 .spectator-overlay .spectator-bracket-track .bracket-slot{word-break:normal;overflow-wrap:anywhere;white-space:normal}
 
 /* ─── MOBILE RESPONSIVE ─────────────────────────────── */
