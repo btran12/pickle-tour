@@ -245,11 +245,16 @@ select option{background:var(--surface2)}
 /* ─── SPECTATOR PANELS GRID ─────────────────────────── */
 .spectator-panels{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto;max-width:100%}
 .spectator-panels > div{word-break:break-word;overflow-wrap:break-word;max-width:100%;box-sizing:border-box}
+.spectator-standings{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.spectator-standings-group{min-width:0}
+
+.spectator-bracket-scroll{overflow-x:auto;overflow-y:visible;max-width:100%}
+.spectator-bracket-track{display:flex;align-items:stretch;gap:0;flex-wrap:nowrap;min-width:max-content}
 
 /* Spectator overlay bracket: responsive layout */
-.spectator-overlay .bracket-round-col{flex-shrink:1;min-width:auto}
-.spectator-overlay .bracket-match-inner{width:100%!important;max-width:200px;word-break:break-word}
-.spectator-overlay .bracket-slot{word-break:break-word;overflow-wrap:break-word;white-space:normal}
+.spectator-overlay .spectator-bracket-track .bracket-round-col{flex-shrink:0;min-width:auto}
+.spectator-overlay .spectator-bracket-track .bracket-match-inner{width:220px!important;max-width:none;word-break:normal}
+.spectator-overlay .spectator-bracket-track .bracket-slot{word-break:normal;overflow-wrap:anywhere;white-space:normal}
 
 /* ─── MOBILE RESPONSIVE ─────────────────────────────── */
 @media(max-width:640px){
@@ -305,8 +310,8 @@ select option{background:var(--surface2)}
 
 @media(max-width:640px){
   /* Standings: single column */
-  .spectator-standings{flex-direction:column!important}
-  .spectator-standings > div{flex:none!important;width:100%!important;min-width:unset!important}
+  .spectator-standings{grid-template-columns:1fr!important}
+  .spectator-standings-group{width:100%!important;min-width:unset!important}
 }
 
 @media(max-width:400px){
