@@ -110,11 +110,11 @@ export function SpectatorOverlay({ forceOpen }: Props) {
         {/* Panel 1: Standings */}
         <Panel title="📊 Standings" accent="var(--blue)">
           {Object.keys(rrMatches).length ? (
-            <div className="spectator-standings" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <div className="spectator-standings">
               {groups.map((g, gi) => {
                 const st = computeStandings(gi, state)
                 return (
-                  <div key={g.id} style={{ flex: 1, minWidth: 160, border: '2px solid var(--border2)', borderRadius: 'var(--r)', padding: 12, background: 'var(--surface2)' }}>
+                  <div key={g.id} className="spectator-standings-group" style={{ border: '2px solid var(--border2)', borderRadius: 'var(--r)', padding: 12, background: 'var(--surface2)' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 10 }}>{g.name}</div>
                     <table className="standings-table" style={{ fontSize: 14 }}>
                       <thead>
@@ -148,8 +148,8 @@ export function SpectatorOverlay({ forceOpen }: Props) {
         {/* Panel 2: Bracket */}
         <Panel title="🏆 Bracket" accent="var(--gold)">
           {bracketRounds.length ? (
-            <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, flexWrap: 'wrap', minHeight: 'auto' }}>
+            <div className="spectator-bracket-scroll">
+              <div className="spectator-bracket-track" style={{ minHeight: 'auto' }}>
                 {bracketRounds.map((round, ri) => (
                   <>
                     <div key={round.title} style={{ display: 'flex', flexDirection: 'column' }}>
@@ -162,7 +162,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                           const winner = m.winner as Team | null
                           const sd = matchScoreDisplay(m, m.bestOf ?? settings.sfBestOf, settings.winScore, settings.winBy2)
                           return (
-                            <div key={m.id} style={{ margin: 6, background: 'var(--surface2)', border: `1.5px solid ${isDone ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 'var(--r)', width: 220, overflow: 'hidden' }}>
+                            <div key={m.id} className="spectator-bracket-match-card" style={{ margin: 6, background: 'var(--surface2)', border: `1.5px solid ${isDone ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 'var(--r)', overflow: 'hidden' }}>
                               {[{ team: tA, score: sd ? String(sd.scoreA) : '' }, { team: tB, score: sd ? String(sd.scoreB) : '' }].map(({ team: t, score }, idx) => {
                                 const isWin = isDone && winner?.id === t?.id
                                 return (
