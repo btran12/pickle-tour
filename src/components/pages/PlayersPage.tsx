@@ -7,7 +7,7 @@ import type { RosterPlayer } from '../../types'
 
 const TIER_LABEL: Record<number, string> = {
   5: '4.5+ — Elite', 4: '4.0 — Advanced', 3: '3.5 — Solid',
-  2: '2.5–3.0 — Intermediate', 1: '2.0 — Beginner', 0: 'Skill Not Set',
+  2: '2.5–3.0 — Intermediate', 1: '2.0 — Beginner', 0: 'Not Rated',
 }
 
 export function PlayersPage() {

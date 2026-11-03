@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
-import { useModal } from '../../context/ModalContext'
-import { useConfirm } from '../../context/ConfirmContext'
-import { useTheme } from '../../hooks/useTheme'
-import { exportCSV } from '../../utils/export'
+import { SettingsModal } from './SettingsModal'
 import type { WsStatus } from '../../types'
 
 function useClock() {
@@ -28,58 +25,26 @@ function indicatorClass(status: WsStatus): string {
 }
 
 export function Header() {
-  const { state, dispatch, createSession, resumeSession, duplicateTournament, goHome } = useTournament()
-  const { openShare } = useModal()
-  const confirm = useConfirm()
-  const { dark, toggleTheme } = useTheme()
-  const { wsStatus, wsStatusText, tournamentId, role, activePage, presenceCount } = state
-  const [copying, setCopying] = useState(false)
+  const { state } = useTournament()
+  const { wsStatus, wsStatusText, tournamentId, activePage, presenceCount } = state
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const now = useClock()
   const hasSession = !!tournamentId
-  const lastTid = localStorage.getItem('pb_lastTournamentId')
-
-  const leaveSession = async () => {
-    if (tournamentId?.startsWith('local_')) {
-      const ok = await confirm({
-        title: 'Leave Offline Tournament',
-        message: 'This offline tournament is saved on this device. Go home? You can reopen it from the tournament list.',
-        confirmLabel: 'Go Home',
-      })
-      if (!ok) return
-    }
-    goHome()
-  }
-
-  const copySession = async () => {
-    if (!tournamentId) return
-    const ok = await confirm({
-      title: 'Copy Tournament',
-      message: 'Create a new tournament with the same players, teams, courts, and settings?\n\nGroups, schedule, matches, and bracket will start fresh. The current tournament is left unchanged.',
-      confirmLabel: 'Create Copy',
-    })
-    if (!ok) return
-    setCopying(true)
-    await duplicateTournament(tournamentId)
-    setCopying(false)
-  }
 
   return (
     <header>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div className="header-brand">
         <div className="logo">Pickle<span>Bracket</span></div>
         <span className="phase-badge">{PAGE_LABELS[activePage] ?? activePage}</span>
         {hasSession && (
-          <span
-            style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: 'var(--text3)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-            title={tournamentId ?? ''}
-          >
+          <span className="header-session-id" title={tournamentId ?? ''}>
             {tournamentId}
           </span>
         )}
       </div>
 
       <div className="header-actions">
-        <span className="header-clock" style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, color: 'var(--text2)', letterSpacing: 1 }}>
+        <span className="header-clock">
           {now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </span>
         {wsStatus !== 'offline' && (
@@ -91,50 +56,23 @@ export function Header() {
           </span>
         )}
         {presenceCount > 1 && (
-          <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, color: 'var(--text3)', background: 'var(--surface2)', border: '1px solid var(--border)', padding: '3px 8px', borderRadius: 99 }}>
-            {presenceCount} online
-          </span>
+          <span className="presence-badge">{presenceCount} online</span>
         )}
 
-        {!hasSession && (
-          <>
-            {lastTid && (
-              <button className="btn btn-sm btn-outline no-print" onClick={resumeSession} title={lastTid}>↩ Resume</button>
-            )}
-            <button className="btn btn-sm btn-primary no-print" onClick={createSession}>☁ Go Live</button>
-          </>
-        )}
-
-        {hasSession && (
-          <button className="btn btn-sm btn-outline no-print" onClick={leaveSession} title="Back to tournaments">
-            ⌂ Home
-          </button>
-        )}
-
-        {hasSession && role === 'admin' && (
-          <>
-            <button
-              className="btn btn-sm btn-outline no-print"
-              onClick={copySession}
-              disabled={copying || wsStatus === 'connecting'}
-              title={wsStatus === 'connecting' ? 'Waiting for the tournament to load…' : 'Start a new tournament with the same players, teams, and settings'}
-            >
-              {copying ? '⧉ Copying…' : '⧉ Copy'}
-            </button>
-            <button className="btn btn-sm btn-outline no-print" onClick={openShare}>🔗 Share</button>
-            <button className="btn btn-sm btn-outline no-print no-mobile" onClick={() => dispatch({ type: 'SET_PAGE', page: 'setup' })}>
-              {PAGE_LABELS.setup}
-            </button>
-          </>
-        )}
-
-        <button className="btn btn-sm btn-outline no-print no-mobile" onClick={() => exportCSV(state)} title="Export CSV">↓ CSV</button>
-        <button className="btn btn-sm btn-outline no-print" onClick={() => dispatch({ type: 'SET_PAGE', page: 'bracket' })} title="Live View">📺 Live</button>
-        <button className="btn btn-sm btn-outline no-print" onClick={toggleTheme} title="Toggle theme">
-          {dark ? '☀' : '🌙'}
+        <button
+          className={`icon-btn gear-btn ${settingsOpen ? 'active' : ''}`}
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Open settings"
+          title="Settings"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
         </button>
-        <button className="btn btn-sm btn-outline no-print no-mobile" onClick={() => window.print()} title="Print">🖨</button>
       </div>
+
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </header>
   )
 }

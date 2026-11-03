@@ -14,9 +14,12 @@ function useClock() {
   return time
 }
 
-interface Props { forceOpen?: boolean }
+interface Props {
+  forceOpen?: boolean
+  onClose?: () => void
+}
 
-export function SpectatorOverlay({ forceOpen }: Props) {
+export function SpectatorOverlay({ forceOpen, onClose }: Props) {
   const { state, dispatch, goHome } = useTournament()
   const now = useClock()
   const { role, tournamentId, tournamentName, bracketRounds, bracketSeedGroups, groups,
@@ -87,9 +90,12 @@ export function SpectatorOverlay({ forceOpen }: Props) {
             <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 700, letterSpacing: 1 }}>LIVE</span>
           </div>
           {role !== 'viewer' && (
-            <button className="btn btn-outline btn-sm no-print" onClick={() => dispatch({ type: 'SET_PAGE', page: 'bracket' })}>✕ Close</button>
+            <button
+              className="btn btn-outline btn-sm no-print"
+              onClick={() => (onClose ? onClose() : dispatch({ type: 'SET_PAGE', page: 'bracket' }))}
+            >✕ Close</button>
           )}
-          <button className="btn btn-outline btn-sm no-print" onClick={goHome}>⌂ Home</button>
+          <button className="btn btn-outline btn-sm no-print" onClick={() => { onClose?.(); goHome() }}>⌂ Home</button>
         </div>
       </div>
 

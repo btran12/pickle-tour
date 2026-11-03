@@ -1,8 +1,10 @@
 import { TournamentProvider, useTournament } from './context/TournamentContext'
-import { ModalProvider } from './context/ModalContext'
+import { ModalProvider, useModal } from './context/ModalContext'
 import { ConfirmProvider } from './context/ConfirmContext'
+import { useSwipeNavigation } from './hooks/useSwipeNavigation'
 import { Header } from './components/layout/Header'
 import { NavBar } from './components/layout/NavBar'
+import { BottomBar } from './components/layout/BottomBar'
 import { ErrorBoundary } from './components/layout/ErrorBoundary'
 import { JoinToast } from './components/layout/JoinToast'
 import { SetupPage } from './components/pages/SetupPage'
@@ -24,8 +26,14 @@ import { AssignCourtModal } from './components/modals/AssignCourtModal'
 import { ShareModal } from './components/modals/ShareModal'
 
 function AppInner() {
-  const { state } = useTournament()
+  const { state, dispatch } = useTournament()
   const { activePage, tournamentId, role } = state
+  const { liveOpen, closeLive } = useModal()
+
+  // Swipe left/right on touch devices to move between tabs.
+  useSwipeNavigation(activePage, !!tournamentId && role !== 'viewer', page => {
+    dispatch({ type: 'SET_PAGE', page })
+  })
 
   // Welcome overlay: show when no tournament is connected yet
   const showWelcome = !tournamentId
@@ -35,7 +43,7 @@ function AppInner() {
       <Header />
       {!showWelcome && <NavBar />}
 
-      <main>
+      <main className={!showWelcome && role !== 'viewer' ? 'with-bottom-bar' : undefined}>
         {activePage === 'setup' && <SetupPage />}
         {activePage === 'teams' && <TeamsPage />}
         {activePage === 'players' && <PlayersPage />}
@@ -46,8 +54,10 @@ function AppInner() {
         {activePage === 'history' && <HistoryPage />}
       </main>
 
+      {!showWelcome && <BottomBar />}
+
       {showWelcome && <WelcomeOverlay />}
-      <SpectatorOverlay forceOpen={role === 'viewer' && !!tournamentId} />
+      <SpectatorOverlay forceOpen={!!tournamentId && (role === 'viewer' || liveOpen)} onClose={closeLive} />
       <CelebrationOverlay />
 
       <AddEditTeamModal />

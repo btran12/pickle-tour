@@ -13,6 +13,7 @@ interface ModalState {
   addCourtOpen: boolean
   assignCtx: AssignCtx | null
   shareOpen: boolean
+  liveOpen: boolean
 }
 
 interface ModalActions {
@@ -30,6 +31,8 @@ interface ModalActions {
   closeAssignCourt: () => void
   openShare: () => void
   closeShare: () => void
+  openLive: () => void
+  closeLive: () => void
 }
 
 const ModalContext = createContext<(ModalState & ModalActions) | null>(null)
@@ -49,10 +52,11 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const [addCourtOpen, setAddCourtOpen] = useState(false)
   const [assignCtx, setAssignCtx] = useState<AssignCtx | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
+  const [liveOpen, setLiveOpen] = useState(false)
 
   return (
     <ModalContext.Provider value={{
-      addTeamOpen, editTeamId, scoreCtx, addCourtOpen, assignCtx, shareOpen,
+      addTeamOpen, editTeamId, scoreCtx, addCourtOpen, assignCtx, shareOpen, liveOpen,
       addPlayerOpen, editPlayerId,
       openAddTeam: () => { setEditTeamId(null); setAddTeamOpen(true) },
       openEditTeam: (id) => { setEditTeamId(id); setAddTeamOpen(true) },
@@ -68,6 +72,8 @@ export function ModalProvider({ children }: { children: ReactNode }) {
       closeAssignCourt: () => setAssignCtx(null),
       openShare: () => setShareOpen(true),
       closeShare: () => setShareOpen(false),
+      openLive: () => setLiveOpen(true),
+      closeLive: () => setLiveOpen(false),
     }}>
       {children}
     </ModalContext.Provider>

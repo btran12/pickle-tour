@@ -139,6 +139,23 @@ export function SetupPage() {
           </div>
         </div>
       </div>
+
+      <div className="setup-footer no-print">
+        <div style={{ minWidth: 0 }}>
+          <div className="setting-label">Next: {players.length ? `your ${players.length} player${players.length === 1 ? '' : 's'}` : 'add your players'}</div>
+          <div className="setting-desc">
+            {players.length
+              ? 'Review the roster, then build or randomize teams.'
+              : 'Register players on the Players page — in singles each player becomes their own team.'}
+          </div>
+        </div>
+        <button
+          className="btn btn-primary"
+          onClick={() => dispatch({ type: 'SET_PAGE', page: 'players' })}
+        >
+          Continue to Players →
+        </button>
+      </div>
     </div>
   )
 }
