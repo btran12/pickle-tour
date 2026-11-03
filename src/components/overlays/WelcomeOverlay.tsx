@@ -17,10 +17,11 @@ function fmtWhen(ts: number): string {
 }
 
 export function WelcomeOverlay() {
-  const { createSession, openById, dispatch } = useTournament()
+  const { createSession, openById, duplicateTournament, dispatch } = useTournament()
   const confirm = useConfirm()
   const [idInput, setIdInput] = useState('')
   const [saved, setSaved] = useState<SavedTournament[]>(() => getSavedTournaments())
+  const [copyingId, setCopyingId] = useState<string | null>(null)
 
   const forget = async (t: SavedTournament) => {
     const ok = await confirm({
@@ -32,6 +33,19 @@ export function WelcomeOverlay() {
     if (!ok) return
     removeSavedTournament(t.id)
     setSaved(getSavedTournaments())
+  }
+
+  const copy = async (t: SavedTournament) => {
+    const ok = await confirm({
+      title: 'Copy Tournament',
+      message: `Create a new tournament from "${t.name}" with the same players, teams, courts, and settings?\n\nGroups, schedule, matches, and bracket will start fresh.`,
+      confirmLabel: 'Create Copy',
+    })
+    if (!ok) return
+    setCopyingId(t.id)
+    const created = await duplicateTournament(t.id)
+    setCopyingId(null)
+    if (created) setSaved(getSavedTournaments())
   }
 
   return (
@@ -65,6 +79,14 @@ export function WelcomeOverlay() {
                   </button>
                   <div className="saved-item-actions">
                     <button className="btn btn-primary btn-sm" onClick={() => openById(t.id)}>Open</button>
+                    <button
+                      className="btn btn-outline btn-sm saved-item-copy"
+                      title="Start a new tournament with the same setup"
+                      disabled={copyingId !== null}
+                      onClick={() => copy(t)}
+                    >
+                      {copyingId === t.id ? 'Copying…' : '⧉ Copy'}
+                    </button>
                     <button
                       className="btn btn-ghost btn-sm saved-item-remove"
                       title="Remove from list"

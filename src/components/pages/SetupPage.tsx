@@ -8,6 +8,7 @@ export function SetupPage() {
   const { state, dispatch } = useTournament()
   const confirm = useConfirm()
   const { tournamentName, tType, bMethod, settings, teams, players } = state
+  const groupsLocked = Object.keys(state.rrMatches).length > 0 || state.bracketRounds.length > 0
 
   return (
     <div>
@@ -59,8 +60,9 @@ export function SetupPage() {
             <div className="setting-item">
               <div>
                 <div className="setting-label">Number of Groups</div>
+                {groupsLocked && <div className="setting-desc">Locked — round robin has already started</div>}
               </div>
-              <NumControl settingKey="numGroups" />
+              <NumControl settingKey="numGroups" disabled={groupsLocked} />
             </div>
             <div className="setting-item">
               <div>

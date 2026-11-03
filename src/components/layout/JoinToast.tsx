@@ -16,11 +16,11 @@ export function JoinToast() {
 
   return (
     <div style={{
-      position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+      position: 'fixed', bottom: 'calc(20px + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)',
       background: 'var(--surface)', border: '1px solid var(--border2)', borderRadius: 'var(--r2)',
       padding: '10px 20px', fontFamily: "'DM Sans',sans-serif", fontSize: 14, fontWeight: 500,
       color: 'var(--text)', boxShadow: '0 4px 20px rgba(0,0,0,.2)', zIndex: 999,
-      animation: 'fadeIn .2s ease',
+      animation: 'fadeIn .2s ease', maxWidth: 'calc(100vw - 32px)', textAlign: 'center',
     }}>
       {toast.text}
     </div>

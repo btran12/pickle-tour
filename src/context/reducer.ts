@@ -17,6 +17,7 @@ export type Action =
   // Session
   | { type: 'SET_TOURNAMENT_ID'; id: string }
   | { type: 'SET_ROLE'; role: Role }
+  | { type: 'LOAD_TOURNAMENT_STATE'; state: TournamentState }
   | { type: 'RESET_TOURNAMENT' }
   | { type: 'SET_WS_STATUS'; status: WsStatus; text: string }
   | { type: 'SET_PRESENCE'; count: number }
@@ -43,6 +44,8 @@ export type Action =
   | { type: 'REMOVE_PLAYER'; id: number }
   // Groups
   | { type: 'ASSIGN_GROUPS' }
+  | { type: 'SYNC_GROUPS' }
+  | { type: 'SET_GROUP_COUNT'; count: number }
   | { type: 'MOVE_TEAM'; teamId: number; fromGroupId: number | null; toGroupId: number | null }
   // Courts
   | { type: 'ADD_COURT'; name: string }
@@ -56,6 +59,7 @@ export type Action =
   | { type: 'SET_TESTING_MODE'; enabled: boolean }
   // Bracket
   | { type: 'GENERATE_BRACKET' }
+  | { type: 'AUTO_GENERATE_BRACKET' }
   // History
   | { type: 'UNDO_LAST' }
   | { type: 'CLEAR_HISTORY' }
@@ -86,6 +90,10 @@ export function reducer(state: TournamentState, action: Action): TournamentState
 
     case 'SET_ROLE':
       return { ...state, role: action.role }
+
+    case 'LOAD_TOURNAMENT_STATE':
+      // Load an in-memory state snapshot (e.g. a copied tournament).
+      return action.state
 
     case 'RESET_TOURNAMENT':
       // Return to a fresh home state. Server-backed tournaments reload from the API.
@@ -137,13 +145,16 @@ export function reducer(state: TournamentState, action: Action): TournamentState
       return { ...state, teams: [...state.teams, action.team], _tid: state._tid + 1 }
 
     case 'EDIT_TEAM':
-      return {
+      return reconcileGroups({
         ...state,
         teams: state.teams.map(t => t.id === action.team.id ? action.team : t),
-      }
+      })
 
     case 'REMOVE_TEAM':
-      return { ...state, teams: state.teams.filter(t => t.id !== action.id) }
+      return reconcileGroups({
+        ...state,
+        teams: state.teams.filter(t => t.id !== action.id),
+      })
 
     case 'CREATE_TEAM': {
       const ids = [...new Set(action.playerIds)]
@@ -172,7 +183,7 @@ export function reducer(state: TournamentState, action: Action): TournamentState
           avgSkill: avgSkillOf(tp),
         }]
       })
-      return { ...state, teams }
+      return reconcileGroups({ ...state, teams })
     }
 
     case 'RANDOMIZE_TEAMS': {
@@ -186,11 +197,11 @@ export function reducer(state: TournamentState, action: Action): TournamentState
       for (let i = 0; i < limit; i += perTeam) {
         teams.push(teamFromRoster(tid++, '', shuffled.slice(i, i + perTeam)))
       }
-      return { ...state, teams, _tid: tid }
+      return reconcileGroups({ ...state, teams, _tid: tid })
     }
 
     case 'CLEAR_TEAMS':
-      return { ...state, teams: [] }
+      return reconcileGroups({ ...state, teams: [] })
 
     // ── Players ──────────────────────────────────────
     case 'ADD_PLAYER': {
@@ -247,7 +258,7 @@ export function reducer(state: TournamentState, action: Action): TournamentState
           avgSkill: avgSkillOf(tp),
         }]
       })
-      return { ...state, players, teams }
+      return reconcileGroups({ ...state, players, teams })
     }
 
     case 'LOAD_SAMPLE_TEAMS': {
@@ -347,6 +358,57 @@ export function reducer(state: TournamentState, action: Action): TournamentState
       return { ...state, groups }
     }
 
+    case 'SYNC_GROUPS': {
+      // Add every team that is missing from the groups to the currently
+      // smallest group. Existing placements are left untouched.
+      const base = reconcileGroups(state)
+      if (!base.groups.length) return base
+      const assigned = new Set(base.groups.flatMap(g => g.teams.map(t => t.id)))
+      const missing = base.teams.filter(t => !assigned.has(t.id))
+      if (!missing.length) return base
+      const groups = base.groups.map(g => ({ ...g, teams: [...g.teams] }))
+      missing.forEach(t => {
+        let target = groups[0]
+        for (const g of groups) {
+          if (g.teams.length < target.teams.length) target = g
+        }
+        target.teams.push(t)
+      })
+      return { ...base, groups }
+    }
+
+    case 'SET_GROUP_COUNT': {
+      const c = S_CONSTRAINTS.numGroups
+      const n = Math.max(c.min, Math.min(c.max, action.count))
+      if (!state.groups.length) {
+        // No groups yet — just update the setting used when groups are created.
+        return n === state.settings.numGroups
+          ? state
+          : { ...state, settings: { ...state.settings, numGroups: n } }
+      }
+      if (n === state.settings.numGroups && state.groups.length === n) return state
+
+      // Keep existing team placements; move teams from removed groups into
+      // the remaining groups so none are lost.
+      const next = Array.from({ length: n }, (_, i) => {
+        const old = state.groups[i]
+        return {
+          id: i,
+          name: 'Group ' + String.fromCharCode(65 + i),
+          teams: old ? [...old.teams] : [] as Team[],
+        }
+      })
+      state.groups.slice(n).flatMap(g => g.teams).forEach((t, i) => {
+        next[i % n].teams.push(t)
+      })
+
+      return reconcileGroups({
+        ...state,
+        settings: { ...state.settings, numGroups: n },
+        groups: next,
+      })
+    }
+
     case 'MOVE_TEAM': {
       const groups = state.groups.map(g => ({ ...g, teams: [...g.teams] }))
       if (action.fromGroupId !== null) {
@@ -404,9 +466,12 @@ export function reducer(state: TournamentState, action: Action): TournamentState
 
     // ── Round Robin ──────────────────────────────────
     case 'START_RR': {
+      // Always build fixtures from the current team list. Group entries can
+      // hold stale copies after edits, removals, or re-randomizing.
+      const base = reconcileGroups(state)
       const rrMatches: Record<string, Match[]> = {}
-      let mid = state._mid
-      state.groups.forEach((g, gi) => {
+      let mid = base._mid
+      base.groups.forEach((g, gi) => {
         const ms: Match[] = []
         for (let a = 0; a < g.teams.length; a++) {
           for (let b = a + 1; b < g.teams.length; b++) {
@@ -415,7 +480,10 @@ export function reducer(state: TournamentState, action: Action): TournamentState
         }
         rrMatches[gi] = ms
       })
-      return { ...state, rrMatches, _mid: mid, activePage: 'roundrobin' }
+      // Drop court assignments that belonged to a previous round-robin set.
+      const schedule = { ...state.schedule }
+      Object.values(state.rrMatches).flat().forEach(m => { delete schedule[m.id] })
+      return { ...base, rrMatches, schedule, _mid: mid, activePage: 'roundrobin' }
     }
 
     // ── Score ────────────────────────────────────────
@@ -457,7 +525,11 @@ export function reducer(state: TournamentState, action: Action): TournamentState
         const entry = (updated as Match & { _historyEntry?: HistoryEntry })?._historyEntry
         // clean up internal marker
         for (const gi in newRR) newRR[gi] = newRR[gi].map(m => { const { _historyEntry: _, ...rest } = m as Match & { _historyEntry?: HistoryEntry }; return rest })
-        return { ...state, rrMatches: newRR, history: entry ? [...state.history, entry] : state.history }
+        return autoGenerateBracket({
+          ...state,
+          rrMatches: newRR,
+          history: entry ? [...state.history, entry] : state.history,
+        })
       } else {
         // Bracket: apply score then advance winner
         let bracketMatches = state.bracketMatches.map(applyToMatch)
@@ -495,24 +567,11 @@ export function reducer(state: TournamentState, action: Action): TournamentState
     }
 
     // ── Bracket ──────────────────────────────────────
-    case 'GENERATE_BRACKET': {
-      let seeds: (Team | null)[] = []
-      const seedGroups: Record<number, number> = {}
-      state.groups.forEach((g, gi) => {
-        const st = computeStandings(gi, state)
-        st.slice(0, state.settings.advanceCount).forEach(s => {
-          seedGroups[s.team.id] = gi
-          seeds.push(s.team)
-        })
-      })
-      if (seeds.length < 2) return state
-      while (!isPow2(seeds.length)) seeds.push(null)
-      const { bracketMatches, bracketRounds, thirdPlaceMatch, _mid } = buildBracket(seeds, state._mid, state.settings)
-      return {
-        ...state, bracketMatches, bracketRounds, thirdPlaceMatch, bracketSeedGroups: seedGroups,
-        _mid, activePage: 'bracket', confettiShown: false,
-      }
-    }
+    case 'GENERATE_BRACKET':
+      return generateBracketState(state, true)
+
+    case 'AUTO_GENERATE_BRACKET':
+      return autoGenerateBracket(state)
 
     // ── History ──────────────────────────────────────
     case 'UNDO_LAST': {
@@ -615,14 +674,100 @@ function loadSampleTeams(state: TournamentState, samples: SampleTeam[]): Tournam
     players.push(rp1, rp2)
     teams.push(teamFromRoster(tid++, tn, [rp1, rp2]))
   })
-  return {
+  return reconcileGroups({
     ...state,
     tType: 'doubles',
     teams: [...state.teams, ...teams],
     players: [...state.players, ...players],
     _tid: tid,
     _pid: pid,
+  })
+}
+
+/**
+ * Group cards hold team snapshots. After teams are edited, removed, or
+ * regenerated, drop entries whose team no longer exists and refresh the
+ * remaining entries to point at the current team objects.
+ */
+function reconcileGroups(state: TournamentState): TournamentState {
+  if (!state.groups.length) return state
+  const byId = new Map(state.teams.map(t => [t.id, t]))
+  let changed = false
+  const groups = state.groups.map(g => {
+    const teams = g.teams.flatMap(t => {
+      const current = byId.get(t.id)
+      if (!current) { changed = true; return [] }
+      if (current !== t) { changed = true; return [current] }
+      return [t]
+    })
+    return teams === g.teams ? g : { ...g, teams }
+  })
+  return changed ? { ...state, groups } : state
+}
+
+function bracketSeeds(state: TournamentState): { seeds: Team[]; seedGroups: Record<number, number> } {
+  const seeds: Team[] = []
+  const seedGroups: Record<number, number> = {}
+  state.groups.forEach((g, gi) => {
+    const st = computeStandings(gi, state)
+    st.slice(0, state.settings.advanceCount).forEach(s => {
+      seedGroups[s.team.id] = gi
+      seeds.push(s.team)
+    })
+  })
+  return { seeds, seedGroups }
+}
+
+function generateBracketState(state: TournamentState, navigate: boolean): TournamentState {
+  const { seeds, seedGroups } = bracketSeeds(state)
+  if (seeds.length < 2) return state
+  const padded: (Team | null)[] = [...seeds]
+  while (!isPow2(padded.length)) padded.push(null)
+  const { bracketMatches, bracketRounds, thirdPlaceMatch, _mid } = buildBracket(padded, state._mid, state.settings)
+  return {
+    ...state, bracketMatches, bracketRounds, thirdPlaceMatch, bracketSeedGroups: seedGroups,
+    _mid, activePage: navigate ? 'bracket' : state.activePage, confettiShown: false,
   }
+}
+
+function roundRobinComplete(state: TournamentState): boolean {
+  if (!state.groups.length) return false
+  const hasMatches = Object.values(state.rrMatches).some(ms => ms.length > 0)
+  if (!hasMatches) return false
+  return state.groups.every((_, gi) => (state.rrMatches[gi] ?? []).every(m => m.status === 'done'))
+}
+
+function bracketHasResults(state: TournamentState): boolean {
+  return state.bracketMatches.some(m => m.games.length > 0) ||
+    (state.thirdPlaceMatch?.games.length ?? 0) > 0
+}
+
+function bracketSeedIds(state: TournamentState): Set<number> {
+  const ids = new Set<number>()
+  state.bracketRounds[0]?.matches.forEach(m => {
+    ;[m.teamA, m.teamB].forEach(t => {
+      if (t && !(t as { isBye?: boolean }).isBye) ids.add((t as Team).id)
+    })
+  })
+  return ids
+}
+
+/**
+ * Once every round-robin match is done, create the bracket automatically.
+ * If a bracket already exists without any played matches, refresh it when
+ * the qualifying teams changed. A bracket with results is never replaced.
+ */
+function autoGenerateBracket(state: TournamentState): TournamentState {
+  if (!roundRobinComplete(state)) return state
+  const { seeds } = bracketSeeds(state)
+  if (seeds.length < 2) return state
+  if (state.bracketMatches.length > 0) {
+    if (bracketHasResults(state)) return state
+    const existing = bracketSeedIds(state)
+    const sameSeeds = existing.size === seeds.length && seeds.every(t => existing.has(t.id))
+    if (sameSeeds) return state
+  }
+  return generateBracketState(state, false)
 }
 
 function isPow2(n: number): boolean {

@@ -91,51 +91,53 @@ export function PlayersPage() {
                 )}
                 <span style={{ fontSize: 12, color: 'var(--text3)' }}>{group.length} player{group.length !== 1 ? 's' : ''}</span>
               </div>
-              <table className="standings-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Player</th>
-                    {isD && <th>Team</th>}
-                    <th className="no-print" style={{ textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {group.map((p, i) => {
-                    const team = teamFor(p)
-                    return (
-                      <tr key={p.id}>
-                        <td><span className="rank-num">{i + 1}</span></td>
-                        <td style={{ fontWeight: 500 }}>{p.name}</td>
-                        {isD && (
-                          <td style={{ fontSize: 12, color: team ? 'var(--text3)' : 'var(--text3)' }}>
-                            {team ? team.name : <em>Unassigned</em>}
+              <div className="table-scroll">
+                <table className="standings-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Player</th>
+                      {isD && <th>Team</th>}
+                      <th className="no-print" style={{ textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.map((p, i) => {
+                      const team = teamFor(p)
+                      return (
+                        <tr key={p.id}>
+                          <td><span className="rank-num">{i + 1}</span></td>
+                          <td style={{ fontWeight: 500 }}>{p.name}</td>
+                          {isD && (
+                            <td style={{ fontSize: 12, color: team ? 'var(--text3)' : 'var(--text3)' }}>
+                              {team ? team.name : <em>Unassigned</em>}
+                            </td>
+                          )}
+                          <td style={{ textAlign: 'right' }} className="no-print">
+                            <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
+                              <button className="btn btn-outline btn-sm" onClick={() => openEditPlayer(p.id)} title="Edit player">✏️</button>
+                              <button
+                                className="btn btn-danger btn-sm"
+                                title="Remove player"
+                                onClick={async () => {
+                                  if (await confirm({
+                                    title: 'Remove Player',
+                                    message: `Remove ${p.name} from the tournament?`,
+                                    confirmLabel: 'Remove',
+                                    danger: true,
+                                  })) {
+                                    dispatch({ type: 'REMOVE_PLAYER', id: p.id })
+                                  }
+                                }}
+                              >✕</button>
+                            </div>
                           </td>
-                        )}
-                        <td style={{ textAlign: 'right' }} className="no-print">
-                          <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
-                            <button className="btn btn-outline btn-sm" onClick={() => openEditPlayer(p.id)} title="Edit player">✏️</button>
-                            <button
-                              className="btn btn-danger btn-sm"
-                              title="Remove player"
-                              onClick={async () => {
-                                if (await confirm({
-                                  title: 'Remove Player',
-                                  message: `Remove ${p.name} from the tournament?`,
-                                  confirmLabel: 'Remove',
-                                  danger: true,
-                                })) {
-                                  dispatch({ type: 'REMOVE_PLAYER', id: p.id })
-                                }
-                              }}
-                            >✕</button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )
         })

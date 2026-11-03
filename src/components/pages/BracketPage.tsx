@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 import { MatchCard } from '../shared/MatchCard'
@@ -45,25 +45,27 @@ export function BracketPage() {
                   <span className="group-stage-name">{g.name}</span>
                   <span className="group-stage-progress">{done}/{matches.length}</span>
                 </div>
-                <table className="group-stage-table">
-                  <thead>
-                    <tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PD</th></tr>
-                  </thead>
-                  <tbody>
-                    {standings.map((s, i) => (
-                      <tr key={s.team.id} className={i < settings.advanceCount ? 'advancing' : ''}>
-                        <td className="rank-num">{i + 1}</td>
-                        <td>
-                          {getTeamDisplayName(s.team)}
-                          {i < settings.advanceCount && <span className="advance-mark" title="Advances">↑</span>}
-                        </td>
-                        <td>{s.wins}</td>
-                        <td>{s.losses}</td>
-                        <td>{s.pd >= 0 ? '+' : ''}{s.pd}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="table-scroll">
+                  <table className="group-stage-table">
+                    <thead>
+                      <tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PD</th></tr>
+                    </thead>
+                    <tbody>
+                      {standings.map((s, i) => (
+                        <tr key={s.team.id} className={i < settings.advanceCount ? 'advancing' : ''}>
+                          <td className="rank-num">{i + 1}</td>
+                          <td>
+                            {getTeamDisplayName(s.team)}
+                            {i < settings.advanceCount && <span className="advance-mark" title="Advances">↑</span>}
+                          </td>
+                          <td>{s.wins}</td>
+                          <td>{s.losses}</td>
+                          <td>{s.pd >= 0 ? '+' : ''}{s.pd}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
                 {matches.length > 0 && (
                   <details className="group-stage-matches">
                     <summary>Match results</summary>
@@ -169,8 +171,8 @@ export function BracketPage() {
           {bracketRounds.map((round, ri) => {
             const nextCount = bracketRounds[ri + 1]?.matches.length ?? 0
             return (
-              <>
-                <div key={round.title} className="bracket-round-col">
+              <Fragment key={round.title}>
+                <div className="bracket-round-col">
                   <div className="bracket-round-title">{round.title}</div>
                   <div className="bracket-round-body">
                     {round.matches.map(m => {
@@ -250,7 +252,7 @@ export function BracketPage() {
                     </div>
                   </div>
                 )}
-              </>
+              </Fragment>
             )
           })}
 

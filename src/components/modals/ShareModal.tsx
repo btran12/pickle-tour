@@ -35,7 +35,7 @@ export function ShareModal() {
         <div style={{ marginBottom: 8 }}>
           <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 4 }}>Viewer Link</div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <input readOnly value={viewUrl} style={{ flex: 1, fontSize: 11 }} />
+            <input className="share-url-input" readOnly value={viewUrl} style={{ flex: 1 }} />
             <button className="btn btn-outline btn-sm" onClick={() => copy(viewUrl, 'view')}>{copied === 'view' ? '✓' : 'Copy'}</button>
           </div>
         </div>
@@ -43,7 +43,7 @@ export function ShareModal() {
         <div style={{ marginBottom: 8 }}>
           <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 4 }}>Admin Link</div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <input readOnly value={adminUrl} style={{ flex: 1, fontSize: 11 }} />
+            <input className="share-url-input" readOnly value={adminUrl} style={{ flex: 1 }} />
             <button className="btn btn-outline btn-sm" onClick={() => copy(adminUrl, 'admin')}>{copied === 'admin' ? '✓' : 'Copy'}</button>
           </div>
         </div>

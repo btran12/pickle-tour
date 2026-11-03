@@ -2,8 +2,9 @@ import { createContext, useContext, useReducer, useEffect, useRef, useCallback, 
 import type { TournamentState, WireState, Role } from '../types'
 import { reducer, type Action } from './reducer'
 import { initialState } from './initialState'
-import { getSerializableState } from '../utils/serialization'
+import { getSerializableState, hydrateState } from '../utils/serialization'
 import { saveTournament, getSavedTournament, getLastTournamentId } from '../utils/tournamentHistory'
+import { copyTournamentState } from '../utils/tournamentCopy'
 import { CONFIG } from '../config'
 import { useTheme } from '../hooks/useTheme'
 
@@ -15,6 +16,7 @@ interface TournamentContextValue {
   createSession: () => void
   resumeSession: () => void
   openById: (id: string) => void
+  duplicateTournament: (id: string) => Promise<boolean>
   goHome: () => void
 }
 
@@ -96,6 +98,8 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     let isFirst = true
 
     const fetchState = async () => {
+      // Ignore responses that belong to a session we already left.
+      if (stateRef.current.tournamentId !== tid) return
       try {
         const res = await fetch(`${CONFIG.API_URL}/tournaments/${tid}`)
         if (res.status === 404) {
@@ -175,6 +179,50 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SHOW_TOAST', text: '🔗 Loading tournament…' })
   }, [activateSession])
 
+  const duplicateTournament = useCallback(async (id: string): Promise<boolean> => {
+    let source: TournamentState | null = null
+
+    if (stateRef.current.tournamentId === id) {
+      // Duplicating the tournament that is currently open: use live state.
+      source = stateRef.current
+    } else if (!id.startsWith('local_')) {
+      dispatch({ type: 'SHOW_TOAST', text: '⧉ Copying tournament…' })
+      try {
+        const res = await fetch(`${CONFIG.API_URL}/tournaments/${id}`)
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const { state: wireState } = await res.json() as { state: WireState; updatedAt: string }
+        source = hydrateState({ ...initialState, role: 'admin' }, wireState)
+      } catch (e) {
+        console.warn('[API] duplicate failed', e)
+        dispatch({ type: 'SHOW_TOAST', text: '✕ Could not load tournament to copy' })
+        return false
+      }
+    }
+
+    if (!source) {
+      dispatch({ type: 'SHOW_TOAST', text: '✕ Tournament is not available to copy' })
+      return false
+    }
+
+    const newId = id.startsWith('local_')
+      ? 'local_' + Date.now()
+      : 'pb_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
+    const copy = copyTournamentState(source, newId)
+
+    lastKnownUpdatedAt.current = null
+    // The copy is brand new, so its state can be saved right away.
+    sessionReady.current = true
+    dispatch({ type: 'LOAD_TOURNAMENT_STATE', state: copy })
+
+    const url = new URL(window.location.href)
+    url.searchParams.set('t', newId)
+    url.searchParams.set('role', 'admin')
+    window.history.replaceState({}, '', url.toString())
+
+    dispatch({ type: 'SHOW_TOAST', text: '⧉ Tournament copied — groups and matches start fresh' })
+    return true
+  }, [])
+
   const goHome = useCallback(() => {
     lastKnownUpdatedAt.current = null
     sessionReady.current = false
@@ -186,7 +234,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <TournamentContext.Provider value={{ state, dispatch, createSession, resumeSession, openById, goHome }}>
+    <TournamentContext.Provider value={{ state, dispatch, createSession, resumeSession, openById, duplicateTournament, goHome }}>
       {children}
     </TournamentContext.Provider>
   )

@@ -28,11 +28,12 @@ function indicatorClass(status: WsStatus): string {
 }
 
 export function Header() {
-  const { state, dispatch, createSession, resumeSession, goHome } = useTournament()
+  const { state, dispatch, createSession, resumeSession, duplicateTournament, goHome } = useTournament()
   const { openShare } = useModal()
   const confirm = useConfirm()
   const { dark, toggleTheme } = useTheme()
   const { wsStatus, wsStatusText, tournamentId, role, activePage, presenceCount } = state
+  const [copying, setCopying] = useState(false)
   const now = useClock()
   const hasSession = !!tournamentId
   const lastTid = localStorage.getItem('pb_lastTournamentId')
@@ -48,6 +49,19 @@ export function Header() {
       if (!ok) return
     }
     goHome()
+  }
+
+  const copySession = async () => {
+    if (!tournamentId) return
+    const ok = await confirm({
+      title: 'Copy Tournament',
+      message: 'Create a new tournament with the same players, teams, courts, and settings?\n\nGroups, schedule, matches, and bracket will start fresh. The current tournament is left unchanged.',
+      confirmLabel: 'Create Copy',
+    })
+    if (!ok) return
+    setCopying(true)
+    await duplicateTournament(tournamentId)
+    setCopying(false)
   }
 
   return (
@@ -100,8 +114,16 @@ export function Header() {
 
         {hasSession && role === 'admin' && (
           <>
+            <button
+              className="btn btn-sm btn-outline no-print"
+              onClick={copySession}
+              disabled={copying || wsStatus === 'connecting'}
+              title={wsStatus === 'connecting' ? 'Waiting for the tournament to load…' : 'Start a new tournament with the same players, teams, and settings'}
+            >
+              {copying ? '⧉ Copying…' : '⧉ Copy'}
+            </button>
             <button className="btn btn-sm btn-outline no-print" onClick={openShare}>🔗 Share</button>
-            <button className="btn btn-sm btn-outline no-print" onClick={() => dispatch({ type: 'SET_PAGE', page: 'setup' })}>
+            <button className="btn btn-sm btn-outline no-print no-mobile" onClick={() => dispatch({ type: 'SET_PAGE', page: 'setup' })}>
               {PAGE_LABELS.setup}
             </button>
           </>

@@ -75,7 +75,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
   return (
     <div className="spectator-overlay open" style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 20px', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+      <div className="spectator-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 20px', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div className="logo">Pickle<span>Bracket</span></div>
           <div>
@@ -83,8 +83,8 @@ export function SpectatorOverlay({ forceOpen }: Props) {
             <div style={{ fontSize: 11, color: 'var(--text3)' }}>{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</div>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 28, letterSpacing: 2, color: 'var(--text)', lineHeight: 1 }}>
+        <div className="spectator-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div className="spectator-clock" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 28, letterSpacing: 2, color: 'var(--text)', lineHeight: 1 }}>
             {now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -117,26 +117,28 @@ export function SpectatorOverlay({ forceOpen }: Props) {
                 return (
                   <div key={g.id} className="spectator-standings-group" style={{ border: '2px solid var(--border2)', borderRadius: 'var(--r)', padding: 12, background: 'var(--surface2)' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 10 }}>{g.name}</div>
-                    <table className="standings-table" style={{ fontSize: 14 }}>
-                      <thead>
-                        <tr>
-                          <th style={{ fontSize: 11 }}>#</th>
-                          <th style={{ fontSize: 11 }}>Team</th>
-                          <th style={{ fontSize: 11 }}>W</th>
-                          <th style={{ fontSize: 11 }}>L</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {st.map((s, i) => (
-                          <tr key={s.team.id}>
-                            <td><span className={`rank-num rank-${i + 1}`} style={{ fontSize: 14 }}>{i + 1}</span></td>
-                            <td style={{ fontSize: 14, fontWeight: 600 }}>{getTeamDisplayName(s.team)}</td>
-                            <td style={{ color: 'var(--accent)', fontSize: 14, fontWeight: 700 }}>{s.wins}</td>
-                            <td style={{ color: 'var(--red)', fontSize: 14, fontWeight: 700 }}>{s.losses}</td>
+                    <div className="table-scroll">
+                      <table className="standings-table" style={{ fontSize: 14 }}>
+                        <thead>
+                          <tr>
+                            <th style={{ fontSize: 11 }}>#</th>
+                            <th style={{ fontSize: 11 }}>Team</th>
+                            <th style={{ fontSize: 11 }}>W</th>
+                            <th style={{ fontSize: 11 }}>L</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {st.map((s, i) => (
+                            <tr key={s.team.id}>
+                              <td><span className={`rank-num rank-${i + 1}`} style={{ fontSize: 14 }}>{i + 1}</span></td>
+                              <td style={{ fontSize: 14, fontWeight: 600 }}>{getTeamDisplayName(s.team)}</td>
+                              <td style={{ color: 'var(--accent)', fontSize: 14, fontWeight: 700 }}>{s.wins}</td>
+                              <td style={{ color: 'var(--red)', fontSize: 14, fontWeight: 700 }}>{s.losses}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )
               })}
