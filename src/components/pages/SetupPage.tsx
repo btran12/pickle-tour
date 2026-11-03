@@ -1,11 +1,13 @@
 import { useTournament } from '../../context/TournamentContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import { ToggleGroup } from '../shared/ToggleGroup'
 import { NumControl } from '../shared/NumControl'
 import type { TournamentType, BracketMethod } from '../../types'
 
 export function SetupPage() {
   const { state, dispatch } = useTournament()
-  const { tournamentName, tType, bMethod, settings } = state
+  const confirm = useConfirm()
+  const { tournamentName, tType, bMethod, settings, teams, players } = state
 
   return (
     <div>
@@ -30,7 +32,16 @@ export function SetupPage() {
               <ToggleGroup<TournamentType>
                 options={[{ value: 'singles', label: 'Singles' }, { value: 'doubles', label: 'Doubles' }]}
                 value={tType}
-                onChange={v => dispatch({ type: 'SET_TTYPE', value: v })}
+                onChange={async v => {
+                  if (v === 'singles' && teams.some(t => t.players.length > 1) && players.length) {
+                    if (!await confirm({
+                      title: 'Switch to Singles',
+                      message: 'Switch to singles? Teams will be rebuilt so every player is their own team.',
+                      confirmLabel: 'Switch',
+                    })) return
+                  }
+                  dispatch({ type: 'SET_TTYPE', value: v })
+                }}
               />
             </div>
             <div className="form-row">

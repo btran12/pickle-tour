@@ -256,10 +256,10 @@ Resources:
           // ── State schema allowlist ───────────────────────────────────────
           // Only these top-level keys are accepted from clients.
           const ALLOWED_STATE_KEYS = new Set([
-            'tType','bMethod','tournamentName','teams','groups',
+            'tType','bMethod','tournamentName','teams','players','groups',
             'rrMatches','bracketMatches','bracketRounds',
             'thirdPlaceMatchId','courts','schedule','history','settings',
-            'bracketSeedGroups','_tid','_mid','_cid'
+            'bracketSeedGroups','_tid','_mid','_cid','_pid'
           ]);
           function sanitizeState(state) {
             if (!state || typeof state !== 'object' || Array.isArray(state)) return null;
@@ -284,9 +284,19 @@ Resources:
               name: sanitizeString(t.name, 80),
               avgSkill: typeof t.avgSkill === 'number' ? t.avgSkill : 0,
               players: Array.isArray(t.players) ? t.players.slice(0, 2).map(p => ({
+                playerId: typeof p.playerId === 'number' ? p.playerId : undefined,
                 name: sanitizeString(p.name, 80),
                 skill: typeof p.skill === 'number' ? p.skill : 0
               })) : []
+            }));
+          }
+
+          function sanitizePlayers(players) {
+            if (!Array.isArray(players)) return [];
+            return players.slice(0, 500).map(p => ({
+              id: typeof p.id === 'number' ? p.id : 0,
+              name: sanitizeString(p.name, 80),
+              skill: typeof p.skill === 'number' ? p.skill : 0
             }));
           }
 
@@ -295,6 +305,7 @@ Resources:
             const s = { ...state };
             if (s.tournamentName) s.tournamentName = sanitizeString(s.tournamentName, 120);
             if (s.teams) s.teams = sanitizeTeams(s.teams);
+            if (s.players) s.players = sanitizePlayers(s.players);
             if (s.history) s.history = Array.isArray(s.history) ? s.history.slice(0, 100) : [];
             return s;
           }
@@ -618,10 +629,10 @@ Resources:
 
           const VALID_TID = /^[a-zA-Z0-9_]{8,64}$/;
           const ALLOWED_STATE_KEYS = new Set([
-            'tType','bMethod','tournamentName','teams','groups',
+            'tType','bMethod','tournamentName','teams','players','groups',
             'rrMatches','bracketMatches','bracketRounds',
             'thirdPlaceMatchId','courts','schedule','history','settings',
-            'bracketSeedGroups','_tid','_mid','_cid'
+            'bracketSeedGroups','_tid','_mid','_cid','_pid'
           ]);
 
           function sanitizeState(state) {

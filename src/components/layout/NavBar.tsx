@@ -3,8 +3,8 @@ import type { Page } from '../../types'
 
 const PAGES: { id: Page; label: string }[] = [
   { id: 'setup', label: 'Setup' },
-  { id: 'teams', label: 'Teams' },
   { id: 'players', label: 'Players' },
+  { id: 'teams', label: 'Teams' },
   { id: 'groups', label: 'Groups' },
   { id: 'schedule', label: 'Courts' },
   { id: 'roundrobin', label: 'Round Robin' },

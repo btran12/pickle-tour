@@ -1,5 +1,6 @@
 import { TournamentProvider, useTournament } from './context/TournamentContext'
 import { ModalProvider } from './context/ModalContext'
+import { ConfirmProvider } from './context/ConfirmContext'
 import { Header } from './components/layout/Header'
 import { NavBar } from './components/layout/NavBar'
 import { JoinToast } from './components/layout/JoinToast'
@@ -15,6 +16,7 @@ import { WelcomeOverlay } from './components/overlays/WelcomeOverlay'
 import { SpectatorOverlay } from './components/overlays/SpectatorOverlay'
 import { CelebrationOverlay } from './components/overlays/CelebrationOverlay'
 import { AddEditTeamModal } from './components/modals/AddEditTeamModal'
+import { AddEditPlayerModal } from './components/modals/AddEditPlayerModal'
 import { ScoreModal } from './components/modals/ScoreModal'
 import { AddCourtModal } from './components/modals/AddCourtModal'
 import { AssignCourtModal } from './components/modals/AssignCourtModal'
@@ -44,10 +46,11 @@ function AppInner() {
       </main>
 
       {showWelcome && <WelcomeOverlay />}
-      <SpectatorOverlay forceOpen={role === 'viewer'} />
+      <SpectatorOverlay forceOpen={role === 'viewer' && !!tournamentId} />
       <CelebrationOverlay />
 
       <AddEditTeamModal />
+      <AddEditPlayerModal />
       <ScoreModal />
       <AddCourtModal />
       <AssignCourtModal />
@@ -62,7 +65,9 @@ export default function App() {
   return (
     <TournamentProvider>
       <ModalProvider>
-        <AppInner />
+        <ConfirmProvider>
+          <AppInner />
+        </ConfirmProvider>
       </ModalProvider>
     </TournamentProvider>
   )

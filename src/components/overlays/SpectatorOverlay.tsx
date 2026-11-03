@@ -16,7 +16,7 @@ function useClock() {
 interface Props { forceOpen?: boolean }
 
 export function SpectatorOverlay({ forceOpen }: Props) {
-  const { state, dispatch } = useTournament()
+  const { state, dispatch, goHome } = useTournament()
   const now = useClock()
   const { role, tournamentId, tournamentName, bracketRounds, bracketSeedGroups, groups,
     thirdPlaceMatch, rrMatches, schedule, courts, settings } = state
@@ -94,6 +94,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
           {role !== 'viewer' && (
             <button className="btn btn-outline btn-sm no-print" onClick={() => dispatch({ type: 'SET_PAGE', page: 'bracket' })}>✕ Close</button>
           )}
+          <button className="btn btn-outline btn-sm no-print" onClick={goHome}>⌂ Home</button>
         </div>
       </div>
 

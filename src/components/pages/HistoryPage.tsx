@@ -1,8 +1,10 @@
 import { useTournament } from '../../context/TournamentContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import { fmtTs } from '../../utils/scoring'
 
 export function HistoryPage() {
   const { state, dispatch } = useTournament()
+  const confirm = useConfirm()
   const { history } = state
 
   return (
@@ -20,7 +22,11 @@ export function HistoryPage() {
         <button
           className="btn btn-danger btn-sm"
           disabled={history.length === 0}
-          onClick={() => { if (confirm('Clear all history?')) dispatch({ type: 'CLEAR_HISTORY' }) }}
+          onClick={async () => {
+            if (await confirm({ title: 'Clear History', message: 'Clear all history?', confirmLabel: 'Clear', danger: true })) {
+              dispatch({ type: 'CLEAR_HISTORY' })
+            }
+          }}
         >
           Clear History
         </button>

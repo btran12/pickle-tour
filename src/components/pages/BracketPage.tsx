@@ -1,13 +1,15 @@
+import { useState } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 import { MatchCard } from '../shared/MatchCard'
-import { matchScoreDisplay, getTeamDisplayName } from '../../utils/scoring'
+import { computeStandings, matchScoreDisplay, getTeamDisplayName } from '../../utils/scoring'
 import type { Team } from '../../types'
 
 export function BracketPage() {
   const { state, dispatch } = useTournament()
   const { openScore } = useModal()
-  const { bracketRounds, bracketMatches, thirdPlaceMatch, bracketSeedGroups, groups, settings } = state
+  const { bracketRounds, bracketMatches, thirdPlaceMatch, bracketSeedGroups, groups, rrMatches, settings } = state
+  const [showGroups, setShowGroups] = useState(true)
 
   const fin = bracketRounds[bracketRounds.length - 1]?.matches[0]
   const champ = fin?.status === 'done' ? (fin.winner as Team | null) : null
@@ -16,9 +18,85 @@ export function BracketPage() {
   const third = tp?.status === 'done' ? (tp.winner as Team | null) : null
   const tournamentDone = !!champ && (!tp || tp.status === 'done')
 
+  const groupMatches = groups.flatMap((_, gi) => rrMatches[gi] ?? [])
+  const hasGroupStage = groups.length > 0 && groupMatches.length > 0
+  const groupMatchesDone = groupMatches.filter(m => m.status === 'done').length
+
+  const groupStageSection = hasGroupStage ? (
+    <div className="group-stage mb18">
+      <div className="flex-row flex-between mb8" style={{ alignItems: 'center' }}>
+        <div className="card-title" style={{ margin: 0 }}>Group Stage</div>
+        <div className="flex-row no-print" style={{ gap: 8, alignItems: 'center' }}>
+          <span className="group-stage-progress">{groupMatchesDone}/{groupMatches.length} matches complete</span>
+          <button className="btn btn-ghost btn-sm" onClick={() => setShowGroups(v => !v)}>
+            {showGroups ? 'Hide' : 'Show'}
+          </button>
+        </div>
+      </div>
+      {showGroups && (
+        <div className="group-stage-grid">
+          {groups.map((g, gi) => {
+            const matches = rrMatches[gi] ?? []
+            const standings = computeStandings(gi, state)
+            const done = matches.filter(m => m.status === 'done').length
+            return (
+              <div key={g.id} className="group-stage-card">
+                <div className="group-stage-head">
+                  <span className="group-stage-name">{g.name}</span>
+                  <span className="group-stage-progress">{done}/{matches.length}</span>
+                </div>
+                <table className="group-stage-table">
+                  <thead>
+                    <tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PD</th></tr>
+                  </thead>
+                  <tbody>
+                    {standings.map((s, i) => (
+                      <tr key={s.team.id} className={i < settings.advanceCount ? 'advancing' : ''}>
+                        <td className="rank-num">{i + 1}</td>
+                        <td>
+                          {getTeamDisplayName(s.team)}
+                          {i < settings.advanceCount && <span className="advance-mark" title="Advances">↑</span>}
+                        </td>
+                        <td>{s.wins}</td>
+                        <td>{s.losses}</td>
+                        <td>{s.pd >= 0 ? '+' : ''}{s.pd}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {matches.length > 0 && (
+                  <details className="group-stage-matches">
+                    <summary>Match results</summary>
+                    <div className="group-stage-match-list">
+                      {matches.map(m => {
+                        const a = m.teamA as Team | null
+                        const b = m.teamB as Team | null
+                        const sd = matchScoreDisplay(m, settings.groupStageBestOf, settings.winScore, settings.winBy2)
+                        const winA = m.status === 'done' && (m.winner as Team | null)?.id === a?.id
+                        const winB = m.status === 'done' && (m.winner as Team | null)?.id === b?.id
+                        return (
+                          <div key={m.id} className="group-stage-match">
+                            <span className={winA ? 'gsm-win' : ''}>{a ? getTeamDisplayName(a) : 'TBD'}</span>
+                            <span className="gsm-score">{sd ? `${sd.scoreA}–${sd.scoreB}` : 'vs'}</span>
+                            <span className={`gsm-team-b ${winB ? 'gsm-win' : ''}`}>{b ? getTeamDisplayName(b) : 'TBD'}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </details>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  ) : null
+
   if (!bracketRounds.length) return (
     <div>
       <div className="section-title">Bracket</div>
+      {groupStageSection}
       <div className="empty-state">
         <div className="ei">🏆</div>
         <strong>Bracket not generated yet</strong>
@@ -83,6 +161,8 @@ export function BracketPage() {
         </div>
       )}
 
+      {groupStageSection}
+
       {/* Visual bracket */}
       <div className="bracket-wrapper">
         <div className="bracket">
@@ -133,7 +213,7 @@ export function BracketPage() {
                               style={state.testingMode && !isDone && tA ? { cursor: 'pointer' } : undefined}
                             >
                               {tA?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
-                                : tA ? getTeamDisplayName(tA) : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                                : tA ? <span className="bracket-team-name">{getTeamDisplayName(tA)}{groupBadge(tA)}</span> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                               {hasScore && <span className="bracket-slot-score">{getScore(m, 'A')}</span>}
                             </div>
                             <div 
@@ -147,7 +227,7 @@ export function BracketPage() {
                               style={state.testingMode && !isDone && tB ? { cursor: 'pointer' } : undefined}
                             >
                               {tB?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
-                                : tB ? getTeamDisplayName(tB) : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                                : tB ? <span className="bracket-team-name">{getTeamDisplayName(tB)}{groupBadge(tB)}</span> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                               {hasScore && <span className="bracket-slot-score">{getScore(m, 'B')}</span>}
                             </div>
                           </div>
@@ -216,7 +296,7 @@ export function BracketPage() {
                             }}
                             style={state.testingMode && !isDone && t ? { cursor: 'pointer' } : undefined}
                           >
-                            {t ? getTeamDisplayName(t) : <span style={{ color: 'var(--text3)' }}>TBD</span>}
+                            {t ? <span className="bracket-team-name">{getTeamDisplayName(t)}{groupBadge(t)}</span> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
                             {score && <span className="bracket-slot-score">{idx === 0 ? score.scoreA : score.scoreB}</span>}
                           </div>
                         )

@@ -7,6 +7,8 @@ interface AssignCtx { matchId: number }
 interface ModalState {
   addTeamOpen: boolean
   editTeamId: number | null
+  addPlayerOpen: boolean
+  editPlayerId: number | null
   scoreCtx: ScoringCtx | null
   addCourtOpen: boolean
   assignCtx: AssignCtx | null
@@ -17,6 +19,9 @@ interface ModalActions {
   openAddTeam: () => void
   openEditTeam: (id: number) => void
   closeTeamModal: () => void
+  openAddPlayer: () => void
+  openEditPlayer: (id: number) => void
+  closePlayerModal: () => void
   openScore: (ctx: ScoringCtx) => void
   closeScore: () => void
   openAddCourt: () => void
@@ -38,6 +43,8 @@ export function useModal() {
 export function ModalProvider({ children }: { children: ReactNode }) {
   const [addTeamOpen, setAddTeamOpen] = useState(false)
   const [editTeamId, setEditTeamId] = useState<number | null>(null)
+  const [addPlayerOpen, setAddPlayerOpen] = useState(false)
+  const [editPlayerId, setEditPlayerId] = useState<number | null>(null)
   const [scoreCtx, setScoreCtx] = useState<ScoringCtx | null>(null)
   const [addCourtOpen, setAddCourtOpen] = useState(false)
   const [assignCtx, setAssignCtx] = useState<AssignCtx | null>(null)
@@ -46,9 +53,13 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   return (
     <ModalContext.Provider value={{
       addTeamOpen, editTeamId, scoreCtx, addCourtOpen, assignCtx, shareOpen,
+      addPlayerOpen, editPlayerId,
       openAddTeam: () => { setEditTeamId(null); setAddTeamOpen(true) },
       openEditTeam: (id) => { setEditTeamId(id); setAddTeamOpen(true) },
       closeTeamModal: () => { setAddTeamOpen(false); setEditTeamId(null) },
+      openAddPlayer: () => { setEditPlayerId(null); setAddPlayerOpen(true) },
+      openEditPlayer: (id) => { setEditPlayerId(id); setAddPlayerOpen(true) },
+      closePlayerModal: () => { setAddPlayerOpen(false); setEditPlayerId(null) },
       openScore: (ctx) => setScoreCtx(ctx),
       closeScore: () => setScoreCtx(null),
       openAddCourt: () => setAddCourtOpen(true),

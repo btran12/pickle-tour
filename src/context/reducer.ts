@@ -1,8 +1,9 @@
 import type {
-  TournamentState, Team, Match, MatchType, HistoryEntry,
+  TournamentState, Team, Match, MatchType, HistoryEntry, RosterPlayer, Player,
   WireState, TournamentType, BracketMethod, Page, WsStatus, Role, Settings,
 } from '../types'
 import { S_CONSTRAINTS, ODD_ONLY } from '../types'
+import { initialState } from './initialState'
 import { computeStandings, gameWin } from '../utils/scoring'
 import { buildBracket, rebuildBracketRounds } from '../utils/bracket'
 import { hydrateState } from '../utils/serialization'
@@ -16,6 +17,7 @@ export type Action =
   // Session
   | { type: 'SET_TOURNAMENT_ID'; id: string }
   | { type: 'SET_ROLE'; role: Role }
+  | { type: 'RESET_TOURNAMENT' }
   | { type: 'SET_WS_STATUS'; status: WsStatus; text: string }
   | { type: 'SET_PRESENCE'; count: number }
   | { type: 'SET_TOURNAMENT_NAME'; name: string }
@@ -28,9 +30,17 @@ export type Action =
   | { type: 'ADD_TEAM'; team: Team }
   | { type: 'EDIT_TEAM'; team: Team }
   | { type: 'REMOVE_TEAM'; id: number }
+  | { type: 'CREATE_TEAM'; playerIds: number[]; name?: string }
+  | { type: 'UNASSIGN_PLAYER'; teamId: number; playerId: number }
+  | { type: 'RANDOMIZE_TEAMS' }
+  | { type: 'CLEAR_TEAMS' }
   | { type: 'LOAD_SAMPLE_TEAMS' }
   | { type: 'LOAD_SAMPLE_TEAMS_16' }
   | { type: 'LOAD_SAMPLE_TEAMS_32' }
+  // Players
+  | { type: 'ADD_PLAYER'; name: string; skill: number }
+  | { type: 'EDIT_PLAYER'; id: number; name: string; skill: number }
+  | { type: 'REMOVE_PLAYER'; id: number }
   // Groups
   | { type: 'ASSIGN_GROUPS' }
   | { type: 'MOVE_TEAM'; teamId: number; fromGroupId: number | null; toGroupId: number | null }
@@ -77,6 +87,10 @@ export function reducer(state: TournamentState, action: Action): TournamentState
     case 'SET_ROLE':
       return { ...state, role: action.role }
 
+    case 'RESET_TOURNAMENT':
+      // Return to a fresh home state. Server-backed tournaments reload from the API.
+      return { ...initialState }
+
     case 'SET_WS_STATUS':
       return { ...state, wsStatus: action.status, wsStatusText: action.text }
 
@@ -87,8 +101,21 @@ export function reducer(state: TournamentState, action: Action): TournamentState
       return { ...state, tournamentName: action.name }
 
     // ── Setup ────────────────────────────────────────
-    case 'SET_TTYPE':
+    case 'SET_TTYPE': {
+      if (action.value === state.tType) return state
+      // Singles formats are one player per team: rebuild teams from the roster.
+      if (action.value === 'singles' && state.players.length) {
+        let tid = state._tid
+        const teams = state.players.map(p => teamFromRoster(tid++, '', [p]))
+        return { ...state, tType: action.value, teams, _tid: tid }
+      }
+      // Moving from singles to doubles: one-player teams no longer make sense.
+      // Clear them (players stay registered) so they can be paired up.
+      if (action.value === 'doubles' && state.teams.length && state.teams.every(t => t.players.length === 1)) {
+        return { ...state, tType: action.value, teams: [] }
+      }
       return { ...state, tType: action.value }
+    }
 
     case 'SET_BMETHOD':
       return { ...state, bMethod: action.value }
@@ -118,6 +145,111 @@ export function reducer(state: TournamentState, action: Action): TournamentState
     case 'REMOVE_TEAM':
       return { ...state, teams: state.teams.filter(t => t.id !== action.id) }
 
+    case 'CREATE_TEAM': {
+      const ids = [...new Set(action.playerIds)]
+      const members = ids
+        .map(id => state.players.find(p => p.id === id))
+        .filter((p): p is RosterPlayer => Boolean(p))
+      const assigned = new Set(
+        state.teams.flatMap(t => t.players.map(p => p.playerId)).filter((id): id is number => id != null)
+      )
+      if (!members.length || members.length !== ids.length) return state
+      if (members.some(p => assigned.has(p.id))) return state
+      const team = teamFromRoster(state._tid, action.name ?? '', members)
+      return { ...state, teams: [...state.teams, team], _tid: state._tid + 1 }
+    }
+
+    case 'UNASSIGN_PLAYER': {
+      const teams = state.teams.flatMap(t => {
+        if (t.id !== action.teamId) return [t]
+        const tp = t.players.filter(p => p.playerId !== action.playerId)
+        if (!tp.length) return []
+        const wasAuto = t.name === t.players.map(p => p.name).join(' / ')
+        return [{
+          ...t,
+          name: wasAuto ? tp.map(p => p.name).join(' / ') : t.name,
+          players: tp,
+          avgSkill: avgSkillOf(tp),
+        }]
+      })
+      return { ...state, teams }
+    }
+
+    case 'RANDOMIZE_TEAMS': {
+      if (!state.players.length) return state
+      const shuffled = [...state.players].sort(() => Math.random() - 0.5)
+      const perTeam = state.tType === 'doubles' ? 2 : 1
+      // Leave a single leftover player unassigned instead of making a 1-player doubles team.
+      const limit = state.tType === 'doubles' ? shuffled.length - (shuffled.length % 2) : shuffled.length
+      let tid = state._tid
+      const teams: Team[] = []
+      for (let i = 0; i < limit; i += perTeam) {
+        teams.push(teamFromRoster(tid++, '', shuffled.slice(i, i + perTeam)))
+      }
+      return { ...state, teams, _tid: tid }
+    }
+
+    case 'CLEAR_TEAMS':
+      return { ...state, teams: [] }
+
+    // ── Players ──────────────────────────────────────
+    case 'ADD_PLAYER': {
+      const name = action.name.trim()
+      if (!name) return state
+      const player: RosterPlayer = { id: state._pid, name, skill: action.skill }
+      const players = [...state.players, player]
+      // In singles every player is immediately their own team.
+      if (state.tType === 'singles') {
+        const team = teamFromRoster(state._tid, '', [player])
+        return {
+          ...state, players, teams: [...state.teams, team],
+          _pid: state._pid + 1, _tid: state._tid + 1,
+        }
+      }
+      return { ...state, players, _pid: state._pid + 1 }
+    }
+
+    case 'EDIT_PLAYER': {
+      const name = action.name.trim()
+      if (!name) return state
+      const old = state.players.find(p => p.id === action.id)
+      if (!old) return state
+      const players = state.players.map(p =>
+        p.id === action.id ? { ...p, name, skill: action.skill } : p
+      )
+      const teams = state.teams.map(t => {
+        if (!t.players.some(p => p.playerId === action.id)) return t
+        const tp = t.players.map(p =>
+          p.playerId === action.id ? { ...p, name, skill: action.skill } : p
+        )
+        const wasAuto = t.name === old.name || t.name === t.players.map(p => p.name).join(' / ')
+        return {
+          ...t,
+          name: wasAuto ? tp.map(p => p.name).join(' / ') : t.name,
+          players: tp,
+          avgSkill: avgSkillOf(tp),
+        }
+      })
+      return { ...state, players, teams }
+    }
+
+    case 'REMOVE_PLAYER': {
+      const players = state.players.filter(p => p.id !== action.id)
+      const teams = state.teams.flatMap(t => {
+        if (!t.players.some(p => p.playerId === action.id)) return [t]
+        const tp = t.players.filter(p => p.playerId !== action.id)
+        if (!tp.length) return []
+        const wasAuto = t.name === t.players.map(p => p.name).join(' / ')
+        return [{
+          ...t,
+          name: wasAuto ? tp.map(p => p.name).join(' / ') : t.name,
+          players: tp,
+          avgSkill: avgSkillOf(tp),
+        }]
+      })
+      return { ...state, players, teams }
+    }
+
     case 'LOAD_SAMPLE_TEAMS': {
       const samples = [
         { tn: 'The Picklers',    p1: 'Alex Rivera',    s1: 5, p2: 'Sam Torres',     s2: 4 },
@@ -129,13 +261,7 @@ export function reducer(state: TournamentState, action: Action): TournamentState
         { tn: 'Serve & Protect', p1: 'Taylor Brown',   s1: 2, p2: 'Jamie Wilson',   s2: 2 },
         { tn: 'The Bangers',     p1: 'Charlie Moore',  s1: 2, p2: 'Finley Taylor',  s2: 2 },
       ]
-      let tid = state._tid
-      const newTeams = samples.map(({ tn, p1, s1, p2, s2 }) => {
-        const skills = [s1, s2].filter(s => s > 0)
-        const avg = skills.reduce((a, b) => a + b, 0) / skills.length
-        return { id: tid++, name: tn, players: [{ name: p1, skill: s1 }, { name: p2, skill: s2 }], avgSkill: avg }
-      })
-      return { ...state, tType: 'doubles', teams: [...state.teams, ...newTeams], _tid: tid }
+      return loadSampleTeams(state, samples)
     }
 
     case 'LOAD_SAMPLE_TEAMS_16': {
@@ -157,13 +283,7 @@ export function reducer(state: TournamentState, action: Action): TournamentState
         { tn: 'Backhand Bandits',  p1: 'Kendall Fox',    s1: 2, p2: 'Remy Holt',      s2: 2 },
         { tn: 'Soft Game Gang',    p1: 'Sloane Perry',   s1: 1, p2: 'Winter Cole',    s2: 2 },
       ]
-      let tid = state._tid
-      const newTeams = samples.map(({ tn, p1, s1, p2, s2 }) => {
-        const skills = [s1, s2].filter(s => s > 0)
-        const avg = skills.reduce((a, b) => a + b, 0) / skills.length
-        return { id: tid++, name: tn, players: [{ name: p1, skill: s1 }, { name: p2, skill: s2 }], avgSkill: avg }
-      })
-      return { ...state, tType: 'doubles', teams: [...state.teams, ...newTeams], _tid: tid }
+      return loadSampleTeams(state, samples)
     }
 
     case 'LOAD_SAMPLE_TEAMS_32': {
@@ -201,13 +321,7 @@ export function reducer(state: TournamentState, action: Action): TournamentState
         { tn: 'Wild Cards',        p1: 'Phoenix Stark',  s1: 1, p2: 'Ember Quinn',    s2: 1 },
         { tn: 'First Timers',      p1: 'River Stone',    s1: 1, p2: 'Willa Dean',     s2: 1 },
       ]
-      let tid = state._tid
-      const newTeams = samples.map(({ tn, p1, s1, p2, s2 }) => {
-        const skills = [s1, s2].filter(s => s > 0)
-        const avg = skills.reduce((a, b) => a + b, 0) / skills.length
-        return { id: tid++, name: tn, players: [{ name: p1, skill: s1 }, { name: p2, skill: s2 }], avgSkill: avg }
-      })
-      return { ...state, tType: 'doubles', teams: [...state.teams, ...newTeams], _tid: tid }
+      return loadSampleTeams(state, samples)
     }
 
     // ── Groups ───────────────────────────────────────
@@ -468,6 +582,48 @@ export function reducer(state: TournamentState, action: Action): TournamentState
 }
 
 // ─── Helpers ─────────────────────────────────────────
+
+function avgSkillOf(players: Array<{ skill: number }>): number {
+  const skills = players.map(p => p.skill).filter(s => s > 0)
+  return skills.length ? skills.reduce((a, b) => a + b, 0) / skills.length : 0
+}
+
+function teamFromRoster(id: number, name: string, roster: RosterPlayer[]): Team {
+  const players = roster.map(p => ({ playerId: p.id, name: p.name, skill: p.skill }))
+  return {
+    id,
+    name: name.trim() || roster.map(p => p.name).join(' / '),
+    players,
+    avgSkill: avgSkillOf(players),
+  }
+}
+
+interface SampleTeam {
+  tn: string
+  p1: string; s1: number
+  p2: string; s2: number
+}
+
+function loadSampleTeams(state: TournamentState, samples: SampleTeam[]): TournamentState {
+  let tid = state._tid
+  let pid = state._pid
+  const players: RosterPlayer[] = []
+  const teams: Team[] = []
+  samples.forEach(({ tn, p1, s1, p2, s2 }) => {
+    const rp1: RosterPlayer = { id: pid++, name: p1, skill: s1 }
+    const rp2: RosterPlayer = { id: pid++, name: p2, skill: s2 }
+    players.push(rp1, rp2)
+    teams.push(teamFromRoster(tid++, tn, [rp1, rp2]))
+  })
+  return {
+    ...state,
+    tType: 'doubles',
+    teams: [...state.teams, ...teams],
+    players: [...state.players, ...players],
+    _tid: tid,
+    _pid: pid,
+  }
+}
 
 function isPow2(n: number): boolean {
   return n > 0 && (n & (n - 1)) === 0

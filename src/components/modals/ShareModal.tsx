@@ -49,7 +49,7 @@ export function ShareModal() {
         </div>
 
         <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 8 }}>
-          Bookmark the Admin Link or copy the ID — click <strong>↩ Resume</strong> on return to restore your tournament.
+          Bookmark the Admin Link or copy the ID — you can reopen it later from the tournament list on the Home screen.
         </div>
 
         <div className="modal-actions">

@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
+import { useConfirm } from '../../context/ConfirmContext'
 
 export function AddCourtModal() {
   const { dispatch } = useTournament()
   const { addCourtOpen, closeAddCourt } = useModal()
+  const confirm = useConfirm()
   const [name, setName] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -14,8 +16,11 @@ export function AddCourtModal() {
 
   if (!addCourtOpen) return null
 
-  const handleSubmit = () => {
-    if (!name.trim()) { alert('Enter a court name.'); return }
+  const handleSubmit = async () => {
+    if (!name.trim()) {
+      await confirm({ title: 'Missing Name', message: 'Enter a court name.', confirmLabel: 'OK', hideCancel: true })
+      return
+    }
     dispatch({ type: 'ADD_COURT', name: name.trim() })
     closeAddCourt()
   }

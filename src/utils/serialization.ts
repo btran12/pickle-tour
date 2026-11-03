@@ -1,5 +1,5 @@
 import type {
-  TournamentState, WireState, Match, Team, ByeTeam,
+  TournamentState, WireState, Match, Team, ByeTeam, RosterPlayer,
   SerializedMatch, BracketRound,
 } from '../types'
 
@@ -11,6 +11,7 @@ export function getSerializableState(state: TournamentState): WireState {
     bMethod: state.bMethod,
     tournamentName: state.tournamentName,
     teams: state.teams,
+    players: state.players,
     groups: state.groups.map(g => ({ id: g.id, name: g.name, teamIds: g.teams.map(t => t.id) })),
     rrMatches: serializeMatches(state.rrMatches),
     bracketMatches: serializeMatchArray(state.bracketMatches),
@@ -24,6 +25,7 @@ export function getSerializableState(state: TournamentState): WireState {
     _tid: state._tid,
     _mid: state._mid,
     _cid: state._cid,
+    _pid: state._pid,
   }
 }
 
@@ -52,8 +54,45 @@ export function serializeMatches(rrMatches: Record<string, Match[]>): Record<str
 // ─── Hydrate (wire → state) ─────────────────────────
 
 export function hydrateState(current: TournamentState, wire: WireState): TournamentState {
+  let pid = wire._pid ?? current._pid ?? 1
+
+  // Normalize teams so every player links back to a roster entry.
+  const teams: Team[] = (wire.teams ?? []).map(t => ({
+    ...t,
+    players: (t.players ?? []).map(p => ({ ...p })),
+  }))
+
+  let players: RosterPlayer[] = wire.players ?? []
+  if (!players.length && teams.length) {
+    // Backwards compatibility: build a roster from teams saved before rosters existed.
+    const seen: Record<string, RosterPlayer> = {}
+    players = []
+    teams.forEach(t => {
+      t.players.forEach(p => {
+        if (p.playerId) return
+        const key = `${p.name.trim().toLowerCase()}|${p.skill}`
+        let rp = seen[key]
+        if (!rp) {
+          rp = { id: pid++, name: p.name, skill: p.skill }
+          seen[key] = rp
+          players.push(rp)
+        }
+        p.playerId = rp.id
+      })
+    })
+  } else {
+    // Link any unlinked player to an existing roster entry with the same name/skill.
+    teams.forEach(t => {
+      t.players.forEach(p => {
+        if (p.playerId) return
+        const match = players.find(rp => rp.name === p.name && rp.skill === p.skill)
+        if (match) p.playerId = match.id
+      })
+    })
+  }
+
   const teamById: Record<number, Team> = {}
-  ;(wire.teams ?? []).forEach(t => { teamById[t.id] = t })
+  teams.forEach(t => { teamById[t.id] = t })
 
   function hydrateTeam(ref: { id: number } | ByeTeam | null | undefined): Team | ByeTeam | null {
     if (!ref) return null
@@ -100,7 +139,8 @@ export function hydrateState(current: TournamentState, wire: WireState): Tournam
     tType: wire.tType ?? current.tType,
     bMethod: wire.bMethod ?? current.bMethod,
     tournamentName: wire.tournamentName ?? current.tournamentName,
-    teams: wire.teams ?? [],
+    teams,
+    players,
     groups,
     rrMatches,
     bracketMatches,
@@ -114,6 +154,7 @@ export function hydrateState(current: TournamentState, wire: WireState): Tournam
     _tid: wire._tid ?? current._tid,
     _mid: wire._mid ?? current._mid,
     _cid: wire._cid ?? current._cid,
+    _pid: pid,
     // Viewers open spectator on first load
     activePage: current.role === 'viewer' ? current.activePage : current.activePage,
   }

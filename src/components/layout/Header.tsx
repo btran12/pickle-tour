@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import { useTheme } from '../../hooks/useTheme'
 import { exportCSV } from '../../utils/export'
 import type { WsStatus } from '../../types'
@@ -27,13 +28,27 @@ function indicatorClass(status: WsStatus): string {
 }
 
 export function Header() {
-  const { state, dispatch, createSession, resumeSession } = useTournament()
+  const { state, dispatch, createSession, resumeSession, goHome } = useTournament()
   const { openShare } = useModal()
+  const confirm = useConfirm()
   const { dark, toggleTheme } = useTheme()
   const { wsStatus, wsStatusText, tournamentId, role, activePage, presenceCount } = state
   const now = useClock()
   const hasSession = !!tournamentId
   const lastTid = localStorage.getItem('pb_lastTournamentId')
+
+  const leaveSession = async () => {
+    if (tournamentId?.startsWith('local_')) {
+      const ok = await confirm({
+        title: 'Leave Offline Tournament',
+        message: 'Offline tournaments are not saved. Go home and lose your changes?',
+        confirmLabel: 'Go Home',
+        danger: true,
+      })
+      if (!ok) return
+    }
+    goHome()
+  }
 
   return (
     <header>
@@ -75,6 +90,12 @@ export function Header() {
             )}
             <button className="btn btn-sm btn-primary no-print" onClick={createSession}>☁ Go Live</button>
           </>
+        )}
+
+        {hasSession && (
+          <button className="btn btn-sm btn-outline no-print" onClick={leaveSession} title="Back to tournaments">
+            ⌂ Home
+          </button>
         )}
 
         {hasSession && role === 'admin' && (

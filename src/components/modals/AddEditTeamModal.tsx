@@ -1,111 +1,137 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import type { Team } from '../../types'
-
-const SKILL_OPTS = [
-  { value: '', label: 'Not specified' },
-  { value: '1', label: '2.0 — Beginner' },
-  { value: '2', label: '2.5–3.0 — Intermediate' },
-  { value: '3', label: '3.5 — Solid' },
-  { value: '4', label: '4.0 — Advanced' },
-  { value: '5', label: '4.5+ — Elite' },
-]
 
 export function AddEditTeamModal() {
   const { state, dispatch } = useTournament()
   const { addTeamOpen, editTeamId, closeTeamModal } = useModal()
-  const { tType, teams, _tid } = state
+  const confirm = useConfirm()
+  const { teams, players } = state
   const isEdit = editTeamId !== null
-  const isD = tType === 'doubles'
-  const p1Ref = useRef<HTMLInputElement>(null)
-
   const existing = isEdit ? teams.find(t => t.id === editTeamId) : null
 
   const [tn, setTn] = useState('')
   const [p1, setP1] = useState('')
-  const [s1, setS1] = useState('')
   const [p2, setP2] = useState('')
-  const [s2, setS2] = useState('')
+
+  // Players already on another team can't be picked again.
+  const assignedElsewhere = new Set(
+    teams
+      .filter(t => t.id !== editTeamId)
+      .flatMap(t => t.players.map(p => p.playerId))
+      .filter((id): id is number => id != null)
+  )
+  const selectable = players.filter(p => !assignedElsewhere.has(p.id))
 
   useEffect(() => {
     if (!addTeamOpen) return
-    if (existing) {
-      const ep1 = existing.players[0] ?? {}
-      const ep2 = existing.players[1] ?? {}
-      setTn(isD ? existing.name : '')
-      setP1((ep1 as { name?: string }).name ?? '')
-      setS1(String((ep1 as { skill?: number }).skill ?? ''))
-      setP2((ep2 as { name?: string }).name ?? '')
-      setS2(String((ep2 as { skill?: number }).skill ?? ''))
-    } else {
-      setTn(''); setP1(''); setS1(''); setP2(''); setS2('')
-    }
-    setTimeout(() => p1Ref.current?.focus(), 50)
+    setTn(existing?.name ?? '')
+    setP1(String(existing?.players[0]?.playerId ?? ''))
+    setP2(String(existing?.players[1]?.playerId ?? ''))
   }, [addTeamOpen, editTeamId])
 
   if (!addTeamOpen) return null
 
-  const handleSubmit = () => {
-    if (!p1.trim()) { alert('Enter player name.'); return }
-    const sk1 = parseInt(s1) || 0
-    let team: Team
-    if (!isD) {
-      team = { id: isEdit ? editTeamId! : _tid, name: p1.trim(), players: [{ name: p1.trim(), skill: sk1 }], avgSkill: sk1 }
-    } else {
-      const p2v = p2.trim() || 'Player 2'
-      const sk2 = parseInt(s2) || 0
-      const name = isD ? (tn.trim() || `${p1.trim()} / ${p2v}`) : p1.trim()
-      const skills = [sk1, sk2].filter(s => s > 0)
-      const avg = skills.length ? skills.reduce((a, b) => a + b, 0) / skills.length : 0
-      team = { id: isEdit ? editTeamId! : _tid, name, players: [{ name: p1.trim(), skill: sk1 }, { name: p2v, skill: sk2 }], avgSkill: avg }
+  const handleSubmit = async () => {
+    const chosen = [p1, p2]
+      .filter(Boolean)
+      .map(id => players.find(p => p.id === Number(id)))
+      .filter((p): p is NonNullable<typeof p> => Boolean(p))
+
+    if (chosen.length !== 2) {
+      await confirm({
+        title: 'Choose Players',
+        message: 'Choose two players for a doubles team.',
+        confirmLabel: 'OK',
+        hideCancel: true,
+      })
+      return
     }
-    dispatch(isEdit ? { type: 'EDIT_TEAM', team } : { type: 'ADD_TEAM', team })
+
+    const teamPlayers = chosen.map(p => ({ playerId: p.id, name: p.name, skill: p.skill }))
+    const skills = teamPlayers.map(p => p.skill).filter(s => s > 0)
+    const avgSkill = skills.length ? skills.reduce((a, b) => a + b, 0) / skills.length : 0
+
+    if (isEdit) {
+      const team: Team = {
+        id: editTeamId!,
+        name: tn.trim() || chosen.map(p => p.name).join(' / '),
+        players: teamPlayers,
+        avgSkill,
+      }
+      dispatch({ type: 'EDIT_TEAM', team })
+    } else {
+      dispatch({ type: 'CREATE_TEAM', playerIds: chosen.map(p => p.id), name: tn })
+    }
     closeTeamModal()
   }
-
-  const title = isEdit ? (isD ? 'EDIT DOUBLES TEAM' : 'EDIT PLAYER') : (isD ? 'ADD DOUBLES TEAM' : 'ADD PLAYER')
 
   return (
     <div className="modal-overlay open" onClick={e => { if (e.target === e.currentTarget) closeTeamModal() }}>
       <div className="modal">
-        <div className="modal-title">{title}</div>
-        {isD && (
-          <div className="form-row">
-            <label>Team Name (optional)</label>
-            <input type="text" value={tn} onChange={e => setTn(e.target.value)} placeholder="Auto-generated if blank" />
-          </div>
-        )}
-        <div className={isD ? 'form-row-inline' : 'form-row'}>
-          <div>
-            <label>{isD ? 'Player 1' : 'Player Name'}</label>
-            <input ref={p1Ref} type="text" value={p1} onChange={e => setP1(e.target.value)} placeholder={isD ? 'Player 1' : 'Enter name'} />
-          </div>
-          <div>
-            <label>Skill</label>
-            <select value={s1} onChange={e => setS1(e.target.value)}>
-              {SKILL_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-        </div>
-        {isD && (
-          <div className="form-row-inline mt8">
-            <div>
-              <label>Player 2</label>
-              <input type="text" value={p2} onChange={e => setP2(e.target.value)} placeholder="Player 2" />
+        <div className="modal-title">{isEdit ? 'EDIT DOUBLES TEAM' : 'ADD DOUBLES TEAM'}</div>
+
+        {players.length === 0 ? (
+          <>
+            <div className="alert alert-warn">
+              Add players first, then you can pair them into teams.
             </div>
-            <div>
-              <label>Skill</label>
-              <select value={s2} onChange={e => setS2(e.target.value)}>
-                {SKILL_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={closeTeamModal}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                onClick={() => { closeTeamModal(); dispatch({ type: 'SET_PAGE', page: 'players' }) }}
+              >
+                Go to Players →
+              </button>
             </div>
-          </div>
+          </>
+        ) : (
+          <>
+            <div className="form-row">
+              <label>Team Name (optional)</label>
+              <input
+                type="text"
+                value={tn}
+                onChange={e => setTn(e.target.value)}
+                placeholder="Auto-generated from player names"
+              />
+            </div>
+            <div className="form-row-inline">
+              <div>
+                <label>Player 1</label>
+                <select value={p1} onChange={e => setP1(e.target.value)}>
+                  <option value="">Select player…</option>
+                  {selectable.filter(p => String(p.id) !== p2).map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Player 2</label>
+                <select value={p2} onChange={e => setP2(e.target.value)}>
+                  <option value="">Select player…</option>
+                  {selectable.filter(p => String(p.id) !== p1).map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {selectable.length < 2 && (
+              <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 8 }}>
+                Not enough unassigned players. Add more players or remove a team first.
+              </div>
+            )}
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={closeTeamModal}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={selectable.length < 2}>
+                {isEdit ? 'Save' : 'Add Team'}
+              </button>
+            </div>
+          </>
         )}
-        <div className="modal-actions">
-          <button className="btn btn-outline" onClick={closeTeamModal}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSubmit}>{isEdit ? 'Save' : 'Add'}</button>
-        </div>
       </div>
     </div>
   )

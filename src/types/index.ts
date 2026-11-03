@@ -3,6 +3,13 @@
 export interface Player {
   name: string
   skill: number // 0 = not set, 1-5
+  playerId?: number // links back to the registered player roster
+}
+
+export interface RosterPlayer {
+  id: number
+  name: string
+  skill: number // 0 = not set, 1-5
 }
 
 export interface Team {
@@ -113,6 +120,7 @@ export interface WireState {
   bMethod: BracketMethod
   tournamentName: string
   teams: Team[]
+  players: RosterPlayer[]
   groups: SerializedGroup[]
   rrMatches: Record<string, SerializedMatch[]>
   bracketMatches: SerializedMatch[]
@@ -126,6 +134,7 @@ export interface WireState {
   _tid: number
   _mid: number
   _cid: number
+  _pid: number
 }
 
 // ─── App state ───────────────────────────────────────
@@ -139,6 +148,7 @@ export interface TournamentState {
 
   // Data
   teams: Team[]
+  players: RosterPlayer[]
   groups: Group[]
   rrMatches: Record<string, Match[]>
   bracketMatches: Match[]
@@ -153,6 +163,7 @@ export interface TournamentState {
   _tid: number
   _mid: number
   _cid: number
+  _pid: number
 
   // WS / session
   wsStatus: WsStatus
