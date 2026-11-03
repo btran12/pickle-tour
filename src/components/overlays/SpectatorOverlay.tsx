@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { computeStandings, matchScoreDisplay, gamesWon, fmtTime, gameWin, getTeamDisplayName } from '../../utils/scoring'
+import { rndTitle } from '../../utils/bracket'
 import { allMatchesFlat } from '../../context/reducer'
 import type { Match, Team } from '../../types'
 
@@ -63,13 +64,7 @@ export function SpectatorOverlay({ forceOpen }: Props) {
   }
 
   const getBracketRoundTitle = (ri: number, matchCount: number): string => {
-    const t = totalBracketRounds
-    if (ri === t - 1) return '🏆 Final'
-    if (ri === t - 2) return '🥈 Semi-Finals'
-    if (ri === t - 3) return 'Quarter-Finals'
-    if (matchCount === 16) return 'Round of 16'
-    if (matchCount === 8) return 'Round of 8'
-    return `Round ${ri + 1}`
+    return rndTitle(ri, totalBracketRounds, matchCount)
   }
 
   return (

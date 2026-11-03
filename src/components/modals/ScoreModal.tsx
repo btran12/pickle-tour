@@ -52,6 +52,9 @@ export function ScoreModal() {
       if (games[i]?.a === '' || games[i]?.b === '') continue
       collected.push({ scoreA: parseInt(games[i].a) || 0, scoreB: parseInt(games[i].b) || 0 })
     }
+    // Nothing entered and nothing saved yet: just close instead of writing an
+    // empty "score updated" entry to the history.
+    if (!collected.length && !match.games.length) { closeScore(); return }
     dispatch({ type: 'SUBMIT_SCORE', matchType: scoreCtx.type, matchId: scoreCtx.matchId, games: collected })
     closeScore()
   }

@@ -3,6 +3,7 @@ import { ModalProvider } from './context/ModalContext'
 import { ConfirmProvider } from './context/ConfirmContext'
 import { Header } from './components/layout/Header'
 import { NavBar } from './components/layout/NavBar'
+import { ErrorBoundary } from './components/layout/ErrorBoundary'
 import { JoinToast } from './components/layout/JoinToast'
 import { SetupPage } from './components/pages/SetupPage'
 import { TeamsPage } from './components/pages/TeamsPage'
@@ -66,7 +67,9 @@ export default function App() {
     <TournamentProvider>
       <ModalProvider>
         <ConfirmProvider>
-          <AppInner />
+          <ErrorBoundary>
+            <AppInner />
+          </ErrorBoundary>
         </ConfirmProvider>
       </ModalProvider>
     </TournamentProvider>

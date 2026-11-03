@@ -507,13 +507,17 @@ export function reducer(state: TournamentState, action: Action): TournamentState
       const applyToMatch = (m: Match): Match => {
         if (m.id !== matchId) return m
         const snapshot = JSON.stringify({ games: m.games, winner: m.winner ? { id: (m.winner as Team).id } : null, status: m.status })
+        const aName = (m.teamA as Team | null)?.name ?? 'TBD'
+        const bName = (m.teamB as Team | null)?.name ?? 'TBD'
         let winner = m.winner, loser = m.loser, status = m.status
-        if (wA >= wn) { winner = m.teamA; loser = m.teamB; status = 'done' }
-        else if (wB >= wn) { winner = m.teamB; loser = m.teamA; status = 'done' }
+        // A match can only be completed when the winning side is actually known
+        // (bracket slots can still be TBD while the previous round is open).
+        if (wA >= wn && m.teamA) { winner = m.teamA; loser = m.teamB; status = 'done' }
+        else if (wB >= wn && m.teamB) { winner = m.teamB; loser = m.teamA; status = 'done' }
         else { winner = null; loser = null; status = trimmed.length > 0 ? 'live' : 'pending' }
-        const desc = status === 'done'
-          ? `${(winner as Team).name} def. ${(winner as Team).id === (m.teamA as Team)?.id ? (m.teamB as Team)?.name : (m.teamA as Team)?.name} (${trimmed.map(g => g.scoreA + '-' + g.scoreB).join(', ')})`
-          : `Score updated: ${(m.teamA as Team)?.name} vs ${(m.teamB as Team)?.name}`
+        const desc = status === 'done' && winner
+          ? `${(winner as Team).name} def. ${(winner as Team).id === (m.teamA as Team)?.id ? bName : aName} (${trimmed.map(g => g.scoreA + '-' + g.scoreB).join(', ')})`
+          : `Score updated: ${aName} vs ${bName}`
         const entry: HistoryEntry = { ts: Date.now(), desc, ctx: { type: matchType, matchId, snapshot } }
         return { ...m, games: trimmed, winner, loser, status, _historyEntry: entry } as Match & { _historyEntry: HistoryEntry }
       }
@@ -606,7 +610,23 @@ export function reducer(state: TournamentState, action: Action): TournamentState
         let thirdPlaceMatch = state.thirdPlaceMatch?.id === matchId
           ? restoreMatch(state.thirdPlaceMatch!)
           : state.thirdPlaceMatch
-        return { ...state, bracketMatches, thirdPlaceMatch, history }
+        // A semi-final feeds the 3rd-place match with its loser — clear that
+        // slot too, otherwise the bracket shows a team that never lost.
+        if (thirdPlaceMatch && thirdPlaceMatch.id !== matchId && thirdPlaceMatch.feedLoserFrom) {
+          const tp = { ...thirdPlaceMatch }
+          const feeds = tp.feedLoserFrom as [number, number]
+          let tpChanged = false
+          if (feeds[0] === matchId) { tp.teamA = null; tpChanged = true }
+          if (feeds[1] === matchId) { tp.teamB = null; tpChanged = true }
+          if (tpChanged) {
+            thirdPlaceMatch = tp
+            bracketMatches = bracketMatches.map(m => m.id === tp.id ? { ...m, teamA: tp.teamA, teamB: tp.teamB } : m)
+          }
+        }
+        // Rounds hold the match objects the bracket renders, so rebuild them
+        // after restoring scores (otherwise the UI keeps the undone result).
+        const bracketRounds = rebuildBracketRounds(bracketMatches)
+        return { ...state, bracketMatches, bracketRounds, thirdPlaceMatch, history }
       }
     }
 
@@ -685,24 +705,74 @@ function loadSampleTeams(state: TournamentState, samples: SampleTeam[]): Tournam
 }
 
 /**
- * Group cards hold team snapshots. After teams are edited, removed, or
- * regenerated, drop entries whose team no longer exists and refresh the
- * remaining entries to point at the current team objects.
+ * Team edits, removals, and regenerations invalidate the team snapshots held
+ * by groups and by every match. Refresh those references so names and skills
+ * stay in sync, and drop group entries whose team no longer exists.
  */
 function reconcileGroups(state: TournamentState): TournamentState {
-  if (!state.groups.length) return state
   const byId = new Map(state.teams.map(t => [t.id, t]))
   let changed = false
-  const groups = state.groups.map(g => {
-    const teams = g.teams.flatMap(t => {
-      const current = byId.get(t.id)
-      if (!current) { changed = true; return [] }
-      if (current !== t) { changed = true; return [current] }
-      return [t]
+
+  const refresh = (ref: Team | null | undefined): Team | null | undefined => {
+    if (!ref) return ref
+    if ((ref as { isBye?: boolean }).isBye) return ref
+    const current = byId.get((ref as Team).id)
+    if (!current || current === ref) return ref
+    changed = true
+    return current
+  }
+
+  const syncMatch = (m: Match): Match => {
+    const teamA = refresh(m.teamA as Team | null)
+    const teamB = refresh(m.teamB as Team | null)
+    const winner = refresh(m.winner as Team | null)
+    const loser = refresh(m.loser as Team | null)
+    if (teamA === m.teamA && teamB === m.teamB && winner === m.winner && loser === m.loser) return m
+    return { ...m, teamA, teamB, winner, loser } as Match
+  }
+
+  const groups = state.groups.length
+    ? state.groups.map(g => {
+      const teams = g.teams.flatMap(t => {
+        const current = byId.get(t.id)
+        if (!current) { changed = true; return [] }
+        if (current !== t) { changed = true; return [current] }
+        return [t]
+      })
+      return teams === g.teams ? g : { ...g, teams }
     })
-    return teams === g.teams ? g : { ...g, teams }
-  })
-  return changed ? { ...state, groups } : state
+    : state.groups
+
+  let rrMatches = state.rrMatches
+  let bracketMatches = state.bracketMatches
+  let thirdPlaceMatch = state.thirdPlaceMatch
+
+  if (Object.keys(state.rrMatches).length) {
+    let matchesChanged = false
+    const next: Record<string, Match[]> = {}
+    for (const gi in state.rrMatches) {
+      const synced = state.rrMatches[gi].map(syncMatch)
+      if (synced.some((m, i) => m !== state.rrMatches[gi][i])) matchesChanged = true
+      next[gi] = synced
+    }
+    if (matchesChanged) rrMatches = next
+  }
+
+  if (state.bracketMatches.length) {
+    const synced = state.bracketMatches.map(syncMatch)
+    if (synced.some((m, i) => m !== state.bracketMatches[i])) bracketMatches = synced
+  }
+
+  if (state.thirdPlaceMatch) {
+    thirdPlaceMatch = syncMatch(state.thirdPlaceMatch)
+  }
+
+  if (!changed) return state
+  // Rounds point at match objects, so refresh them when teams were renamed.
+  const bracketRounds = bracketMatches !== state.bracketMatches
+    ? rebuildBracketRounds(bracketMatches)
+    : state.bracketRounds
+  return { ...state, groups, rrMatches, bracketMatches, bracketRounds, thirdPlaceMatch }
 }
 
 function bracketSeeds(state: TournamentState): { seeds: Team[]; seedGroups: Record<number, number> } {

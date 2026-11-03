@@ -1,4 +1,5 @@
 import type { Role } from '../types'
+import { deleteLocalState, isLocalId } from './localStore'
 
 export interface SavedTournament {
   id: string
@@ -39,7 +40,7 @@ export function getSavedTournaments(): SavedTournament[] {
 }
 
 export function saveTournament(t: SavedTournament): void {
-  if (!t.id || t.id.startsWith('local_')) return
+  if (!t.id) return
   const name = t.name.trim() || 'Untitled Tournament'
   const list = getSavedTournaments().filter(x => x.id !== t.id)
   // Keep host access if this browser ever had it for the tournament.
@@ -55,6 +56,7 @@ export function removeSavedTournament(id: string): void {
   if (localStorage.getItem(LAST_ID_KEY) === id) {
     localStorage.removeItem(LAST_ID_KEY)
   }
+  if (isLocalId(id)) deleteLocalState(id)
 }
 
 export function getSavedTournament(id: string): SavedTournament | undefined {

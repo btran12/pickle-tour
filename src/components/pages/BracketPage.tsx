@@ -2,14 +2,15 @@ import { Fragment, useState } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 import { MatchCard } from '../shared/MatchCard'
-import { computeStandings, matchScoreDisplay, getTeamDisplayName } from '../../utils/scoring'
+import { computeStandings, matchScoreDisplay, getTeamDisplayName, quickWinGames } from '../../utils/scoring'
 import type { Team } from '../../types'
 
 export function BracketPage() {
   const { state, dispatch } = useTournament()
   const { openScore } = useModal()
   const { bracketRounds, bracketMatches, thirdPlaceMatch, bracketSeedGroups, groups, rrMatches, settings } = state
-  const [showGroups, setShowGroups] = useState(true)
+  // On phones the standings cards push the bracket far below the fold.
+  const [showGroups, setShowGroups] = useState(() => window.innerWidth > 640)
 
   const fin = bracketRounds[bracketRounds.length - 1]?.matches[0]
   const champ = fin?.status === 'done' ? (fin.winner as Team | null) : null
@@ -187,13 +188,13 @@ export function BracketPage() {
                       const canOpenModal = !state.testingMode && tA && tB && !tA.isBye && !tB.isBye
                       
                       const handleQuickScore = (teamId: number) => {
-                        if (isDone || !state.testingMode) return
+                        if (!canScore || !state.testingMode) return
                         const winnerIsA = teamId === tA?.id
                         dispatch({
                           type: 'SUBMIT_SCORE',
                           matchType: 'bracket',
                           matchId: m.id,
-                          games: [{ scoreA: winnerIsA ? 11 : 0, scoreB: winnerIsA ? 0 : 11 }]
+                          games: quickWinGames(m.bestOf ?? settings.sfBestOf, settings.winScore, winnerIsA),
                         })
                       }
                       
@@ -207,12 +208,12 @@ export function BracketPage() {
                             <div 
                               className={`bracket-slot ${isWinA ? 'winner-slot' : ''}`}
                               onClick={(e) => {
-                                if (state.testingMode) {
+                                if (state.testingMode && canScore) {
                                   e.stopPropagation()
                                   handleQuickScore(tA?.id ?? 0)
                                 }
                               }}
-                              style={state.testingMode && !isDone && tA ? { cursor: 'pointer' } : undefined}
+                              style={state.testingMode && canScore ? { cursor: 'pointer' } : undefined}
                             >
                               {tA?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
                                 : tA ? <span className="bracket-team-name">{getTeamDisplayName(tA)}{groupBadge(tA)}</span> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
@@ -221,12 +222,12 @@ export function BracketPage() {
                             <div 
                               className={`bracket-slot ${isWinB ? 'winner-slot' : ''}`}
                               onClick={(e) => {
-                                if (state.testingMode) {
+                                if (state.testingMode && canScore) {
                                   e.stopPropagation()
                                   handleQuickScore(tB?.id ?? 0)
                                 }
                               }}
-                              style={state.testingMode && !isDone && tB ? { cursor: 'pointer' } : undefined}
+                              style={state.testingMode && canScore ? { cursor: 'pointer' } : undefined}
                             >
                               {tB?.isBye ? <span style={{ color: 'var(--text3)', fontStyle: 'italic' }}>BYE</span>
                                 : tB ? <span className="bracket-team-name">{getTeamDisplayName(tB)}{groupBadge(tB)}</span> : <span style={{ color: 'var(--text3)' }}>TBD</span>}
@@ -276,13 +277,12 @@ export function BracketPage() {
                         
                         const handleQuickScore = () => {
                           if (isDone || !state.testingMode || !t) return
-                          const otherTeam = idx === 0 ? tp.teamB : tp.teamA
                           const winnerIsA = idx === 0
                           dispatch({
                             type: 'SUBMIT_SCORE',
                             matchType: 'bracket',
                             matchId: tp.id,
-                            games: [{ scoreA: winnerIsA ? 11 : 0, scoreB: winnerIsA ? 0 : 11 }]
+                            games: quickWinGames(tp.bestOf ?? settings.thirdBestOf, settings.winScore, winnerIsA),
                           })
                         }
                         

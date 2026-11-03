@@ -14,6 +14,17 @@ export function gameWin(sA: number, sB: number, winScore: number, winBy2: boolea
   return -1
 }
 
+/**
+ * Games needed to win a best-of-N match outright. Used by testing-mode
+ * quick scoring so one tap completes the whole match, not just one game.
+ */
+export function quickWinGames(bestOf: number, winScore: number, teamIsA: boolean): Array<{ scoreA: number; scoreB: number }> {
+  const wn = Math.max(1, Math.ceil(bestOf / 2))
+  return Array.from({ length: wn }, () => (teamIsA
+    ? { scoreA: winScore, scoreB: 0 }
+    : { scoreA: 0, scoreB: winScore }))
+}
+
 export function gamesWon(match: Match, side: 'A' | 'B', winScore: number, winBy2: boolean): number {
   return match.games.filter(g => {
     const w = gameWin(g.scoreA, g.scoreB, winScore, winBy2)

@@ -17,7 +17,7 @@ function fmtWhen(ts: number): string {
 }
 
 export function WelcomeOverlay() {
-  const { createSession, openById, duplicateTournament, dispatch } = useTournament()
+  const { createSession, startOfflineSession, openById, duplicateTournament } = useTournament()
   const confirm = useConfirm()
   const [idInput, setIdInput] = useState('')
   const [saved, setSaved] = useState<SavedTournament[]>(() => getSavedTournaments())
@@ -72,9 +72,11 @@ export function WelcomeOverlay() {
                   >
                     <span className="saved-item-name">
                       <span className="saved-item-name-text">{t.name}</span>
-                      <span className={`saved-role ${t.role}`}>{t.role === 'admin' ? 'Host' : 'Viewer'}</span>
+                      {t.id.startsWith('local_')
+                        ? <span className="saved-role offline">Offline</span>
+                        : <span className={`saved-role ${t.role}`}>{t.role === 'admin' ? 'Host' : 'Viewer'}</span>}
                     </span>
-                    <span className="saved-item-id">{t.id}</span>
+                    <span className="saved-item-id">{t.id.startsWith('local_') ? 'Saved on this device' : t.id}</span>
                     <span className="saved-item-meta">Last opened {fmtWhen(t.lastVisited)}</span>
                   </button>
                   <div className="saved-item-actions">
@@ -120,16 +122,12 @@ export function WelcomeOverlay() {
         </div>
 
         <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 18, textAlign: 'center' }}>
-          You can also use the app offline — just skip the live session
+          You can also use the app offline — everything stays on this device
         </div>
         <button
           className="btn btn-ghost btn-full"
           style={{ marginTop: 8 }}
-          onClick={() => {
-            dispatch({ type: 'SET_ROLE', role: 'admin' })
-            dispatch({ type: 'SET_TOURNAMENT_ID', id: 'local_' + Date.now() })
-            dispatch({ type: 'SET_PAGE', page: 'setup' })
-          }}
+          onClick={startOfflineSession}
         >
           Use Offline (no sync)
         </button>

@@ -3,6 +3,7 @@ import type { TournamentState, WireState, Role } from '../types'
 import { reducer, type Action } from './reducer'
 import { initialState } from './initialState'
 import { getSerializableState, hydrateState } from '../utils/serialization'
+import { saveLocalState, loadLocalState, isLocalId } from '../utils/localStore'
 import { saveTournament, getSavedTournament, getLastTournamentId } from '../utils/tournamentHistory'
 import { copyTournamentState } from '../utils/tournamentCopy'
 import { CONFIG } from '../config'
@@ -14,6 +15,7 @@ interface TournamentContextValue {
   state: TournamentState
   dispatch: React.Dispatch<Action>
   createSession: () => void
+  startOfflineSession: () => void
   resumeSession: () => void
   openById: (id: string) => void
   duplicateTournament: (id: string) => Promise<boolean>
@@ -71,6 +73,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     if (!state.tournamentId) return
     if (!sessionReady.current) return
     if (skipSave.current) { skipSave.current = false; return }
+    if (isLocalId(state.tournamentId)) { saveLocalState(state); return }
     save(state)
   }, [
     state.teams, state.players, state.groups, state.rrMatches, state.bracketMatches,
@@ -137,29 +140,53 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const tid = params.get('t')
-    if (tid) {
-      const role = params.get('role') === 'admin' ? 'admin' : 'viewer'
-      lastKnownUpdatedAt.current = null
-      sessionReady.current = false
+    if (!tid) return
+    const role = params.get('role') === 'admin' ? 'admin' : 'viewer'
+    lastKnownUpdatedAt.current = null
+    if (isLocalId(tid)) {
+      // Offline sessions are restored from this device's storage.
+      sessionReady.current = true
+      const restored = loadLocalState(tid, { ...initialState, tournamentId: tid, role })
       dispatch({ type: 'SET_TOURNAMENT_ID', id: tid })
       dispatch({ type: 'SET_ROLE', role })
-      dispatch({ type: 'SET_WS_STATUS', status: 'connecting', text: '⟳ Loading…' })
+      dispatch({ type: 'SET_WS_STATUS', status: 'offline', text: '' })
+      if (restored) dispatch({ type: 'LOAD_TOURNAMENT_STATE', state: restored })
+      return
     }
+    sessionReady.current = false
+    dispatch({ type: 'SET_TOURNAMENT_ID', id: tid })
+    dispatch({ type: 'SET_ROLE', role })
+    dispatch({ type: 'SET_WS_STATUS', status: 'connecting', text: '⟳ Loading…' })
   }, [])
 
   // ── Session helpers ──────────────────────────────────
   const activateSession = useCallback((tid: string, role: Role = 'admin') => {
+    const local = isLocalId(tid)
     lastKnownUpdatedAt.current = null
-    sessionReady.current = false
+    sessionReady.current = local
     dispatch({ type: 'RESET_TOURNAMENT' })
     dispatch({ type: 'SET_TOURNAMENT_ID', id: tid })
     dispatch({ type: 'SET_ROLE', role })
-    dispatch({ type: 'SET_WS_STATUS', status: 'connecting', text: '⟳ Loading…' })
+    dispatch({
+      type: 'SET_WS_STATUS',
+      status: local ? 'offline' : 'connecting',
+      text: local ? '' : '⟳ Loading…',
+    })
+    if (local) {
+      const restored = loadLocalState(tid, { ...initialState, tournamentId: tid, role })
+      if (restored) dispatch({ type: 'LOAD_TOURNAMENT_STATE', state: restored })
+    }
     const url = new URL(window.location.href)
     url.searchParams.set('t', tid)
     url.searchParams.set('role', role)
     window.history.replaceState({}, '', url.toString())
   }, [])
+
+  const startOfflineSession = useCallback(() => {
+    activateSession('local_' + Date.now(), 'admin')
+    dispatch({ type: 'SET_PAGE', page: 'setup' })
+    dispatch({ type: 'SHOW_TOAST', text: '📴 Offline tournament — saved on this device' })
+  }, [activateSession])
 
   const createSession = useCallback(() => {
     const tid = 'pb_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
@@ -234,7 +261,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <TournamentContext.Provider value={{ state, dispatch, createSession, resumeSession, openById, duplicateTournament, goHome }}>
+    <TournamentContext.Provider value={{ state, dispatch, createSession, startOfflineSession, resumeSession, openById, duplicateTournament, goHome }}>
       {children}
     </TournamentContext.Provider>
   )

@@ -86,10 +86,9 @@ export function buildBracket(
 export function rndTitle(i: number, t: number, matchCount?: number): string {
   if (i === t - 1) return '🏆 Final'
   if (i === t - 2) return '🥈 Semi-Finals'
-  if (t >= 4 && i === t - 3) return 'Quarter-Finals'
-  // For early rounds, show "Round of X" based on number of matches
-  if (matchCount === 16) return 'Round of 16'
-  if (matchCount === 8) return 'Round of 8'
+  if (i === t - 3) return 'Quarter-Finals'
+  // Early rounds are named by how many teams enter them (matches × 2).
+  if (matchCount && matchCount * 2 >= 4) return `Round of ${matchCount * 2}`
   return `Round ${i + 1}`
 }
 

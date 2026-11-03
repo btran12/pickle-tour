@@ -26,6 +26,13 @@ export function ShareModal() {
       <div className="modal">
         <div className="modal-title">Share Tournament</div>
 
+        {tid.startsWith('local_') && (
+          <div className="alert alert-warn" style={{ fontSize: 12 }}>
+            This is an offline tournament — it lives only in this browser. Links below won't work on other devices.
+            Use <strong>Go Live</strong> to create a synced tournament.
+          </div>
+        )}
+
         <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 6 }}><strong>Tournament ID</strong></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
           <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 12, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 10px', flex: 1 }}>{tid}</span>

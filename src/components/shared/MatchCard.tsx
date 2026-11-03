@@ -1,5 +1,5 @@
 import type { Match, Team, MatchType } from '../../types'
-import { matchScoreDisplay, fmtTime } from '../../utils/scoring'
+import { matchScoreDisplay, fmtTime, quickWinGames } from '../../utils/scoring'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 
@@ -30,7 +30,7 @@ export function MatchCard({ match, matchType, bestOf, is3rdPlace, testingMode }:
       type: 'SUBMIT_SCORE',
       matchType,
       matchId: match.id,
-      games: [{ scoreA: winnerIsA ? 11 : 0, scoreB: winnerIsA ? 0 : 11 }]
+      games: quickWinGames(bestOf, state.settings.winScore, winnerIsA),
     })
   }
 

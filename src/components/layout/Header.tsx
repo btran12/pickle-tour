@@ -42,9 +42,8 @@ export function Header() {
     if (tournamentId?.startsWith('local_')) {
       const ok = await confirm({
         title: 'Leave Offline Tournament',
-        message: 'Offline tournaments are not saved. Go home and lose your changes?',
+        message: 'This offline tournament is saved on this device. Go home? You can reopen it from the tournament list.',
         confirmLabel: 'Go Home',
-        danger: true,
       })
       if (!ok) return
     }

@@ -33,6 +33,7 @@ export function SetupPage() {
               <ToggleGroup<TournamentType>
                 options={[{ value: 'singles', label: 'Singles' }, { value: 'doubles', label: 'Doubles' }]}
                 value={tType}
+                disabled={groupsLocked}
                 onChange={async v => {
                   if (v === 'singles' && teams.some(t => t.players.length > 1) && players.length) {
                     if (!await confirm({
@@ -44,6 +45,7 @@ export function SetupPage() {
                   dispatch({ type: 'SET_TTYPE', value: v })
                 }}
               />
+              {groupsLocked && <div className="setting-desc">Locked — the tournament has already started</div>}
             </div>
             <div className="form-row">
               <label>Group Assignment</label>
