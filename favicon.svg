@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PickleBracket">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d4ed8" />
+      <stop offset="1" stop-color="#6d28d9" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#tile)" />
+  <g transform="translate(256 256) rotate(35)">
+    <g fill="#0f172a" opacity=".22" transform="translate(8 15)">
+      <rect x="-99.8" y="-179.2" width="199.6" height="235.6" rx="74" />
+      <rect x="-28.7" y="-8.7" width="57.4" height="198.4" rx="28.7" />
+    </g>
+    <rect x="-99.8" y="-179.2" width="199.6" height="235.6" rx="74" fill="#f8fafc" />
+    <rect x="-28.7" y="-8.7" width="57.4" height="198.4" rx="28.7" fill="#f8fafc" />
+  </g>
+  <circle cx="401.9" cy="110.1" r="52.2" fill="#1e40af" />
+  <circle cx="401.9" cy="110.1" r="44" fill="#bef264" />
+  <circle cx="401.9" cy="110.1" r="6.4" fill="#1e40af" />
+  <circle cx="419.3" cy="124.4" r="6.4" fill="#1e40af" />
+  <circle cx="386" cy="128" r="6.4" fill="#1e40af" />
+</svg>
