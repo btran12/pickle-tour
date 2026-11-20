@@ -6,6 +6,8 @@ export interface SavedTournament {
   name: string
   role: Role
   lastVisited: number
+  /** Placeholder built from the old single-value key: its role is a guess, not proof of access. */
+  legacy?: boolean
 }
 
 const STORAGE_KEY = 'pb_tournaments'
@@ -19,21 +21,27 @@ export function getSavedTournaments(): SavedTournament[] {
     if (Array.isArray(parsed)) {
       list = parsed
         .filter((t): t is Partial<SavedTournament> => !!t && typeof t === 'object' && typeof t.id === 'string')
-        .map(t => ({
-          id: t.id as string,
-          name: typeof t.name === 'string' && t.name.trim() ? t.name : 'Untitled Tournament',
-          role: t.role === 'viewer' ? 'viewer' : 'admin',
-          lastVisited: typeof t.lastVisited === 'number' ? t.lastVisited : 0,
-        }))
+        .map(t => {
+          const lastVisited = typeof t.lastVisited === 'number' ? t.lastVisited : 0
+          return {
+            id: t.id as string,
+            name: typeof t.name === 'string' && t.name.trim() ? t.name : 'Untitled Tournament',
+            role: t.role === 'viewer' ? 'viewer' : 'admin',
+            lastVisited,
+            // Entries at epoch 0 are migration placeholders written by earlier builds.
+            legacy: lastVisited === 0 && t.role !== 'viewer',
+          }
+        })
     }
   } catch {
     list = []
   }
 
-  // Migrate the old single-value resume key into the visible list.
+  // Migrate the old single-value resume key into the visible list. The old key carried no
+  // role, so treat the entry as a guess: opening a viewer link must be allowed to correct it.
   const lastId = localStorage.getItem(LAST_ID_KEY)
   if (lastId && !list.some(t => t.id === lastId)) {
-    list.push({ id: lastId, name: 'Previous Tournament', role: 'admin', lastVisited: 0 })
+    list.push({ id: lastId, name: 'Previous Tournament', role: 'admin', lastVisited: 0, legacy: true })
   }
 
   return list.sort((a, b) => b.lastVisited - a.lastVisited)
@@ -43,9 +51,12 @@ export function saveTournament(t: SavedTournament): void {
   if (!t.id) return
   const name = t.name.trim() || 'Untitled Tournament'
   const list = getSavedTournaments().filter(x => x.id !== t.id)
-  // Keep host access if this browser ever had it for the tournament.
-  const role = getSavedTournament(t.id)?.role === 'admin' ? 'admin' : t.role
-  list.unshift({ ...t, name, role })
+  const previous = getSavedTournament(t.id)
+  // Keep host access if this browser really had it for the tournament. A legacy placeholder
+  // only guessed "admin", so do not use it to promote an explicit viewer session.
+  const keepHost = previous?.role === 'admin' && !previous.legacy
+  const role: Role = keepHost ? 'admin' : t.role
+  list.unshift({ id: t.id, name, role, lastVisited: t.lastVisited })
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, MAX_SAVED)))
   localStorage.setItem(LAST_ID_KEY, t.id)
 }

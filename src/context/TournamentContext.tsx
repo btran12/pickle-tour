@@ -197,13 +197,45 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
   const resumeSession = useCallback(() => {
     const tid = getLastTournamentId()
     if (!tid) return
-    activateSession(tid, getSavedTournament(tid)?.role ?? 'admin')
+    activateSession(tid, getSavedTournament(tid)?.role ?? 'viewer')
     dispatch({ type: 'SHOW_TOAST', text: '↩ Resuming tournament…' })
   }, [activateSession])
 
-  const openById = useCallback((id: string) => {
-    activateSession(id, getSavedTournament(id)?.role ?? 'admin')
+  const openById = useCallback(async (id: string) => {
+    const tid = id.trim()
+    if (!tid) return
+
+    // Offline sessions live only on this device, so there is nothing to verify online.
+    if (isLocalId(tid)) {
+      activateSession(tid, getSavedTournament(tid)?.role ?? 'viewer')
+      dispatch({ type: 'SHOW_TOAST', text: '↩ Loading offline tournament…' })
+      return
+    }
+
+    // Same shape the API accepts; rejecting it here gives instant feedback.
+    if (!/^[a-zA-Z0-9_]{8,64}$/.test(tid)) {
+      dispatch({ type: 'SHOW_TOAST', text: '✕ Invalid tournament ID — check it and try again' })
+      return
+    }
+
     dispatch({ type: 'SHOW_TOAST', text: '🔗 Loading tournament…' })
+    try {
+      const res = await fetch(`${CONFIG.API_URL}/tournaments/${encodeURIComponent(tid)}`)
+      // The API answers 404 for an ID that has no saved state; without this check the app
+      // would start a brand-new tournament under that ID instead of reporting the mistake.
+      if (res.status === 404) {
+        dispatch({ type: 'SHOW_TOAST', text: '✕ Invalid tournament ID — no tournament with that ID' })
+        return
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    } catch (e) {
+      console.warn('[API] join failed', e)
+      dispatch({ type: 'SHOW_TOAST', text: '✕ Could not reach the server — try again' })
+      return
+    }
+
+    activateSession(tid, getSavedTournament(tid)?.role ?? 'viewer')
+    dispatch({ type: 'SHOW_TOAST', text: '🔗 Joined tournament' })
   }, [activateSession])
 
   const duplicateTournament = useCallback(async (id: string): Promise<boolean> => {
