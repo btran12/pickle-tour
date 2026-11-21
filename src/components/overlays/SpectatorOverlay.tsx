@@ -177,8 +177,8 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                                 const isWin = isDone && winner?.id === t?.id
                                 return (
                                   <div key={idx} style={{ padding: '8px 11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 15, fontWeight: 600, borderBottom: idx === 0 ? '1px solid var(--border)' : undefined, background: isWin ? 'var(--accent-dim)' : undefined, color: isWin ? 'var(--accent)' : 'var(--text)', borderLeft: isWin ? '3px solid var(--accent)' : undefined }}>
-                                    <span>{t?.name ?? 'TBD'}</span>
-                                    {sd && m.games.length > 0 && <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 15, fontWeight: 700 }}>{score}</span>}
+                                    <span className="spectator-bracket-team">{t?.name ?? 'TBD'}</span>
+                                    {sd && m.games.length > 0 && <span className="spectator-bracket-score">{score}</span>}
                                   </div>
                                 )
                               })}
