@@ -151,6 +151,8 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .rank-num{font-family:'DM Mono',monospace;color:var(--text3);font-weight:600}
 .rank-1{color:var(--gold)}.rank-2{color:var(--text2)}.rank-3{color:#b45309}
 .pts-cell{font-family:'DM Mono',monospace;font-weight:700;color:var(--accent)}
+.tiebreak-cell{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2px;color:var(--text3);white-space:nowrap}
+.tiebreak-note{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2px;color:var(--text3);margin-top:8px;line-height:1.5}
 
 /* ─── BRACKET ───────────────────────────────────────── */
 .bracket-wrapper{overflow-x:auto;padding-bottom:12px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
@@ -194,7 +196,7 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 
 /* Group stage summary shown above the bracket */
 .group-stage{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:16px;box-shadow:0 1px 4px var(--shadow)}
-.group-stage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.group-stage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .group-stage-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;display:flex;flex-direction:column;gap:8px}
 .group-stage-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .group-stage-name{font-size:14px;font-weight:700;color:var(--text)}
@@ -203,7 +205,8 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .group-stage-table th{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);text-align:left;font-weight:600;padding:3px 4px;border-bottom:1px solid var(--border)}
 .group-stage-table td{padding:4px;border-bottom:1px solid var(--border);color:var(--text2);font-family:'DM Sans',sans-serif}
 .group-stage-table tr:last-child td{border-bottom:none}
-.group-stage-table th:nth-child(n+3),.group-stage-table td:nth-child(n+3){text-align:center;width:32px}
+.group-stage-table th:nth-child(n+3),.group-stage-table td:nth-child(n+3){text-align:center;width:28px}
+.group-stage-table th.tiebreak-col,.group-stage-table td.tiebreak-cell{width:52px;text-align:center;font-size:10px}
 .group-stage-table tr.advancing td{color:var(--text);font-weight:600;background:var(--accent-dim)}
 .group-stage-table tr.advancing td:first-child{border-left:3px solid var(--accent)}
 .advance-mark{margin-left:5px;font-size:10px;color:var(--accent);font-weight:700}
@@ -504,8 +507,12 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   .spectator-standings .standings-table td{padding:7px 4px!important;font-size:12px!important}
   .spectator-standings .standings-table th:first-child,
   .spectator-standings .standings-table td:first-child{width:26px;padding-left:0!important;text-align:center}
-  .spectator-standings .standings-table th:nth-last-child(-n+2),
-  .spectator-standings .standings-table td:nth-last-child(-n+2){width:32px;padding-right:0!important;text-align:center}
+  .spectator-standings .standings-table th:nth-child(3),
+  .spectator-standings .standings-table td:nth-child(3),
+  .spectator-standings .standings-table th:nth-child(4),
+  .spectator-standings .standings-table td:nth-child(4){width:28px;padding-left:0!important;padding-right:0!important;text-align:center}
+  .spectator-standings .standings-table th:nth-child(5),
+  .spectator-standings .standings-table td:nth-child(5){width:60px;padding-left:0!important;padding-right:0!important;text-align:right;font-size:10px!important;white-space:nowrap}
   .spectator-standings .spectator-team-cell{font-size:13px!important;white-space:normal;overflow-wrap:anywhere}
 
   /* Bracket: narrower cards that scroll horizontally */

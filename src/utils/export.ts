@@ -25,9 +25,9 @@ export function exportCSV(state: TournamentState): void {
 
   rows.push([], ['STANDINGS'])
   state.groups.forEach((g, gi) => {
-    rows.push([g.name], ['Rank', 'Team', 'Wins', 'Losses', 'Pt Diff'])
+    rows.push([g.name], ['Rank', 'Team', 'Wins', 'Losses', 'Pt Diff', 'Tiebreak'])
     computeStandings(gi, state).forEach((s, i) => {
-      rows.push([i + 1, s.team.name, s.wins, s.losses, s.pd])
+      rows.push([i + 1, s.team.name, s.wins, s.losses, s.pd, s.tiebreakReason])
     })
     rows.push([])
   })

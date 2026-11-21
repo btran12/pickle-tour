@@ -71,6 +71,10 @@ export function matchScoreDisplay(
   }
 }
 
+/** Legend for the Tiebreak column shown next to standings. */
+export const TIEBREAK_LEGEND = 'Shown when teams are level: H2H = head-to-head, GW = games won, PD = point differential, Pts = points scored.'
+export const TIEBREAK_KEY = 'H2H = head-to-head · GW = games won · PD = point differential · Pts = points scored'
+
 export interface Standing {
   team: Team
   wins: number
@@ -79,6 +83,8 @@ export interface Standing {
   gamesLost: number
   pd: number
   pointsFor: number
+  /** Short explanation of the tiebreaker that ordered this team, or '' if not tied. */
+  tiebreakReason: string
 }
 
 interface HeadToHeadRecord {
@@ -90,10 +96,13 @@ interface HeadToHeadRecord {
   pointsFor: number
 }
 
+const signed = (n: number) => (n > 0 ? `+${n}` : String(n))
+
 /**
  * Order teams that are level on record, games won, and point differential by
  * how they fared against each other (mini-league). Falls back to total points
- * scored, then team id so the order is always deterministic.
+ * scored, then team id so the order is always deterministic. Also records a
+ * short reason for the column shown in the standings tables.
  */
 function orderByHeadToHead(tied: Standing[], matches: Match[], settings: Settings): Standing[] {
   const ids = new Set(tied.map(s => s.team.id))
@@ -130,7 +139,7 @@ function orderByHeadToHead(tied: Standing[], matches: Match[], settings: Setting
     })
   })
 
-  return [...tied].sort((a, b) => {
+  const ordered = [...tied].sort((a, b) => {
     const ra = rec[a.team.id]
     const rb = rec[b.team.id]
     return rb.wins - ra.wins
@@ -140,6 +149,28 @@ function orderByHeadToHead(tied: Standing[], matches: Match[], settings: Setting
       || b.pointsFor - a.pointsFor
       || a.team.id - b.team.id
   })
+
+  const firstH2H = rec[ordered[0].team.id]
+  const h2hRecordVaries = ordered.some(s => {
+    const r = rec[s.team.id]
+    return r.wins !== firstH2H.wins || r.losses !== firstH2H.losses
+  })
+  const h2hPdVaries = ordered.some(s => rec[s.team.id].pd !== firstH2H.pd)
+  const h2hGamesVary = ordered.some(s => rec[s.team.id].gamesWon !== firstH2H.gamesWon)
+  const h2hPointsVary = ordered.some(s => rec[s.team.id].pointsFor !== firstH2H.pointsFor)
+  const overallPointsVary = ordered.some(s => s.pointsFor !== ordered[0].pointsFor)
+
+  ordered.forEach(s => {
+    const r = rec[s.team.id]
+    if (h2hRecordVaries) s.tiebreakReason = `H2H ${r.wins}–${r.losses}`
+    else if (h2hPdVaries) s.tiebreakReason = `H2H ${signed(r.pd)} PD`
+    else if (h2hGamesVary) s.tiebreakReason = `H2H ${r.gamesWon} GW`
+    else if (h2hPointsVary) s.tiebreakReason = `H2H ${r.pointsFor} pts`
+    else if (overallPointsVary) s.tiebreakReason = `Pts ${s.pointsFor}`
+    else s.tiebreakReason = 'Dead heat'
+  })
+
+  return ordered
 }
 
 function applyHeadToHead(sorted: Standing[], matches: Match[], settings: Settings): Standing[] {
@@ -150,6 +181,7 @@ function applyHeadToHead(sorted: Standing[], matches: Match[], settings: Setting
     while (
       j < sorted.length
       && sorted[j].wins === sorted[i].wins
+      && sorted[j].losses === sorted[i].losses
       && sorted[j].gamesWon === sorted[i].gamesWon
       && sorted[j].pd === sorted[i].pd
     ) {
@@ -162,11 +194,38 @@ function applyHeadToHead(sorted: Standing[], matches: Match[], settings: Setting
   return out
 }
 
+/**
+ * Teams level on record but separated by the earlier tiebreakers (games won
+ * or point differential) still get a reason so the table always explains the
+ * order. Head-to-head reasons set above are left untouched.
+ */
+function markRecordTiebreaks(rows: Standing[]): Standing[] {
+  let i = 0
+  while (i < rows.length) {
+    let j = i + 1
+    while (j < rows.length && rows[j].wins === rows[i].wins && rows[j].losses === rows[i].losses) j++
+    const group = rows.slice(i, j)
+    if (group.length > 1) {
+      const first = group[0]
+      const gamesVary = group.some(s => s.gamesWon !== first.gamesWon)
+      const pdVaries = group.some(s => s.pd !== first.pd)
+      group.forEach(s => {
+        if (s.tiebreakReason) return
+        if (gamesVary) s.tiebreakReason = `GW ${s.gamesWon}`
+        else if (pdVaries) s.tiebreakReason = `PD ${signed(s.pd)}`
+        else s.tiebreakReason = 'Dead heat'
+      })
+    }
+    i = j
+  }
+  return rows
+}
+
 export function computeStandings(gi: number, state: TournamentState): Standing[] {
   const matches = state.rrMatches[gi] ?? []
   const map: Record<number, Standing> = {}
   state.groups[gi]?.teams.forEach(t => {
-    map[t.id] = { team: t, wins: 0, losses: 0, gamesWon: 0, gamesLost: 0, pd: 0, pointsFor: 0 }
+    map[t.id] = { team: t, wins: 0, losses: 0, gamesWon: 0, gamesLost: 0, pd: 0, pointsFor: 0, tiebreakReason: '' }
   })
   matches.forEach(m => {
     if (m.status !== 'done' || !m.winner) return
@@ -193,7 +252,7 @@ export function computeStandings(gi: number, state: TournamentState): Standing[]
   const sorted = Object.values(map).sort((a, b) =>
     b.wins - a.wins || b.gamesWon - a.gamesWon || b.pd - a.pd,
   )
-  return applyHeadToHead(sorted, matches, state.settings)
+  return markRecordTiebreaks(applyHeadToHead(sorted, matches, state.settings))
 }
 
 export function getTeamDisplayName(team: Team): string {

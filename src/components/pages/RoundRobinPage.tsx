@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { MatchCard } from '../shared/MatchCard'
-import { computeStandings, getTeamDisplayName } from '../../utils/scoring'
+import { computeStandings, getTeamDisplayName, TIEBREAK_LEGEND, TIEBREAK_KEY } from '../../utils/scoring'
 
 export function RoundRobinPage() {
   const { state, dispatch } = useTournament()
@@ -111,7 +111,7 @@ export function RoundRobinPage() {
           <div className="table-scroll">
             <table className="standings-table">
               <thead>
-                <tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>GW</th><th>GL</th><th>PD</th></tr>
+                <tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>GW</th><th>GL</th><th>PD</th><th title={TIEBREAK_LEGEND}>Tiebreak</th></tr>
               </thead>
               <tbody>
                 {standings.map((s, i) => (
@@ -126,11 +126,13 @@ export function RoundRobinPage() {
                     <td style={{ color: 'var(--text2)' }}>{s.gamesWon}</td>
                     <td style={{ color: 'var(--text3)' }}>{s.gamesLost}</td>
                     <td className="pts-cell">{s.pd >= 0 ? '+' : ''}{s.pd}</td>
+                    <td className="tiebreak-cell">{s.tiebreakReason || '—'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <div className="tiebreak-note">{TIEBREAK_KEY}</div>
         </div>
       )}
 

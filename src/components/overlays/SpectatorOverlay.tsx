@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
-import { computeStandings, matchScoreDisplay, gamesWon, fmtTime, gameWin, getTeamDisplayName } from '../../utils/scoring'
+import { computeStandings, matchScoreDisplay, gamesWon, fmtTime, gameWin, getTeamDisplayName, TIEBREAK_LEGEND, TIEBREAK_KEY } from '../../utils/scoring'
 import { rndTitle } from '../../utils/bracket'
 import { allMatchesFlat } from '../../context/reducer'
 import type { Match, Team } from '../../types'
@@ -112,6 +112,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
         {/* Panel 1: Standings */}
         <Panel title="📊 Standings" accent="var(--blue)">
           {Object.keys(rrMatches).length ? (
+            <>
             <div className="spectator-standings">
               {groups.map((g, gi) => {
                 const st = computeStandings(gi, state)
@@ -126,6 +127,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                             <th style={{ fontSize: 11 }}>Team</th>
                             <th style={{ fontSize: 11 }}>W</th>
                             <th style={{ fontSize: 11 }}>L</th>
+                            <th style={{ fontSize: 11 }} title={TIEBREAK_LEGEND}>Tiebreak</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -135,6 +137,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                               <td className="spectator-team-cell" style={{ fontSize: 14, fontWeight: 600 }}>{getTeamDisplayName(s.team)}</td>
                               <td style={{ color: 'var(--accent)', fontSize: 14, fontWeight: 700 }}>{s.wins}</td>
                               <td style={{ color: 'var(--red)', fontSize: 14, fontWeight: 700 }}>{s.losses}</td>
+                              <td className="tiebreak-cell">{s.tiebreakReason || '—'}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -144,6 +147,8 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                 )
               })}
             </div>
+            <div className="tiebreak-note">{TIEBREAK_KEY}</div>
+            </>
           ) : (
             <div style={{ color: 'var(--text3)', fontSize: 15 }}>No round robin data yet</div>
           )}

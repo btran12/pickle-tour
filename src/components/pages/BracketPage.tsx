@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 import { MatchCard } from '../shared/MatchCard'
-import { computeStandings, matchScoreDisplay, getTeamDisplayName, quickWinGames } from '../../utils/scoring'
+import { computeStandings, matchScoreDisplay, getTeamDisplayName, quickWinGames, TIEBREAK_LEGEND } from '../../utils/scoring'
 import type { Team } from '../../types'
 
 export function BracketPage() {
@@ -49,7 +49,7 @@ export function BracketPage() {
                 <div className="table-scroll">
                   <table className="group-stage-table">
                     <thead>
-                      <tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PD</th></tr>
+                      <tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PD</th><th className="tiebreak-col" title={TIEBREAK_LEGEND}>Tiebreak</th></tr>
                     </thead>
                     <tbody>
                       {standings.map((s, i) => (
@@ -62,6 +62,7 @@ export function BracketPage() {
                           <td>{s.wins}</td>
                           <td>{s.losses}</td>
                           <td>{s.pd >= 0 ? '+' : ''}{s.pd}</td>
+                          <td className="tiebreak-cell">{s.tiebreakReason || '—'}</td>
                         </tr>
                       ))}
                     </tbody>
