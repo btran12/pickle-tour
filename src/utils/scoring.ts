@@ -1,4 +1,4 @@
-import type { Match, Team, TournamentState } from '../types'
+import type { Match, Settings, Team, TournamentState } from '../types'
 
 export interface ScoreDisplay {
   scoreA: number
@@ -78,13 +78,95 @@ export interface Standing {
   gamesWon: number
   gamesLost: number
   pd: number
+  pointsFor: number
+}
+
+interface HeadToHeadRecord {
+  wins: number
+  losses: number
+  gamesWon: number
+  gamesLost: number
+  pd: number
+  pointsFor: number
+}
+
+/**
+ * Order teams that are level on record, games won, and point differential by
+ * how they fared against each other (mini-league). Falls back to total points
+ * scored, then team id so the order is always deterministic.
+ */
+function orderByHeadToHead(tied: Standing[], matches: Match[], settings: Settings): Standing[] {
+  const ids = new Set(tied.map(s => s.team.id))
+  const rec: Record<number, HeadToHeadRecord> = {}
+  tied.forEach(s => {
+    rec[s.team.id] = { wins: 0, losses: 0, gamesWon: 0, gamesLost: 0, pd: 0, pointsFor: 0 }
+  })
+
+  matches.forEach(m => {
+    if (m.status !== 'done' || !m.winner) return
+    const aId = (m.teamA as Team | null)?.id
+    const bId = (m.teamB as Team | null)?.id
+    if (aId == null || bId == null || aId === bId) return
+    if (!ids.has(aId) || !ids.has(bId)) return
+    const wId = (m.winner as Team).id
+    const lId = wId === aId ? bId : aId
+    if (!rec[wId] || !rec[lId]) return
+
+    rec[wId].wins++
+    rec[lId].losses++
+    m.games.forEach(g => {
+      const w = gameWin(g.scoreA, g.scoreB, settings.winScore, settings.winBy2)
+      rec[aId].pd += g.scoreA - g.scoreB
+      rec[bId].pd += g.scoreB - g.scoreA
+      rec[aId].pointsFor += g.scoreA
+      rec[bId].pointsFor += g.scoreB
+      if (w === 0) {
+        rec[aId].gamesWon++
+        rec[bId].gamesLost++
+      } else if (w === 1) {
+        rec[bId].gamesWon++
+        rec[aId].gamesLost++
+      }
+    })
+  })
+
+  return [...tied].sort((a, b) => {
+    const ra = rec[a.team.id]
+    const rb = rec[b.team.id]
+    return rb.wins - ra.wins
+      || rb.pd - ra.pd
+      || rb.gamesWon - ra.gamesWon
+      || rb.pointsFor - ra.pointsFor
+      || b.pointsFor - a.pointsFor
+      || a.team.id - b.team.id
+  })
+}
+
+function applyHeadToHead(sorted: Standing[], matches: Match[], settings: Settings): Standing[] {
+  const out: Standing[] = []
+  let i = 0
+  while (i < sorted.length) {
+    let j = i + 1
+    while (
+      j < sorted.length
+      && sorted[j].wins === sorted[i].wins
+      && sorted[j].gamesWon === sorted[i].gamesWon
+      && sorted[j].pd === sorted[i].pd
+    ) {
+      j++
+    }
+    if (j - i > 1) out.push(...orderByHeadToHead(sorted.slice(i, j), matches, settings))
+    else out.push(sorted[i])
+    i = j
+  }
+  return out
 }
 
 export function computeStandings(gi: number, state: TournamentState): Standing[] {
   const matches = state.rrMatches[gi] ?? []
   const map: Record<number, Standing> = {}
   state.groups[gi]?.teams.forEach(t => {
-    map[t.id] = { team: t, wins: 0, losses: 0, gamesWon: 0, gamesLost: 0, pd: 0 }
+    map[t.id] = { team: t, wins: 0, losses: 0, gamesWon: 0, gamesLost: 0, pd: 0, pointsFor: 0 }
   })
   matches.forEach(m => {
     if (m.status !== 'done' || !m.winner) return
@@ -98,15 +180,20 @@ export function computeStandings(gi: number, state: TournamentState): Standing[]
       const bId = (m.teamB as Team)?.id
       if (map[aId]) {
         map[aId].pd += g.scoreA - g.scoreB
+        map[aId].pointsFor += g.scoreA
         if (w === 0) map[aId].gamesWon++; else if (w === 1) map[aId].gamesLost++
       }
       if (map[bId]) {
         map[bId].pd += g.scoreB - g.scoreA
+        map[bId].pointsFor += g.scoreB
         if (w === 1) map[bId].gamesWon++; else if (w === 0) map[bId].gamesLost++
       }
     })
   })
-  return Object.values(map).sort((a, b) => b.wins - a.wins || b.gamesWon - a.gamesWon || b.pd - a.pd)
+  const sorted = Object.values(map).sort((a, b) =>
+    b.wins - a.wins || b.gamesWon - a.gamesWon || b.pd - a.pd,
+  )
+  return applyHeadToHead(sorted, matches, state.settings)
 }
 
 export function getTeamDisplayName(team: Team): string {
