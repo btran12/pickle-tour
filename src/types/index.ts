@@ -76,9 +76,36 @@ export interface BracketRound {
   matches: Match[]
 }
 
-export interface Settings {
+export type StageKey = 'group' | 'quarter' | 'semi' | 'final' | 'third'
+
+export interface StageScoring {
+  /** Points needed to win a game at this stage. */
   winScore: number
+  /** Whether a game must be won by 2 points at this stage. */
   winBy2: boolean
+}
+
+export const STAGE_KEYS: StageKey[] = ['group', 'quarter', 'semi', 'final', 'third']
+
+export const STAGE_LABELS: Record<StageKey, string> = {
+  group: 'Group Stage',
+  quarter: 'Quarter Finals',
+  semi: 'Semifinals',
+  final: 'Finals',
+  third: '3rd Place',
+}
+
+export const DEFAULT_STAGE_SCORING: StageScoring = { winScore: 11, winBy2: true }
+
+export function defaultScoringByStage(): Record<StageKey, StageScoring> {
+  return STAGE_KEYS.reduce((acc, stage) => {
+    acc[stage] = { ...DEFAULT_STAGE_SCORING }
+    return acc
+  }, {} as Record<StageKey, StageScoring>)
+}
+
+export interface Settings {
+  scoringByStage: Record<StageKey, StageScoring>
   groupStageBestOf: number
   advanceCount: number
   quarterFinalsBestOf: number

@@ -1,6 +1,6 @@
 import type { TournamentState } from '../types'
 import type { Team } from '../types'
-import { computeStandings, gamesWon } from './scoring'
+import { computeStandings, gamesWon, scoringForMatch } from './scoring'
 
 export function exportCSV(state: TournamentState): void {
   const tn = state.tournamentName || 'Tournament'
@@ -37,12 +37,13 @@ export function exportCSV(state: TournamentState): void {
     state.bracketRounds.forEach(r => {
       r.matches.forEach(m => {
         if ((m.teamA as { isBye?: boolean })?.isBye || (m.teamB as { isBye?: boolean })?.isBye) return
+        const scoring = scoringForMatch(m, state.settings, state.bracketRounds.length)
         rows.push([
           r.title,
           (m.teamA as Team)?.name ?? '',
           (m.teamB as Team)?.name ?? '',
-          gamesWon(m, 'A', state.settings.winScore, state.settings.winBy2),
-          gamesWon(m, 'B', state.settings.winScore, state.settings.winBy2),
+          gamesWon(m, 'A', scoring.winScore, scoring.winBy2),
+          gamesWon(m, 'B', scoring.winScore, scoring.winBy2),
           (m.winner as Team)?.name ?? '',
         ])
       })

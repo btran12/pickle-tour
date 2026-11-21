@@ -2,12 +2,13 @@ import { useTournament } from '../../context/TournamentContext'
 import { useConfirm } from '../../context/ConfirmContext'
 import { ToggleGroup } from '../shared/ToggleGroup'
 import { NumControl } from '../shared/NumControl'
-import type { TournamentType, BracketMethod } from '../../types'
+import { DEFAULT_STAGE_SCORING } from '../../types'
+import type { TournamentType, BracketMethod, Settings, StageKey } from '../../types'
 
 export function SetupPage() {
   const { state, dispatch } = useTournament()
   const confirm = useConfirm()
-  const { tournamentName, tType, bMethod, settings, teams, players } = state
+  const { tournamentName, tType, bMethod, teams, players } = state
   const groupsLocked = Object.keys(state.rrMatches).length > 0 || state.bracketRounds.length > 0
 
   return (
@@ -78,54 +79,23 @@ export function SetupPage() {
         <div>
           <div className="card">
             <div className="card-title">Scoring</div>
-            <div className="setting-item">
-              <div>
-                <div className="setting-label">Win Score</div>
-                <div className="setting-desc">Points needed to win a game</div>
-              </div>
-              <div className="flex-row" style={{ gap: 8 }}>
-                <NumControl settingKey="winScore" />
-                <ToggleGroup<string>
-                  options={[{ value: 'true', label: 'Win by 2' }, { value: 'false', label: 'Exact' }]}
-                  value={settings.winBy2 ? 'true' : 'false'}
-                  onChange={v => dispatch({ type: 'SET_SETTING', key: 'winBy2', value: v === 'true' })}
-                />
-              </div>
+            <div className="setting-desc" style={{ marginTop: -6, marginBottom: 8 }}>
+              Each stage defaults to 11 points, win by 2.
             </div>
-            <div className="setting-item">
-              <div>
-                <div className="setting-label">Group Stage Best Of</div>
-              </div>
-              <NumControl settingKey="groupStageBestOf" />
-            </div>
+            <StageScoringRow
+              stage="group"
+              label="Group Stage"
+              bestOfKey="groupStageBestOf"
+              desc="Round robin and early bracket rounds"
+            />
           </div>
 
           <div className="card">
-            <div className="card-title">Bracket</div>
-            <div className="setting-item">
-              <div>
-                <div className="setting-label">Quarter Finals Best Of</div>
-              </div>
-              <NumControl settingKey="quarterFinalsBestOf" />
-            </div>
-            <div className="setting-item">
-              <div>
-                <div className="setting-label">Semifinals Best Of</div>
-              </div>
-              <NumControl settingKey="sfBestOf" />
-            </div>
-            <div className="setting-item">
-              <div>
-                <div className="setting-label">Finals Best Of</div>
-              </div>
-              <NumControl settingKey="finalsBestOf" />
-            </div>
-            <div className="setting-item">
-              <div>
-                <div className="setting-label">3rd Place Best Of</div>
-              </div>
-              <NumControl settingKey="thirdBestOf" />
-            </div>
+            <div className="card-title">Bracket Scoring</div>
+            <StageScoringRow stage="quarter" label="Quarter Finals" bestOfKey="quarterFinalsBestOf" />
+            <StageScoringRow stage="semi" label="Semifinals" bestOfKey="sfBestOf" />
+            <StageScoringRow stage="final" label="Finals" bestOfKey="finalsBestOf" />
+            <StageScoringRow stage="third" label="3rd Place" bestOfKey="thirdBestOf" />
           </div>
 
           <div className="card">
@@ -155,6 +125,50 @@ export function SetupPage() {
         >
           Continue to Players →
         </button>
+      </div>
+    </div>
+  )
+}
+
+interface StageScoringRowProps {
+  stage: StageKey
+  label: string
+  bestOfKey: keyof Settings
+  desc?: string
+}
+
+function StageScoringRow({ stage, label, bestOfKey, desc }: StageScoringRowProps) {
+  const { state, dispatch } = useTournament()
+  const scoring = state.settings.scoringByStage?.[stage] ?? DEFAULT_STAGE_SCORING
+
+  return (
+    <div className="setting-item stage-scoring-row">
+      <div>
+        <div className="setting-label">{label}</div>
+        {desc && <div className="setting-desc">{desc}</div>}
+      </div>
+      <div className="stage-scoring-controls">
+        <div className="stage-control">
+          <span className="stage-control-label">Best of</span>
+          <NumControl settingKey={bestOfKey} />
+        </div>
+        <div className="stage-control">
+          <span className="stage-control-label">Win score</span>
+          <NumControl stage={stage} />
+        </div>
+        <div className="stage-control">
+          <span className="stage-control-label">Win condition</span>
+          <ToggleGroup<string>
+            options={[{ value: 'true', label: 'Win by 2' }, { value: 'false', label: 'Exact' }]}
+            value={scoring.winBy2 ? 'true' : 'false'}
+            onChange={v => dispatch({
+              type: 'SET_STAGE_SETTING',
+              stage,
+              key: 'winBy2',
+              value: v === 'true',
+            })}
+          />
+        </div>
       </div>
     </div>
   )

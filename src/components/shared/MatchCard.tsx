@@ -1,5 +1,5 @@
 import type { Match, Team, MatchType } from '../../types'
-import { matchScoreDisplay, fmtTime, quickWinGames } from '../../utils/scoring'
+import { matchScoreDisplay, fmtTime, quickWinGames, scoringForMatch } from '../../utils/scoring'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 
@@ -17,7 +17,8 @@ export function MatchCard({ match, matchType, bestOf, is3rdPlace, testingMode }:
   const isDone = match.status === 'done'
   const sc = state.schedule[match.id]
   const court = sc ? state.courts.find(c => c.id === sc.courtId) : null
-  const sd = matchScoreDisplay(match, bestOf, state.settings.winScore, state.settings.winBy2)
+  const scoring = scoringForMatch(match, state.settings, state.bracketRounds.length)
+  const sd = matchScoreDisplay(match, bestOf, scoring.winScore, scoring.winBy2)
   const teamA = match.teamA as Team | null
   const teamB = match.teamB as Team | null
   const winner = match.winner as Team | null
@@ -30,7 +31,7 @@ export function MatchCard({ match, matchType, bestOf, is3rdPlace, testingMode }:
       type: 'SUBMIT_SCORE',
       matchType,
       matchId: match.id,
-      games: quickWinGames(bestOf, state.settings.winScore, winnerIsA),
+      games: quickWinGames(bestOf, scoring.winScore, winnerIsA),
     })
   }
 

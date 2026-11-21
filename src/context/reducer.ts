@@ -1,10 +1,11 @@
 import type {
   TournamentState, Team, Match, MatchType, HistoryEntry, RosterPlayer, Player,
   WireState, TournamentType, BracketMethod, Page, WsStatus, Role, Settings,
+  StageKey,
 } from '../types'
-import { S_CONSTRAINTS, ODD_ONLY } from '../types'
+import { DEFAULT_STAGE_SCORING, S_CONSTRAINTS, ODD_ONLY } from '../types'
 import { initialState } from './initialState'
-import { computeStandings, gameWin } from '../utils/scoring'
+import { computeStandings, gameWin, scoringForMatch, scoringForStage } from '../utils/scoring'
 import { buildBracket, rebuildBracketRounds } from '../utils/bracket'
 import { hydrateState } from '../utils/serialization'
 
@@ -27,6 +28,8 @@ export type Action =
   | { type: 'SET_BMETHOD'; value: BracketMethod }
   | { type: 'ADJ_SETTING'; key: keyof Settings; delta: number }
   | { type: 'SET_SETTING'; key: keyof Settings; value: number | boolean }
+  | { type: 'ADJ_STAGE_SETTING'; stage: StageKey; key: 'winScore'; delta: number }
+  | { type: 'SET_STAGE_SETTING'; stage: StageKey; key: 'winScore' | 'winBy2'; value: number | boolean }
   // Teams
   | { type: 'ADD_TEAM'; team: Team }
   | { type: 'EDIT_TEAM'; team: Team }
@@ -139,6 +142,38 @@ export function reducer(state: TournamentState, action: Action): TournamentState
 
     case 'SET_SETTING':
       return { ...state, settings: { ...state.settings, [action.key]: action.value } }
+
+    case 'ADJ_STAGE_SETTING': {
+      const current = state.settings.scoringByStage?.[action.stage] ?? DEFAULT_STAGE_SCORING
+      const winScore = Math.max(1, Math.min(99, current.winScore + action.delta))
+      return {
+        ...state,
+        settings: {
+          ...state.settings,
+          scoringByStage: {
+            ...state.settings.scoringByStage,
+            [action.stage]: { ...current, winScore },
+          },
+        },
+      }
+    }
+
+    case 'SET_STAGE_SETTING': {
+      const current = state.settings.scoringByStage?.[action.stage] ?? DEFAULT_STAGE_SCORING
+      const value = action.key === 'winScore'
+        ? Math.max(1, Math.min(99, Number(action.value) || 1))
+        : Boolean(action.value)
+      return {
+        ...state,
+        settings: {
+          ...state.settings,
+          scoringByStage: {
+            ...state.settings.scoringByStage,
+            [action.stage]: { ...current, [action.key]: value },
+          },
+        },
+      }
+    }
 
     // ── Teams ────────────────────────────────────────
     case 'ADD_TEAM':
@@ -489,16 +524,20 @@ export function reducer(state: TournamentState, action: Action): TournamentState
     // ── Score ────────────────────────────────────────
     case 'SUBMIT_SCORE': {
       const { matchType, matchId, games } = action
+      const target = findMatch(state, matchType, matchId)
+      const scoring = target
+        ? scoringForMatch(target, state.settings, state.bracketRounds.length)
+        : scoringForStage(state.settings, 'group')
       const wn = Math.ceil(
         (matchType === 'rr'
           ? state.settings.groupStageBestOf
-          : (findMatch(state, matchType, matchId)?.bestOf ?? state.settings.sfBestOf)
+          : (target?.bestOf ?? state.settings.sfBestOf)
         ) / 2
       )
       let wA = 0, wB = 0
       const trimmed: typeof games = []
       for (const g of games) {
-        const w = gameWin(g.scoreA, g.scoreB, state.settings.winScore, state.settings.winBy2)
+        const w = gameWin(g.scoreA, g.scoreB, scoring.winScore, scoring.winBy2)
         if (w === 0) wA++; if (w === 1) wB++
         trimmed.push(g)
         if (wA >= wn || wB >= wn) break

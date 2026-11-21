@@ -1,3 +1,4 @@
+import { defaultScoringByStage } from '../types'
 import type { TournamentState } from '../types'
 
 export const initialState: TournamentState = {
@@ -5,8 +6,7 @@ export const initialState: TournamentState = {
   bMethod: 'skill',
   tournamentName: 'Tournament',
   settings: {
-    winScore: 11,
-    winBy2: true,
+    scoringByStage: defaultScoringByStage(),
     groupStageBestOf: 1,
     advanceCount: 2,
     quarterFinalsBestOf: 1,

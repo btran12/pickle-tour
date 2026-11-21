@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
-import { gameWin } from '../../utils/scoring'
+import { gameWin, scoringForMatch, scoringForStage } from '../../utils/scoring'
 import type { Team, Match } from '../../types'
 
 export function ScoreModal() {
@@ -20,6 +20,10 @@ export function ScoreModal() {
       ? settings.groupStageBestOf
       : (match?.bestOf ?? settings.sfBestOf)
     : 1
+
+  const scoring = match
+    ? scoringForMatch(match, settings, state.bracketRounds.length)
+    : scoringForStage(settings, 'group')
 
   type GameInput = { a: string; b: string }
   const [games, setGames] = useState<GameInput[]>([])
@@ -43,7 +47,7 @@ export function ScoreModal() {
     const a = parseInt(games[i]?.a) || 0
     const b = parseInt(games[i]?.b) || 0
     if (games[i]?.a === '' && games[i]?.b === '') return null
-    return gameWin(a, b, settings.winScore, settings.winBy2)
+    return gameWin(a, b, scoring.winScore, scoring.winBy2)
   }
 
   const handleSubmit = () => {
@@ -64,7 +68,7 @@ export function ScoreModal() {
       <div className="modal">
         <div className="modal-title">Enter Score</div>
         <div className="alert alert-info mb12">
-          First to {wn} game{wn > 1 ? 's' : ''} wins · Score to {settings.winScore}{settings.winBy2 ? ', win by 2' : ''}
+          First to {wn} game{wn > 1 ? 's' : ''} wins · Score to {scoring.winScore}{scoring.winBy2 ? ', win by 2' : ''}
         </div>
 
         {Array.from({ length: bestOf }, (_, i) => {

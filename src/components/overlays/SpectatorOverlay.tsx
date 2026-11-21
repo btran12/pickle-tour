@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
-import { computeStandings, matchScoreDisplay, gamesWon, fmtTime, gameWin, getTeamDisplayName, TIEBREAK_LEGEND, TIEBREAK_KEY } from '../../utils/scoring'
+import { computeStandings, matchScoreDisplay, gamesWon, fmtTime, gameWin, getTeamDisplayName, scoringForMatch, TIEBREAK_LEGEND, TIEBREAK_KEY } from '../../utils/scoring'
 import { rndTitle } from '../../utils/bracket'
 import { allMatchesFlat } from '../../context/reducer'
 import type { Match, Team } from '../../types'
@@ -169,7 +169,8 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                           const tA = m.teamA as Team | null
                           const tB = m.teamB as Team | null
                           const winner = m.winner as Team | null
-                          const sd = matchScoreDisplay(m, m.bestOf ?? settings.sfBestOf, settings.winScore, settings.winBy2)
+                          const scoring = scoringForMatch(m, settings, totalBracketRounds)
+                          const sd = matchScoreDisplay(m, m.bestOf ?? settings.sfBestOf, scoring.winScore, scoring.winBy2)
                           return (
                             <div key={m.id} className="spectator-bracket-match-card" style={{ margin: 6, background: 'var(--surface2)', border: `1.5px solid ${isDone ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 'var(--r)', overflow: 'hidden' }}>
                               {[{ team: tA, score: sd ? String(sd.scoreA) : '' }, { team: tB, score: sd ? String(sd.scoreB) : '' }].map(({ team: t, score }, idx) => {
@@ -213,6 +214,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
               const stageLabel = getStageLabel(m)
               const isRR = rrMatchGroupMap.has(m.id)
               const groupName = rrMatchGroupMap.get(m.id)
+              const scoring = scoringForMatch(m, settings, totalBracketRounds)
               return (
                 <div key={m.id} className="spectator-match-card" style={{ padding: '12px 14px', background: 'var(--surface2)', border: '1.5px solid var(--border)', borderRadius: 'var(--r)', marginBottom: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
@@ -231,12 +233,12 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ flex: 1, textAlign: 'center' }}>
                       <div className="spectator-upcoming-team" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{getTeamDisplayName(tA)}</div>
-                      {m.games.length > 0 && <div className="spectator-upcoming-score" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'A', settings.winScore, settings.winBy2)}</div>}
+                      {m.games.length > 0 && <div className="spectator-upcoming-score" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'A', scoring.winScore, scoring.winBy2)}</div>}
                     </div>
                     <div className="spectator-vs" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, color: 'var(--text3)', flexShrink: 0 }}>VS</div>
                     <div style={{ flex: 1, textAlign: 'center' }}>
                       <div className="spectator-upcoming-team" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{getTeamDisplayName(tB)}</div>
-                      {m.games.length > 0 && <div className="spectator-upcoming-score" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'B', settings.winScore, settings.winBy2)}</div>}
+                      {m.games.length > 0 && <div className="spectator-upcoming-score" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'B', scoring.winScore, scoring.winBy2)}</div>}
                     </div>
                   </div>
                 </div>
@@ -258,14 +260,15 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
               const isRR = rrMatchGroupMap.has(m.id)
               const groupName = rrMatchGroupMap.get(m.id)
               const stageLabel = getStageLabel(m)
+              const scoring = scoringForMatch(m, settings, totalBracketRounds)
 
               // For single-game matches show actual point score; for multi-game show games won
               const scoreA = bestOf === 1
                 ? (m.games[0]?.scoreA ?? 0)
-                : gamesWon(m, 'A', settings.winScore, settings.winBy2)
+                : gamesWon(m, 'A', scoring.winScore, scoring.winBy2)
               const scoreB = bestOf === 1
                 ? (m.games[0]?.scoreB ?? 0)
-                : gamesWon(m, 'B', settings.winScore, settings.winBy2)
+                : gamesWon(m, 'B', scoring.winScore, scoring.winBy2)
 
               const winA = winner?.id === tA.id
               const winB = winner?.id === tB.id
@@ -301,7 +304,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                   {bestOf > 1 && m.games.length > 0 && (
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 8, justifyContent: 'center' }}>
                       {m.games.map((g, gi) => (
-                        <span key={gi} className={`game-pip ${gameWin(g.scoreA, g.scoreB, settings.winScore, settings.winBy2) === 0 ? 'win' : 'loss'}`}>
+                        <span key={gi} className={`game-pip ${gameWin(g.scoreA, g.scoreB, scoring.winScore, scoring.winBy2) === 0 ? 'win' : 'loss'}`}>
                           {g.scoreA}–{g.scoreB}
                         </span>
                       ))}

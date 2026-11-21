@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { useModal } from '../../context/ModalContext'
 import { MatchCard } from '../shared/MatchCard'
-import { computeStandings, matchScoreDisplay, getTeamDisplayName, quickWinGames, TIEBREAK_LEGEND } from '../../utils/scoring'
+import { computeStandings, matchScoreDisplay, getTeamDisplayName, quickWinGames, scoringForMatch, scoringForStage, TIEBREAK_LEGEND } from '../../utils/scoring'
 import type { Team } from '../../types'
 
 export function BracketPage() {
@@ -20,6 +20,7 @@ export function BracketPage() {
   const tournamentDone = !!champ && (!tp || tp.status === 'done')
 
   const groupMatches = groups.flatMap((_, gi) => rrMatches[gi] ?? [])
+  const groupScoring = scoringForStage(settings, 'group')
   const hasGroupStage = groups.length > 0 && groupMatches.length > 0
   const groupMatchesDone = groupMatches.filter(m => m.status === 'done').length
 
@@ -75,7 +76,7 @@ export function BracketPage() {
                       {matches.map(m => {
                         const a = m.teamA as Team | null
                         const b = m.teamB as Team | null
-                        const sd = matchScoreDisplay(m, settings.groupStageBestOf, settings.winScore, settings.winBy2)
+                        const sd = matchScoreDisplay(m, settings.groupStageBestOf, groupScoring.winScore, groupScoring.winBy2)
                         const winA = m.status === 'done' && (m.winner as Team | null)?.id === a?.id
                         const winB = m.status === 'done' && (m.winner as Team | null)?.id === b?.id
                         return (
@@ -119,7 +120,8 @@ export function BracketPage() {
   }
 
   const getScore = (match: typeof bracketMatches[0], side: 'A' | 'B'): string => {
-    const sd = matchScoreDisplay(match, match.bestOf ?? settings.sfBestOf, settings.winScore, settings.winBy2)
+    const scoring = scoringForMatch(match, settings, bracketRounds.length)
+    const sd = matchScoreDisplay(match, match.bestOf ?? settings.sfBestOf, scoring.winScore, scoring.winBy2)
     if (!sd) return ''
     return String(side === 'A' ? sd.scoreA : sd.scoreB)
   }
@@ -191,11 +193,12 @@ export function BracketPage() {
                       const handleQuickScore = (teamId: number) => {
                         if (!canScore || !state.testingMode) return
                         const winnerIsA = teamId === tA?.id
+                        const scoring = scoringForMatch(m, settings, bracketRounds.length)
                         dispatch({
                           type: 'SUBMIT_SCORE',
                           matchType: 'bracket',
                           matchId: m.id,
-                          games: quickWinGames(m.bestOf ?? settings.sfBestOf, settings.winScore, winnerIsA),
+                          games: quickWinGames(m.bestOf ?? settings.sfBestOf, scoring.winScore, winnerIsA),
                         })
                       }
                       
@@ -274,7 +277,8 @@ export function BracketPage() {
                       {([tp.teamA, tp.teamB] as (Team | null)[]).map((t, idx) => {
                         const isDone = tp.status === 'done'
                         const isWin = isDone && (tp.winner as Team | null)?.id === t?.id
-                        const score = matchScoreDisplay(tp, tp.bestOf ?? settings.thirdBestOf, settings.winScore, settings.winBy2)
+                        const scoring = scoringForMatch(tp, settings, bracketRounds.length)
+                        const score = matchScoreDisplay(tp, tp.bestOf ?? settings.thirdBestOf, scoring.winScore, scoring.winBy2)
                         
                         const handleQuickScore = () => {
                           if (isDone || !state.testingMode || !t) return
@@ -283,7 +287,7 @@ export function BracketPage() {
                             type: 'SUBMIT_SCORE',
                             matchType: 'bracket',
                             matchId: tp.id,
-                            games: quickWinGames(tp.bestOf ?? settings.thirdBestOf, settings.winScore, winnerIsA),
+                            games: quickWinGames(tp.bestOf ?? settings.thirdBestOf, scoring.winScore, winnerIsA),
                           })
                         }
                         

@@ -250,6 +250,11 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .setting-item:last-child{border-bottom:none}
 .setting-label{font-size:15px;font-weight:600}
 .setting-desc{font-size:13px;color:var(--text3);margin-top:2px}
+.stage-scoring-row{align-items:flex-start}
+.stage-scoring-controls{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px 16px}
+.stage-control{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.stage-control-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3)}
+.stage-control .toggle-group button{white-space:nowrap;padding:6px 12px}
 
 /* ─── SETTINGS MODAL ──────────────────────── */
 .settings-modal{max-width:520px;padding:20px}
@@ -440,6 +445,8 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 
   /* Setting rows: stack label + control vertically */
   .setting-item{flex-wrap:wrap;gap:8px}
+  .stage-scoring-controls{width:100%;justify-content:space-between;gap:10px}
+  .stage-control .toggle-group button{padding:6px 10px;font-size:13px}
 
   /* Setup footer: stack hint + button */
   .setup-footer{flex-direction:column;align-items:stretch;gap:10px}

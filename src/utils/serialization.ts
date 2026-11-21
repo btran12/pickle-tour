@@ -1,6 +1,7 @@
+import { DEFAULT_STAGE_SCORING, STAGE_KEYS, defaultScoringByStage } from '../types'
 import type {
   TournamentState, WireState, Match, Team, ByeTeam, RosterPlayer,
-  SerializedMatch, BracketRound,
+  SerializedMatch, BracketRound, Settings,
 } from '../types'
 
 // ─── Serialize (state → wire) ────────────────────────
@@ -52,6 +53,35 @@ export function serializeMatches(rrMatches: Record<string, Match[]>): Record<str
 }
 
 // ─── Hydrate (wire → state) ─────────────────────────
+
+type LegacySettings = Partial<Settings> & { winScore?: number; winBy2?: boolean }
+
+/**
+ * Merge saved settings and migrate the old single winScore/winBy2 pair into
+ * per-stage scoring. Old tournaments keep their custom score at every stage.
+ */
+function normalizeSettings(current: Settings, incoming: LegacySettings | undefined): Settings {
+  const base = current.scoringByStage ?? defaultScoringByStage()
+  const byStage = { ...base }
+  STAGE_KEYS.forEach(stage => {
+    byStage[stage] = { ...base[stage] }
+  })
+
+  if (incoming?.scoringByStage) {
+    STAGE_KEYS.forEach(stage => {
+      byStage[stage] = { ...byStage[stage], ...(incoming.scoringByStage?.[stage] ?? {}) }
+    })
+  } else if (incoming && ('winScore' in incoming || 'winBy2' in incoming)) {
+    const winScore = incoming.winScore ?? DEFAULT_STAGE_SCORING.winScore
+    const winBy2 = incoming.winBy2 ?? DEFAULT_STAGE_SCORING.winBy2
+    STAGE_KEYS.forEach(stage => { byStage[stage] = { winScore, winBy2 } })
+  }
+
+  const merged: LegacySettings = { ...current, ...incoming, scoringByStage: byStage }
+  delete merged.winScore
+  delete merged.winBy2
+  return merged as Settings
+}
 
 export function hydrateState(current: TournamentState, wire: WireState): TournamentState {
   let pid = wire._pid ?? current._pid ?? 1
@@ -149,7 +179,7 @@ export function hydrateState(current: TournamentState, wire: WireState): Tournam
     courts: wire.courts ?? [],
     schedule: wire.schedule ?? {},
     history: wire.history ?? [],
-    settings: { ...current.settings, ...(wire.settings ?? {}) },
+    settings: normalizeSettings(current.settings, wire.settings as LegacySettings | undefined),
     bracketSeedGroups: wire.bracketSeedGroups ?? {},
     _tid: wire._tid ?? current._tid,
     _mid: wire._mid ?? current._mid,

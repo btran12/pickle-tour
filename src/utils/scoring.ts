@@ -1,4 +1,5 @@
-import type { Match, Settings, Team, TournamentState } from '../types'
+import { DEFAULT_STAGE_SCORING } from '../types'
+import type { Match, Settings, StageKey, StageScoring, Team, TournamentState } from '../types'
 
 export interface ScoreDisplay {
   scoreA: number
@@ -23,6 +24,29 @@ export function quickWinGames(bestOf: number, winScore: number, teamIsA: boolean
   return Array.from({ length: wn }, () => (teamIsA
     ? { scoreA: winScore, scoreB: 0 }
     : { scoreA: 0, scoreB: winScore }))
+}
+
+/**
+ * Which stage a match belongs to. Round-robin matches (no roundIdx) use the
+ * group-stage rules, as do bracket rounds before the quarter-finals.
+ */
+export function stageForMatch(match: Match, totalBracketRounds: number): StageKey {
+  if (match.is3rdPlace) return 'third'
+  const ri = match.roundIdx
+  if (ri === undefined || ri < 0 || totalBracketRounds <= 0) return 'group'
+  if (ri === totalBracketRounds - 1) return 'final'
+  if (ri === totalBracketRounds - 2) return 'semi'
+  if (totalBracketRounds >= 3 && ri === totalBracketRounds - 3) return 'quarter'
+  return 'group'
+}
+
+/** Scoring rules for a stage, falling back to the defaults for old saved states. */
+export function scoringForStage(settings: Settings, stage: StageKey): StageScoring {
+  return settings.scoringByStage?.[stage] ?? DEFAULT_STAGE_SCORING
+}
+
+export function scoringForMatch(match: Match, settings: Settings, totalBracketRounds: number): StageScoring {
+  return scoringForStage(settings, stageForMatch(match, totalBracketRounds))
 }
 
 export function gamesWon(match: Match, side: 'A' | 'B', winScore: number, winBy2: boolean): number {
@@ -123,8 +147,9 @@ function orderByHeadToHead(tied: Standing[], matches: Match[], settings: Setting
 
     rec[wId].wins++
     rec[lId].losses++
+    const scoring = scoringForStage(settings, 'group')
     m.games.forEach(g => {
-      const w = gameWin(g.scoreA, g.scoreB, settings.winScore, settings.winBy2)
+      const w = gameWin(g.scoreA, g.scoreB, scoring.winScore, scoring.winBy2)
       rec[aId].pd += g.scoreA - g.scoreB
       rec[bId].pd += g.scoreB - g.scoreA
       rec[aId].pointsFor += g.scoreA
@@ -233,8 +258,9 @@ export function computeStandings(gi: number, state: TournamentState): Standing[]
     const lId = wId === (m.teamA as Team)?.id ? (m.teamB as Team)?.id : (m.teamA as Team)?.id
     if (map[wId]) map[wId].wins++
     if (map[lId]) map[lId].losses++
+    const scoring = scoringForStage(state.settings, 'group')
     m.games.forEach(g => {
-      const w = gameWin(g.scoreA, g.scoreB, state.settings.winScore, state.settings.winBy2)
+      const w = gameWin(g.scoreA, g.scoreB, scoring.winScore, scoring.winBy2)
       const aId = (m.teamA as Team)?.id
       const bId = (m.teamB as Team)?.id
       if (map[aId]) {
