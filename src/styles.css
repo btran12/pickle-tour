@@ -355,7 +355,7 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .saved-item-remove:hover{color:var(--red)}
 
 /* ─── SPECTATOR OVERLAY ─────────────────────────────── */
-.spectator-overlay{position:fixed;inset:0;background:var(--bg);z-index:120;display:none;flex-direction:column;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-sizing:border-box;width:100%;max-width:100vw;padding-bottom:env(safe-area-inset-bottom)}
+.spectator-overlay{position:fixed;inset:0;background:var(--bg);z-index:120;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-sizing:border-box;width:100%;max-width:100vw;padding-bottom:env(safe-area-inset-bottom)}
 .spectator-overlay.open{display:flex}
 /* Keep the tournament name from colliding with the clock/actions */
 .spectator-header{gap:18px}
@@ -372,12 +372,23 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* ─── SPECTATOR PANELS GRID ─────────────────────────── */
-.spectator-panels{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto;max-width:100%}
-.spectator-panels > div{word-break:break-word;overflow-wrap:break-word;max-width:100%;box-sizing:border-box}
+.spectator-panels{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto;max-width:100%;min-width:0}
+.spectator-panels > div{word-break:break-word;overflow-wrap:break-word;max-width:100%;min-width:0;box-sizing:border-box}
 .spectator-standings{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
 .spectator-standings-group{min-width:0}
 
-.spectator-bracket-scroll{overflow-x:auto;overflow-y:visible;max-width:100%}
+.spectator-bracket-scroll{overflow-x:auto;overflow-y:visible;max-width:100%;width:100%;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+
+/* Recent-results scoreboard: teams flank the score on desktop, stack into rows on mobile */
+.spectator-result-scoreboard{display:flex;align-items:center;gap:10px}
+.spectator-result-side{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.spectator-result-side.side-a{justify-content:flex-end}
+.spectator-result-side.side-b{justify-content:flex-start}
+.spectator-result-side.side-a .spectator-result-team{text-align:right}
+.spectator-result-side.side-b .spectator-result-team{text-align:left}
+.spectator-result-team{flex:1 1 auto;min-width:0}
+.spectator-result-score{flex-shrink:0}
+.spectator-result-dash{font-size:22px;color:var(--text3);font-weight:300;line-height:1;flex-shrink:0}
 .spectator-bracket-track{display:flex;align-items:stretch;gap:0;flex-wrap:nowrap;min-width:max-content}
 
 /* Spectator overlay bracket: responsive layout */
@@ -469,21 +480,69 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   /* History entries */
   .history-entry{flex-wrap:wrap}
 
-  /* Spectator overlay: single column, seamless panels */
-  .spectator-header{padding:10px 12px!important;flex-wrap:wrap;gap:8px}
+  /* Spectator overlay: compact sticky header + single-column panels */
+  .spectator-header{position:sticky;top:0;z-index:10;padding:calc(10px + env(safe-area-inset-top)) 12px 10px!important;flex-wrap:nowrap;gap:10px;box-shadow:0 1px 0 var(--border)}
+  .spectator-header > div:first-child{gap:0!important}
+  .spectator-header .logo{display:none}
+  .spectator-title{font-size:17px!important;letter-spacing:1.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .spectator-date{font-size:10px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .spectator-clock{display:none!important}
-  .spectator-header .logo{font-size:20px}
-  .spectator-header-actions{gap:8px!important;flex-wrap:wrap}
-  .spectator-panels{grid-template-columns:1fr;grid-template-rows:unset}
-  .spectator-panels > div{background:transparent!important;padding:0!important;border:none!important}
-  .spectator-panels > div > div:first-child{border-bottom:none!important;padding-bottom:10px!important;margin-bottom:16px!important}
-  .spectator-standings{grid-template-columns:1fr!important}
-  .spectator-standings-group{width:100%!important;min-width:unset!important}
+  .spectator-header-actions{gap:10px!important;flex-wrap:nowrap}
+  .spectator-header-actions .btn{min-height:38px;padding:6px 10px;font-size:12px;white-space:nowrap}
+  .spectator-champion{padding:8px 12px!important;font-size:12px!important}
+
+  .spectator-panels{grid-template-columns:1fr;grid-template-rows:unset;gap:0!important;padding-bottom:20px}
+  .spectator-panels > div{background:transparent!important;padding:0 12px!important;border:none!important;min-width:0}
+  .spectator-panel-title{border-bottom:none!important;padding:4px 0 8px!important;margin:14px 0 10px!important;font-size:15px!important}
+
+  /* Standings: fit the table instead of scrolling it sideways */
+  .spectator-standings{grid-template-columns:1fr!important;gap:12px!important}
+  .spectator-standings-group{width:100%!important;min-width:0!important;padding:10px!important}
+  .spectator-standings .table-scroll{overflow-x:visible}
+  .spectator-standings .standings-table{white-space:normal;table-layout:fixed}
+  .spectator-standings .standings-table th,
+  .spectator-standings .standings-table td{padding:7px 4px!important;font-size:12px!important}
+  .spectator-standings .standings-table th:first-child,
+  .spectator-standings .standings-table td:first-child{width:26px;padding-left:0!important;text-align:center}
+  .spectator-standings .standings-table th:nth-last-child(-n+2),
+  .spectator-standings .standings-table td:nth-last-child(-n+2){width:32px;padding-right:0!important;text-align:center}
+  .spectator-standings .spectator-team-cell{font-size:13px!important;white-space:normal;overflow-wrap:anywhere}
+
+  /* Bracket: narrower cards that scroll horizontally */
+  .spectator-overlay{--spectator-bracket-card-width:158px}
+  .spectator-bracket-scroll{width:100%;max-width:100%;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x proximity}
+  .spectator-bracket-track{min-width:max-content}
+  .spectator-overlay .spectator-bracket-track .spectator-bracket-match-card{scroll-snap-align:start}
+  .spectator-round-title{font-size:14px!important;padding:0 8px 6px!important}
+
+  /* On court / upcoming */
+  .spectator-match-card{padding:10px 12px!important}
+  .spectator-match-card > div:first-child{flex-wrap:wrap;row-gap:6px}
+  .spectator-upcoming-team{font-size:19px!important;white-space:normal;overflow-wrap:anywhere}
+  .spectator-upcoming-score{font-size:30px!important}
+  .spectator-vs{font-size:18px!important;padding:0 2px}
+
+  /* Recent results */
+  .spectator-result-card{padding:10px 12px!important}
+  .spectator-result-card > div:first-child{flex-wrap:wrap;row-gap:6px}
+  .spectator-result-scoreboard{flex-direction:column;align-items:stretch;gap:2px}
+  .spectator-result-side{flex:none;width:100%;justify-content:space-between!important;gap:12px}
+  .spectator-result-side.side-b{flex-direction:row-reverse}
+  .spectator-result-dash{display:none}
+  .spectator-result-card .spectator-result-team{flex:1 1 auto;font-size:22px!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.15!important;text-align:left!important}
+  .spectator-result-score{font-size:26px!important;min-width:24px;text-align:right}
+  .spectator-result-card .game-pip{font-size:11px;padding:2px 5px}
 }
 
 @media(max-width:400px){
   .logo{font-size:20px;letter-spacing:2px}
   .phase-badge{display:none}
+  .spectator-title{font-size:15px!important}
+  .spectator-header-actions{gap:6px!important}
+  .spectator-header-actions .btn{padding:5px 8px;font-size:11px}
+  .spectator-upcoming-team{font-size:17px!important}
+  .spectator-result-card .spectator-result-team{font-size:19px!important}
+  .spectator-result-score{font-size:22px!important}
 }
 
 /* Touch feedback where hover is unavailable */

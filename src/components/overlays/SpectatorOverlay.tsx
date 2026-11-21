@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { useTournament } from '../../context/TournamentContext'
 import { computeStandings, matchScoreDisplay, gamesWon, fmtTime, gameWin, getTeamDisplayName } from '../../utils/scoring'
 import { rndTitle } from '../../utils/bracket'
@@ -77,8 +77,8 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div className="logo">Pickle<span>Bracket</span></div>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 18, letterSpacing: 2, color: 'var(--text)' }}>{tournamentName}</div>
-            <div style={{ fontSize: 11, color: 'var(--text3)' }}>{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+            <div className="spectator-title" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 18, letterSpacing: 2, color: 'var(--text)' }}>{tournamentName}</div>
+            <div className="spectator-date" style={{ fontSize: 11, color: 'var(--text3)' }}>{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</div>
           </div>
         </div>
         <div className="spectator-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -101,7 +101,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
 
       {/* Champion banner */}
       {champ && (
-        <div style={{ background: 'var(--accent-dim)', borderBottom: '1px solid var(--border2)', padding: '10px 20px', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textAlign: 'center' }}>
+        <div className="spectator-champion" style={{ background: 'var(--accent-dim)', borderBottom: '1px solid var(--border2)', padding: '10px 20px', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textAlign: 'center' }}>
           🏆 {champ.name}{runnerUp ? ` · 🥈 ${runnerUp.name}` : ''}{third ? ` · 🥉 ${third.name}` : ''}
         </div>
       )}
@@ -132,7 +132,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                           {st.map((s, i) => (
                             <tr key={s.team.id}>
                               <td><span className={`rank-num rank-${i + 1}`} style={{ fontSize: 14 }}>{i + 1}</span></td>
-                              <td style={{ fontSize: 14, fontWeight: 600 }}>{getTeamDisplayName(s.team)}</td>
+                              <td className="spectator-team-cell" style={{ fontSize: 14, fontWeight: 600 }}>{getTeamDisplayName(s.team)}</td>
                               <td style={{ color: 'var(--accent)', fontSize: 14, fontWeight: 700 }}>{s.wins}</td>
                               <td style={{ color: 'var(--red)', fontSize: 14, fontWeight: 700 }}>{s.losses}</td>
                             </tr>
@@ -155,9 +155,9 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
             <div className="spectator-bracket-scroll">
               <div className="spectator-bracket-track" style={{ minHeight: 'auto' }}>
                 {bracketRounds.map((round, ri) => (
-                  <>
-                    <div key={round.title} style={{ display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 17, letterSpacing: 1, color: 'var(--text3)', textAlign: 'center', padding: '0 14px 8px', flexShrink: 0 }}>{getBracketRoundTitle(ri, round.matches.length)}</div>
+                  <Fragment key={round.title}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div className="spectator-round-title" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 17, letterSpacing: 1, color: 'var(--text3)', textAlign: 'center', padding: '0 14px 8px', flexShrink: 0 }}>{getBracketRoundTitle(ri, round.matches.length)}</div>
                       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
                         {round.matches.map(m => {
                           const isDone = m.status === 'done'
@@ -188,7 +188,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                         ))}
                       </div>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </div>
             </div>
@@ -209,7 +209,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
               const isRR = rrMatchGroupMap.has(m.id)
               const groupName = rrMatchGroupMap.get(m.id)
               return (
-                <div key={m.id} style={{ padding: '12px 14px', background: 'var(--surface2)', border: '1.5px solid var(--border)', borderRadius: 'var(--r)', marginBottom: 10 }}>
+                <div key={m.id} className="spectator-match-card" style={{ padding: '12px 14px', background: 'var(--surface2)', border: '1.5px solid var(--border)', borderRadius: 'var(--r)', marginBottom: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                     <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 99, background: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--border2)' }}>
                       {stageLabel}
@@ -225,13 +225,13 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ flex: 1, textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{getTeamDisplayName(tA)}</div>
-                      {m.games.length > 0 && <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'A', settings.winScore, settings.winBy2)}</div>}
+                      <div className="spectator-upcoming-team" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{getTeamDisplayName(tA)}</div>
+                      {m.games.length > 0 && <div className="spectator-upcoming-score" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'A', settings.winScore, settings.winBy2)}</div>}
                     </div>
-                    <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, color: 'var(--text3)', flexShrink: 0 }}>VS</div>
+                    <div className="spectator-vs" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, color: 'var(--text3)', flexShrink: 0 }}>VS</div>
                     <div style={{ flex: 1, textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{getTeamDisplayName(tB)}</div>
-                      {m.games.length > 0 && <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'B', settings.winScore, settings.winBy2)}</div>}
+                      <div className="spectator-upcoming-team" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{getTeamDisplayName(tB)}</div>
+                      {m.games.length > 0 && <div className="spectator-upcoming-score" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 38, color: 'var(--accent)', lineHeight: 1 }}>{gamesWon(m, 'B', settings.winScore, settings.winBy2)}</div>}
                     </div>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
               const winB = winner?.id === tB.id
 
               return (
-                <div key={m.id} style={{ padding: '12px 14px', background: 'var(--surface2)', border: '1.5px solid var(--border)', borderRadius: 'var(--r)', marginBottom: 8 }}>
+                <div key={m.id} className="spectator-result-card" style={{ padding: '12px 14px', background: 'var(--surface2)', border: '1.5px solid var(--border)', borderRadius: 'var(--r)', marginBottom: 8 }}>
                   {/* Stage + group badges */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                     <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 99, background: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--border2)' }}>
@@ -279,18 +279,16 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
                     )}
                   </div>
 
-                  {/* Scoreboard: TEAM A  score — score  TEAM B */}
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ flex: 1, textAlign: 'right', paddingRight: 12, overflow: 'hidden' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, color: winA ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tA)}</div>
+                  {/* Scoreboard: TEAM A  score — score  TEAM B (stacks per team on mobile) */}
+                  <div className="spectator-result-scoreboard">
+                    <div className="spectator-result-side side-a">
+                      <div className="spectator-result-team" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, color: winA ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tA)}</div>
+                      <span className="spectator-result-score" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, lineHeight: 1, color: winA ? 'var(--accent)' : 'var(--text3)' }}>{scoreA}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                      <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, lineHeight: 1, color: winA ? 'var(--accent)' : 'var(--text3)' }}>{scoreA}</span>
-                      <span style={{ fontSize: 22, color: 'var(--text3)', fontWeight: 300, lineHeight: 1 }}>–</span>
-                      <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, lineHeight: 1, color: winB ? 'var(--accent)' : 'var(--text3)' }}>{scoreB}</span>
-                    </div>
-                    <div style={{ flex: 1, paddingLeft: 12, overflow: 'hidden' }}>
-                      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, color: winB ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tB)}</div>
+                    <span className="spectator-result-dash">–</span>
+                    <div className="spectator-result-side side-b">
+                      <span className="spectator-result-score" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, lineHeight: 1, color: winB ? 'var(--accent)' : 'var(--text3)' }}>{scoreB}</span>
+                      <div className="spectator-result-team" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, color: winB ? 'var(--accent)' : 'var(--text)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getTeamDisplayName(tB)}</div>
                     </div>
                   </div>
 
@@ -318,8 +316,8 @@ export function SpectatorOverlay({ forceOpen, onClose }: Props) {
 
 function Panel({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: 'var(--surface)', padding: 16, overflow: 'visible', display: 'flex', flexDirection: 'column', width: '100%' }}>
-      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 16, letterSpacing: 2, color: accent, marginBottom: 10, paddingBottom: 7, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+    <div className="spectator-panel" style={{ background: 'var(--surface)', padding: 16, overflow: 'visible', display: 'flex', flexDirection: 'column', width: '100%' }}>
+      <div className="spectator-panel-title" style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 16, letterSpacing: 2, color: accent, marginBottom: 10, paddingBottom: 7, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         {title}
       </div>
       <div style={{ overflow: 'visible', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
